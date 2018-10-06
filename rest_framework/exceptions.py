@@ -15,3 +15,11 @@ class ValidationError(Exception):
     def __init__(self, detail=None, code=None):
         self.detail = detail
         self.code = code
+
+
+class FieldSearchError(Exception):
+    """
+    Ошибка поиска филда.
+
+    """
+    pass

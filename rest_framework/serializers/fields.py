@@ -3,11 +3,12 @@
 
 """
 import re
+import collections
 
 import six
 
-from rest_framework.exceptions import ValidationError
-from rest_framework.serializers.validators import (
+from flask_rest_framework.exceptions import ValidationError, FieldSearchError
+from flask_rest_framework.serializers.validators import (
     RequiredValidator, MaxLengthValidator, MinLengthValidator, MaxValueValidator, MinValueValidator
 )
 
@@ -15,6 +16,29 @@ MISSING_ERROR_MESSAGE = (
     'Выброшено ValidationError исключение для `{class_name}`, '
     'но ключа `{key}` не найдено в словаре `error_messages`.'
 )  # Дефолтное сообщение об ошибке, для случаев когда нет сообщения.
+
+
+def get_attribute(object, attr_name):
+    """
+    Возвращаем атрибут объекта. Умеет работать со словарями.
+
+    :param object object: Объект, у которго ищем атрибут.
+    :param str attr_name: Название атрибута.
+
+    :return: Найденный атрибут либо исключение.
+    :rtype: object
+
+    :raise AttributeError: Если не нашли атрибут.
+
+    """
+    # Ищем атрибут.
+    if isinstance(object, collections.Mapping):
+        attr = object[attr_name]
+    else:
+        attr = getattr(object, attr_name)
+
+    # Возвращаем.
+    return attr
 
 
 class Field(object):
@@ -28,7 +52,7 @@ class Field(object):
     }
     default_validators = []  # Дефолтный валидаторы для поля.
 
-    def __init__(self, required=None, default=None, label=None, validators=None, error_messages=None):
+    def __init__(self, required=True, default=None, label=None, validators=None, error_messages=None):
         """
         Базовый филд.
 
@@ -41,7 +65,7 @@ class Field(object):
         """
         self.label = label
         self.default = default
-        self.required = required if not self.default else False
+        self.required = bool(required) if not self.default else False
         # Добаляем валидатор для обязательности поля.
         self._validators = ([RequiredValidator()] if self.required else []) + (validators or [])[:]
 
@@ -51,6 +75,24 @@ class Field(object):
             messages.update(getattr(cls, 'default_error_messages', {}))
         messages.update(error_messages or {})
         self.error_messages = messages
+
+    def bind(self, field_name, parent):
+        """
+        Инициализирует имя поля и экземпляр родителя.
+        Вызывается когда поле добавляется к экземпляру родителя.
+
+        :param str field_name: Название поля.
+        :param Serializer parent: Класс сериалайзера, на котором находиться филд.
+
+        :return:
+
+        """
+        self.field_name = field_name
+        self.parent = parent
+
+        # Сами ставим label, если его нету.
+        if self.label is None:
+            self.label = field_name.replace('_', ' ').capitalize()
 
     @property
     def validators(self):
@@ -144,7 +186,45 @@ class Field(object):
             return self.default()
         return self.default
 
-    def validation_is_empty(self, data):
+    def get_attribute(self, instance):
+        """
+        Ищет и возвращает атрибут у объекта.
+
+        :return: Атрибут объекта.
+        :rtype: object
+
+        :raise ValidationError: Если не удалось найти поле.
+        :raise Exception: Если во время поиска возникла ошибка.
+
+        """
+        try:
+            # Пробуем достать данные.
+            return get_attribute(instance, self.field_name)
+        except (KeyError, AttributeError) as e:
+            # Если есть дефолтное значение, тогда его.
+            if self.default is not None:
+                return self.get_default()
+            # Если нет деолтфного и поле обязательное, ругаемся.
+            if self.required:
+                raise FieldSearchError(self.error_messages['required'])
+
+            # Иначе сообщаем об этом инциденте разработчику.
+            msg = (
+                'Выброщено {exc_type} при попытке получить значение для поля '
+                '`{field}` у сериалайзера `{serializer}`.\nВозможно поле '
+                'сериалайзера названо неверно и не соотвествует ни одному '
+                'атрибуту или ключу у объекта `{instance}`.\n'
+                'Текст оригинального исключения: {exc}.'.format(
+                    exc_type=type(e).__name__,
+                    field=self.field_name,
+                    serializer=self.parent.__name__,
+                    instance=instance.__class__.__name__,
+                    exc=e
+                )
+            )
+            raise type(e)(msg)
+
+    def validate_empty_values(self, data):
         """
         Смотрит, пустое ли пришло значение.
 
@@ -154,9 +234,22 @@ class Field(object):
                  Если есть дефолтное значение и не передано ничего, возвращает дефолтное.
                  Кортеж: (is None, actual data)
         :rtype: tuple
+        :raise ValidationError: Если валидацию на пустое поле не прошли.
 
         """
-        return data is None, data or self.default
+        # Обрабатываем.
+        is_empty, data = data is None, data if data is not None else self.default
+
+        # Валидируем.
+        if is_empty and not self.required:
+            return data
+
+        # Если пустое и оно не обязательно, тогад нечего тут валидировать и преобразовывать.
+        if is_empty:
+            raise ValidationError(self.error_messages['required'])
+
+        # Возвращаем.
+        return is_empty, data
 
     def run_validation(self, data):
         """
@@ -171,9 +264,7 @@ class Field(object):
 
         """
         # Сначала валидируем на обязательность.
-        is_empty, data = self.validation_is_empty(data)
-        if is_empty and not self.required:
-            return data
+        is_empty, data = self.validate_empty_values(data)
 
         # Обрабатываем сырые данные.
         value = self.to_internal_value(data)
@@ -195,9 +286,12 @@ class Field(object):
 
         for validator in self.validators or []:
             try:
+                # Прогоняем каждым сериалайзером.
                 validator(value)
             except ValidationError as e:
                 errors.append(e.detail)
+
+        # Проверяем на ошибки.
         if errors:
             raise ValidationError(errors)
 
@@ -210,8 +304,8 @@ class CharField(Field):
     default_error_messages = {
         'invalid': 'Не валидная строка.',
         'blank': 'Это поле не может быть пустым.',
-        'max_length': 'Значение должно быть длиннее {min_length} символов.',
-        'min_length': 'Значение должно быть короче {max_length} символов.'
+        'min_length': 'Значение должно быть длиннее {min_length} символов.',
+        'max_length': 'Значение должно быть короче {max_length} символов.'
     }
 
     def __init__(self, max_length=None, min_length=None, trim_whitespace=False, allow_blank=True, *args, **kwargs):
@@ -249,6 +343,7 @@ class CharField(Field):
 
         """
         if data == '' or (self.trim_whitespace and six.text_type(data).strip() == ''):
+            print('IN CHARFIELD ', data)
             if not self.allow_blank:
                 self.fail('blank')
             return ''
@@ -366,8 +461,8 @@ class FloatField(Field):
         """
         Филд для числа с плавающей точкой.
 
-        :param int min_value: Минимальное значение.
-        :param int max_value: Максимальное значение.
+        :param float min_value: Минимальное значение.
+        :param float max_value: Максимальное значение.
 
         """
         super().__init__(*args, **kwargs)

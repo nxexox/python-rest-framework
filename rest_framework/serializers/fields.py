@@ -7,8 +7,9 @@ import collections
 
 import six
 
-from flask_rest_framework.exceptions import ValidationError, FieldSearchError
-from flask_rest_framework.serializers.validators import (
+from rest_framework.exceptions import ValidationError, SkipError
+from rest_framework.utils import html
+from rest_framework.serializers.validators import (
     RequiredValidator, MaxLengthValidator, MinLengthValidator, MaxValueValidator, MinValueValidator
 )
 
@@ -18,11 +19,11 @@ MISSING_ERROR_MESSAGE = (
 )  # Дефолтное сообщение об ошибке, для случаев когда нет сообщения.
 
 
-def get_attribute(object, attr_name):
+def get_attribute(obj, attr_name):
     """
     Возвращаем атрибут объекта. Умеет работать со словарями.
 
-    :param object object: Объект, у которго ищем атрибут.
+    :param object obj: Объект, у которго ищем атрибут.
     :param str attr_name: Название атрибута.
 
     :return: Найденный атрибут либо исключение.
@@ -32,10 +33,10 @@ def get_attribute(object, attr_name):
 
     """
     # Ищем атрибут.
-    if isinstance(object, collections.Mapping):
-        attr = object[attr_name]
+    if isinstance(obj, collections.Mapping):
+        attr = obj[attr_name]
     else:
-        attr = getattr(object, attr_name)
+        attr = getattr(obj, attr_name)
 
     # Возвращаем.
     return attr
@@ -65,7 +66,7 @@ class Field(object):
         """
         self.label = label
         self.default = default
-        self.required = bool(required) if not self.default else False
+        self.required = bool(required) if self.default is None else False
         # Добаляем валидатор для обязательности поля.
         self._validators = ([RequiredValidator()] if self.required else []) + (validators or [])[:]
 
@@ -204,9 +205,9 @@ class Field(object):
             # Если есть дефолтное значение, тогда его.
             if self.default is not None:
                 return self.get_default()
-            # Если нет деолтфного и поле обязательное, ругаемся.
+            # Если нет дефолтного и поле обязательное, ругаемся.
             if self.required:
-                raise FieldSearchError(self.error_messages['required'])
+                raise SkipError(self.error_messages['required'])
 
             # Иначе сообщаем об этом инциденте разработчику.
             msg = (
@@ -242,7 +243,7 @@ class Field(object):
 
         # Валидируем.
         if is_empty and not self.required:
-            return data
+            return is_empty, data
 
         # Если пустое и оно не обязательно, тогад нечего тут валидировать и преобразовывать.
         if is_empty:
@@ -343,7 +344,6 @@ class CharField(Field):
 
         """
         if data == '' or (self.trim_whitespace and six.text_type(data).strip() == ''):
-            print('IN CHARFIELD ', data)
             if not self.allow_blank:
                 self.fail('blank')
             return ''
@@ -519,7 +519,7 @@ class BooleanField(Field):
     }
     TRUE_VALUES = {
         't', 'T',
-        'y', 'Y', 'yes', 'YES',
+        'y', 'Y', 'yes', 'YES', 'Yes',
         'true', 'True', 'TRUE',
         'on', 'On', 'ON',
         '1', 1,
@@ -527,7 +527,7 @@ class BooleanField(Field):
     }  # Словарь с True вариантами.
     FALSE_VALUES = {
         'f', 'F', 'n',
-        'N', 'no', 'NO',
+        'N', 'no', 'NO', 'No',
         'false', 'False', 'FALSE',
         'off', 'Off', 'OFF',
         '0', 0, 0.0,
@@ -575,3 +575,78 @@ class BooleanField(Field):
             return False
         # Если не нашли, пробуем сами преобразовать.
         return bool(value)
+
+
+class ListField(Field):
+    """
+    Филд для списка объектов.
+
+    """
+    default_error_messages = {
+        'not_a_list': 'Ожидался массив элементов но получен "{input_type}".',
+        'empty': 'Массив не может быть пустым.',
+        'min_length': 'Длина массива должна быть больше или равна {min_length} элементов.',
+        'max_length': 'Длина массива должна быть меньше или равна {max_length} элементов.'
+    }
+
+    def __init__(self, child, min_length=None, max_length=None, allow_empty=False, *args, **kwargs):
+        """
+        Филд для списка объектов.
+
+        :param rest_framework.serializers.Field child: Филд, описывающий тип элементов массива.
+        :param int min_length: Минимальная длина массива.
+        :param int max_length: Максимальная длина массива.
+        :param bool allow_empty: Разрешить ли пустой массив?
+
+        """
+        super().__init__(*args, **kwargs)
+        self.child = child
+        self.min_length = min_length
+        self.max_length = max_length
+        self.allow_empty = bool(allow_empty)
+
+        # Проверяем поле child.
+        if not isinstance(child, Field):
+            raise TypeError('`child=` должен быть экземпляром rest_framework.serializers.Field класса.')
+        self.child.bind(field_name='', parent=self)  # Биндим child поле.
+
+        # Добавляем валидаторы.
+        if self.max_length:
+            message = self.error_messages['max_length'].format(max_length=self.max_length)
+            self.validators.append(MaxLengthValidator(max_length, message=message))
+        if self.min_length:
+            message = self.error_messages['min_length'].format(min_length=self.min_length)
+            self.validators.append(MinLengthValidator(self.min_length, message=message))
+
+    def to_internal_value(self, data):
+        """
+        Преобразование данных в python list объект.
+
+        :param iter data: Данные для преобразования.
+
+        :return: Преобразованные данные.
+        :rtype: list
+
+        """
+        if html.is_html_input(data):
+            data = html.parse_html_list(data)
+
+        if any((isinstance(data, type('')), isinstance(data, collections.Mapping), not hasattr(data, '__iter__'))):
+            self.fail('not_a_list', input_type=type(data).__name__)
+
+        if not self.allow_empty and len(data) == 0:
+            self.fail('empty')
+
+        return [self.child.run_validation(item) for item in data]
+
+    def to_representation(self, value):
+        """
+        Преобразование объекта в валидный list объект.
+
+        :param list value: Объект, который стоит преобразовать.
+
+        :return: Преобразованные данные.
+        :rtype: list
+
+        """
+        return [self.child.to_representation(item) if item is not None else None for item in value]

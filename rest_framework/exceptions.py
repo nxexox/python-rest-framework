@@ -17,9 +17,9 @@ class ValidationError(Exception):
         self.code = code
 
 
-class FieldSearchError(Exception):
+class SkipError(Exception):
     """
-    Ошибка поиска филда.
+    Ошибка, которую стоит пропускать.
 
     """
     pass

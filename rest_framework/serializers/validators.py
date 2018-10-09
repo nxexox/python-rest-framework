@@ -137,7 +137,7 @@ class MinValueValidator(BaseSerializer):
         :raise ValidationError: Если валидацию не прошли.
 
         """
-        if value <= self.min_value:
+        if value < self.min_value:
             raise ValidationError(self.message.format(dict(min_value=self.min_value)))
 
 
@@ -167,5 +167,5 @@ class MaxValueValidator(BaseSerializer):
         :raise ValidationError: Если валидацию не прошли.
 
         """
-        if value >= self.max_value:
+        if value > self.max_value:
             raise ValidationError(self.message.format(dict(max_value=self.max_value)))

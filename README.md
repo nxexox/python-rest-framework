@@ -1,6 +1,7 @@
 # [Python Rest Framework][docs]
 
 [![pypi-version]][pypi]
+[![coverage-status-image]][codecov]
 
 Python Rest Framework is a full-fledged rest api engine.
 You can concentrate all your strength on business logic, take care of the rest of the Python Rest Framework.
@@ -56,5 +57,5 @@ Now we process the request body with a serializer
         print(ser.errors)
 
 [docs]: https://nxexox.github.io/python-rest-framework/
-[pypi-version]: https://img.shields.io/pypi/v/djangorestframework.svg
-[pypi]: https://pypi.org/project/djangorestframework/
+[pypi-version]: https://img.shields.io/pypi/v/python-rest-framework.svg
+[pypi]: https://pypi.org/project/Python-Rest-Framework/

@@ -1,3 +1,5 @@
+import unittest
+
 from rest_framework.tests.test_fields import *
 from rest_framework.tests.test_serializers import *
 from rest_framework.tests.test_validators import *
@@ -11,3 +13,6 @@ __all__ = (
     'BaseSerializerTestClass', 'SerializerTestClass', 'SerializerUserTestCase', 'SerializerSingleMixinTestCase',
     'SerializerManyMixinTestCase', 'SerializerRequiredMixinTestCase',
 )
+
+if __name__ == '__main__':
+    unittest.main()

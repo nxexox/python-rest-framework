@@ -17,9 +17,7 @@ script:
 after_success:
   - codecov  # report to coverage.
   # build docs.
-  - echo "$TRAVIS_BRANCH"
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
       pip install -r requirements/requirements-setup.txt;
-      echo "Hello World!";s
       mkdocs gh-deploy;
     fi

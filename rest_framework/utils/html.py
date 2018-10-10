@@ -1,5 +1,6 @@
 """
-Helpers for dealing with HTML input.
+Утилитки, для работы с сырым html телом запроса.
+
 """
 import re
 

@@ -1,20 +1,24 @@
-.idea
-
+*.idea
 *.pyc
 *.log
-*.socket
+*.cache
+*.sqlite3
+*.egg*
+.benchmarks
 
 __pycache__/
-.cache
 
+python2
+assets
+python3
+venv
+logs/*
 
-python3/
-python2/
-venv/
-env/
+media/*
+static/*
+node_modules
+*tests/snapshots/*
+*tests/fixtures/gitignore/*
 
-.DS_Store
-*.env
-README.TXT
-TODO
-*.txt
+doctrees/
+.buildinfo

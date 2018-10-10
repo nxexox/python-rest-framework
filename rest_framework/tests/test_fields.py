@@ -52,7 +52,7 @@ class BaseFieldTestCase(TestCase):
     }
     __error_messages = {'required': None, 'null': None}  # Дефолтный список ошибок.
 
-    # Класс для тетсирования на пустоту.
+    # Класс для тестирования на пустоту.
     class Empty:
         pass
 
@@ -161,7 +161,7 @@ class BaseFieldTestCase(TestCase):
                 method = getattr(field, method_name, self.Empty())
                 if isinstance(method, self.Empty):
                     self.fail('Тестирование по кейсам не удалось. Не удалось найти метод `{}` у класса `{}`.'.format(
-                        method_name, field.__name__
+                        method_name, field.__class__.__name__
                     ))
 
                 # Если ожидаются ошибки.
@@ -178,11 +178,11 @@ class BaseFieldTestCase(TestCase):
                     res = method(**data)
                     assert res == result, \
                         'В методе `{}.{}()` кейс {} вернул неверный результат `{}`'.format(
-                            field.__name__, method_name, case, res
+                            field.__class__.__name__, method_name, case, res
                         )
             except Exception as e:
                 self.fail('Во время проверки кейса `{}` для метода `{}.{}` произошла неожиданная ошибка: `{}: {}`'.format(
-                    case, self.field_class.__name__, method_name, e.__class__.__name__, e
+                    case, self.field_class.__class__.__name__, method_name, e.__class__.__name__, e
                 ))
 
     def test_default_create(self):
@@ -290,20 +290,16 @@ class BaseFieldTestCase(TestCase):
         Тест преобразования данных в валидный питон объект.
 
         """
-        if 'to_internal_value' in self.abstract_methods:
-            return
-
-        self.__test_method_cases('to_internal_value')
+        if 'to_internal_value' not in self.abstract_methods:
+            self.__test_method_cases('to_internal_value')
 
     def test_to_representation(self):
         """
         Тест преобразования данных в валидный JSON объект.
 
         """
-        if 'to_representation' in self.abstract_methods:
-            return
-
-        self.__test_method_cases('to_representation')
+        if 'to_representation' not in self.abstract_methods:
+            self.__test_method_cases('to_representation')
 
     def test_get_default(self):
         """
@@ -674,5 +670,46 @@ class TestListField(BaseFieldTestCase):
         'error_messages': {}, 'default_error_messages': {}, 'default_validators': [],
         'child': CharField()
     }
-    # TODO: Описать кейсы.
 
+    to_representation_cases = (
+        {'data': {'value': ['123', '123', '123']}, 'return': ['123', '123', '123']},
+        {'data': {'value': [123, 123, 123]}, 'return': ['123', '123', '123']},
+        {'data': {'value': [True, True, True]}, 'return': ['True', 'True', 'True']},
+        {'data': {'value': ['123', 123, True, None]}, 'return': ['123', '123', 'True', None]},
+        {'data': {'value': None}, 'exceptions': (TypeError,)},
+    )  # Кейсы, для проверки работоспособности representation.
+    to_internal_value_cases = (
+        {'data': {'data': ''}, 'exceptions': (ValidationError,)},
+        {'data': {'data': {}}, 'exceptions': (ValidationError,)},
+        {'data': {'data': BaseFieldTestCase.Empty()}, 'exceptions': (ValidationError,)},
+        {'data': {'data': []}, 'params': {'allow_empty': True}, 'return': []},
+        {'data': {'data': []}, 'params': {'allow_empty': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': ['123', '123', '123']}, 'return': ['123', '123', '123']},
+        {'data': {'data': [123, 123, 123]}, 'return': ['123', '123', '123']},
+        # Ошибки тут будут, потому что CharField не хавает True False None в качестве строки.
+        {'data': {'data': [True, True, True]}, 'exceptions': (ValidationError,)},
+        {'data': {'data': ['123', 123, True, None]}, 'exceptions': (ValidationError,)},
+    )  # Кейсы для проверки работоспособности to_internal.
+    run_validation_cases = (
+        {'data': {'data': ''}, 'exceptions': (ValidationError,)},
+        {'data': {'data': {}}, 'exceptions': (ValidationError,)},
+        {'data': {'data': BaseFieldTestCase.Empty()}, 'exceptions': (ValidationError,)},
+        {'data': {'data': []}, 'params': {'allow_empty': True}, 'return': []},
+        {'data': {'data': []}, 'params': {'allow_empty': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': ['123', '123', '123']}, 'return': ['123', '123', '123']},
+        {'data': {'data': [123, 123, 123]}, 'return': ['123', '123', '123']},
+        # Ошибки тут будут, потому что CharField не хавает True False None в качестве строки.
+        {'data': {'data': [True, True, True]}, 'exceptions': (ValidationError,)},
+        {'data': {'data': ['123', 123, True, None]}, 'exceptions': (ValidationError,)},
+        {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 2, 'child': IntegerField()}, 'return': [1, 1, 1]},
+        {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 3, 'child': IntegerField()}, 'return': [1, 1, 1]},
+        {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 5}, 'exceptions': (ValidationError,)},
+        {'data': {'data': [1, 1, 1]}, 'params': {'max_length': 5, 'child': IntegerField()}, 'return': [1, 1, 1]},
+        {'data': {'data': [1, 1, 1]}, 'params': {'max_length': 3, 'child': IntegerField()}, 'return': [1, 1, 1]},
+        {'data': {'data': [1, 1, 1]}, 'params': {'max_length': 2}, 'exceptions': (ValidationError,)},
+        {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 5, 'max_length': 10}, 'exceptions': (ValidationError,)},
+        {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 3, 'max_length': 5, 'child': IntegerField()}, 'return': [1, 1, 1]},
+        {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 1, 'max_length': 5, 'child': IntegerField()}, 'return': [1, 1, 1]},
+        {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 1, 'max_length': 3, 'child': IntegerField()}, 'return': [1, 1, 1]},
+        {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 1, 'max_length': 2}, 'exceptions': (ValidationError,)},
+    )  # Кейсы для проверки работоспособности run_validation.

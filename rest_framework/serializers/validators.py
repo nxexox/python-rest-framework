@@ -77,7 +77,7 @@ class MinLengthValidator(BaseSerializer):
         :raise ValidationError: Если не прошли валидацию.
 
         """
-        if len(value) <= self.min_length:
+        if len(value) < self.min_length:
             raise ValidationError(self.message.format(dict(min_length=self.min_length)))
 
 
@@ -107,7 +107,7 @@ class MaxLengthValidator(BaseSerializer):
         :raise ValidationError: Если не прошли валидацию.
 
         """
-        if len(value) >= self.max_length:
+        if len(value) > self.max_length:
             raise ValidationError(self.message.format(dict(max_length=self.max_length)))
 
 

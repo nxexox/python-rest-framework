@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 import six
 
-from rest_framework.serializers.fields import Field, ListField
+from rest_framework.serializers.fields import Field
 from rest_framework.exceptions import ValidationError, SkipError
 from rest_framework.utils import html
 
@@ -98,7 +98,6 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
         })
 
         # Создаем ListSerializer.
-        print('in init ', cls)
         return ListSerializer(*args, **list_kwargs)
 
     def validate(self, data):
@@ -279,7 +278,7 @@ class Serializer(BaseSerializer):
         :param dict data: Данные, которые валидируем.
 
         :return: Провалидированные и обрабоатанные даные.
-        :raise ValidationError: сли произошли ошибки во время валидации.
+        :raise ValidationError: Если произошли ошибки во время валидации.
 
         """
         validated_data, errors = OrderedDict(), OrderedDict()

@@ -15,7 +15,9 @@ script:
   - coverage run -m unittest rest_framework/tests/__init__.py  # run coverage tests
 
 after_success:
-  - codecov
-  if: branch = master
-    - pip install -r requirements/requirements-setup.txt
-    - mkdocs gh-deploy
+  - codecov  # report to coverage.
+  # build docs.
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+      pip install -r requirements/requirements-setup.txt;
+      mkdocs gh-deploy;
+    fi

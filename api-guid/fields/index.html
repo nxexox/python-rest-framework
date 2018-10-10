@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Python Rest Framework - Web APIs for Python"> 
+    <meta name="author" content="Deys Timofey"> 
+    <link rel="canonical" href="https://www.django-rest-framework.org/api-guid/fields/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    <title>Serializer fields - Python Rest Framework</title>
+
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/font-hack/2.018/css/hack.min.css">
+    <link href='//fonts.googleapis.com/css?family=PT+Sans:400,400italic,700,700italic&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/base.css" rel="stylesheet">
+    <link href="../../css/cinder.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/highlight.css">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js"></script>
+    <script>
+    WebFont.load({
+        google: {
+            families: ['Open Sans', 'PT Sans']
+        }
+    });
+    </script>
+
+    
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+
+            <a class="navbar-brand" href="../..">Python Rest Framework</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="../..">Home</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li class="active">
+    <a href="./">Serializer fields</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../serializers/">Serializers</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../validators/">Validation</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../../release-notes/">Release Notes</a>
+                    </li>
+                
+                
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                            <i class="fa fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="next" href="../..">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../serializers/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/blob/master/docs/api-guid/fields.md"><i class="fa fa-github"></i> Edit on GitHub</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/nxexox/python-rest-framework/"><i class="fa fa-github"></i> GitHub</a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    <div class="container">
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#fields">Fields</a></li>
+            <li class="second-level"><a href="#core-arguments">Core arguments</a></li>
+                
+                <li class="third-level"><a href="#-required">- required</a></li>
+                <li class="third-level"><a href="#-default">- default</a></li>
+                <li class="third-level"><a href="#-label">- label</a></li>
+                <li class="third-level"><a href="#-validators">- validators</a></li>
+                <li class="third-level"><a href="#-error_messages">- error_messages</a></li>
+            <li class="second-level"><a href="#fields_1">Fields</a></li>
+                
+                <li class="third-level"><a href="#-booleanfield">- BooleanField</a></li>
+                <li class="third-level"><a href="#-charfield">- CharField</a></li>
+                <li class="third-level"><a href="#-integerfield">- IntegerField</a></li>
+                <li class="third-level"><a href="#-floatfield">- FloatField</a></li>
+                <li class="third-level"><a href="#-listfield">- ListField</a></li>
+            <li class="second-level"><a href="#custom-fields">Custom fields</a></li>
+                
+            <li class="second-level"><a href="#examples">Examples</a></li>
+                
+                <li class="third-level"><a href="#a-basic-custom-field">A Basic Custom Field</a></li>
+                <li class="third-level"><a href="#raising-validation-errors">Raising validation errors</a></li>
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="fields"><a class="toclink" href="#fields">Fields</a></h1>
+<p>Serializer fields handle converting between primitive values and internal datatypes.  They also deal with validating input values, as well as retrieving and setting the values from their parent objects.</p>
+<hr />
+<p><strong>Note:</strong> The serializer fields are declared in <code>fields.py</code>, but by convention you should import them using <code>from rest_framework import serializers</code> and refer to fields as <code>serializers.&lt;FieldName&gt;</code>.</p>
+<hr />
+<h2 id="core-arguments"><a class="toclink" href="#core-arguments">Core arguments</a></h2>
+<p>Each serializer field class constructor takes at least these arguments.  Some Field classes take additional, field-specific arguments, but the following should always be accepted:</p>
+<h3 id="-required"><a class="toclink" href="#-required">- <code>required</code></a></h3>
+<p>Normally an error will be raised if a field is not supplied during deserialization.
+Set to false if this field is not required to be present during deserialization.</p>
+<p>Setting this to <code>False</code> also allows the object attribute or dictionary key to be omitted from output when serializing the instance. If the key is not present it will simply not be included in the output representation.</p>
+<p>Defaults to <code>True</code>.</p>
+<h3 id="-default"><a class="toclink" href="#-default">- <code>default</code></a></h3>
+<p>If set, this gives the default value that will be used for the field if no input value is supplied. If not set the default behaviour is to not populate the attribute at all.</p>
+<p>May be set to a function or other callable, in which case the value will be evaluated each time it is used. When called, it will receive no arguments.</p>
+<p>When serializing the instance, default will be used if the the object attribute or dictionary key is not present in the instance.</p>
+<p>Note that setting a <code>default</code> value implies that the field is not required. Enabling the arguments of the <code>default</code> keyword will set the<code>required</code> to <code>False</code>.</p>
+<h3 id="-label"><a class="toclink" href="#-label">- <code>label</code></a></h3>
+<p>A short text string that may be used as the name of the field in HTML form fields or other descriptive elements.</p>
+<h3 id="-validators"><a class="toclink" href="#-validators">- <code>validators</code></a></h3>
+<p>A list of validator functions which should be applied to the incoming field input, and which either raise a validation error or simply return. Validator functions should raise <code>serializers.ValidationError</code>.</p>
+<h3 id="-error_messages"><a class="toclink" href="#-error_messages">- <code>error_messages</code></a></h3>
+<p>A dictionary of error codes to error messages.</p>
+<hr />
+<h2 id="fields_1"><a class="toclink" href="#fields_1">Fields</a></h2>
+<h3 id="-booleanfield"><a class="toclink" href="#-booleanfield">- BooleanField</a></h3>
+<p>A boolean representation that also accepts <code>None</code> as a valid value.</p>
+<p>When using HTML encoded form input be aware that omitting a value will always be treated as setting a field to <code>False</code>, even if it has a <code>default=True</code> option specified. This is because HTML checkbox inputs represent the unchecked state by omitting the value, so REST framework treats omission as if it is an empty checkbox input.</p>
+<p><strong>Signature:</strong> <code>BooleanField()</code></p>
+<hr />
+<h3 id="-charfield"><a class="toclink" href="#-charfield">- CharField</a></h3>
+<p>A text representation. Optionally validates the text to be shorter than <code>max_length</code> and longer than <code>min_length</code>.</p>
+<p><strong>Signature:</strong> <code>CharField(max_length=None, min_length=None, trim_whitespace=True, allow_blank=False)</code></p>
+<ul>
+<li><code>min_length</code> - Validates that the input contains no fewer than this number of characters.</li>
+<li><code>max_length</code> - Validates that the input contains no more than this number of characters.</li>
+<li><code>allow_blank</code> - If set to <code>True</code> then the empty string should be considered a valid value. If set to <code>False</code> then the empty string is considered invalid and will raise a validation error. Defaults to <code>False</code>.</li>
+<li><code>trim_whitespace</code> - If set to <code>True</code> then leading and trailing whitespace is trimmed. Defaults to <code>True</code>.</li>
+</ul>
+<hr />
+<h3 id="-integerfield"><a class="toclink" href="#-integerfield">- IntegerField</a></h3>
+<p>An integer representation.</p>
+<p><strong>Signature</strong>: <code>IntegerField(min_value=None, max_value=None)</code></p>
+<ul>
+<li><code>min_value</code> Validate that the number provided is no less than this value.</li>
+<li><code>max_value</code> Validate that the number provided is no greater than this value.</li>
+</ul>
+<hr />
+<h3 id="-floatfield"><a class="toclink" href="#-floatfield">- FloatField</a></h3>
+<p>A floating point representation.</p>
+<p><strong>Signature</strong>: <code>FloatField(min_value=None, max_value=None)</code></p>
+<ul>
+<li><code>min_value</code> Validate that the number provided is no less than this value.</li>
+<li><code>max_value</code> Validate that the number provided is no greater than this value.</li>
+</ul>
+<hr />
+<h3 id="-listfield"><a class="toclink" href="#-listfield">- ListField</a></h3>
+<p>A field class that validates a list of objects.</p>
+<p><strong>Signature</strong>: <code>ListField(child=&lt;A_FIELD_INSTANCE&gt;, min_length=None, max_length=None, allow_empty=False)</code></p>
+<ul>
+<li><code>child</code> - A field instance that should be used for validating the objects in the list.</li>
+<li><code>min_length</code> - Validates that the list contains no fewer than this number of elements.</li>
+<li><code>max_length</code> - Validates that the list contains no more than this number of elements.</li>
+<li><code>allow_blank</code> - If set to<code>True</code>, an empty array should be considered valid. If set to <code>False</code>, an empty array is considered invalid and causes a validation error. The default is <code>False</code>.</li>
+</ul>
+<p>For example, to validate a list of integers you might use something like the following:</p>
+<pre><code>scores = serializers.ListField(
+   child=serializers.IntegerField(min_value=0, max_value=100)
+)
+</code></pre>
+<p>The <code>ListField</code> class also supports a declarative style that allows you to write reusable list field classes.</p>
+<pre><code>class StringListField(serializers.ListField):
+    child = serializers.CharField()
+</code></pre>
+<p>We can now reuse our custom <code>StringListField</code> class throughout our application, without having to provide a <code>child</code> argument to it.</p>
+<hr />
+<h2 id="custom-fields"><a class="toclink" href="#custom-fields">Custom fields</a></h2>
+<p>If you want to create a custom field, you&rsquo;ll need to subclass <code>Field</code> and then override either one or both of the <code>.to_representation()</code> and <code>.to_internal_value()</code> methods.  These two methods are used to convert between the initial datatype, and a primitive, serializable datatype. Primitive datatypes will typically be any of a number, string, boolean, <code>date</code>/<code>time</code>/<code>datetime</code> or <code>None</code>. They may also be any list or dictionary like object that only contains other primitive objects. Other types might be supported, depending on the renderer that you are using.</p>
+<p>The <code>.to_representation()</code> method is called to convert the initial datatype into a primitive, serializable datatype.</p>
+<p>The <code>to_internal_value()</code> method is called to restore a primitive datatype into its internal python representation. This method should raise a <code>serializers.ValidationError</code> if the data is invalid.</p>
+<h2 id="examples"><a class="toclink" href="#examples">Examples</a></h2>
+<h3 id="a-basic-custom-field"><a class="toclink" href="#a-basic-custom-field">A Basic Custom Field</a></h3>
+<p>Let&rsquo;s look at an example of serializing a class that represents an RGB color value:</p>
+<pre><code>class Color(object):
+    """
+    A color represented in the RGB colorspace.
+
+    """
+    def __init__(self, red, green, blue):
+        assert(red &gt;= 0 and green &gt;= 0 and blue &gt;= 0)
+        assert(red &lt; 256 and green &lt; 256 and blue &lt; 256)
+        self.red, self.green, self.blue = red, green, blue
+
+class ColorField(serializers.Field):
+    """
+    Color objects are serialized into 'rgb(#, #, #)' notation.
+
+    """
+    def to_representation(self, value):
+        return "rgb(%d, %d, %d)" % (value.red, value.green, value.blue)
+
+    def to_internal_value(self, data):
+        data = data.strip('rgb(').rstrip(')')
+        red, green, blue = [int(col) for col in data.split(',')]
+        return Color(red, green, blue)
+</code></pre>
+<p>By default field values are treated as mapping to an attribute on the object or key Mapping collection.  If you need to customize how the field value is accessed and set you need to override <code>.get_attribute()</code>.</p>
+<p>As an example, let&rsquo;s create a field that can be used to represent the class name of the object being serialized:</p>
+<pre><code>class ClassNameField(serializers.Field):
+    def get_attribute(self, instance):
+        # We pass the object instance onto `to_representation`,
+        # not just the field attribute.
+        return instance
+
+    def to_representation(self, value):
+        """
+        Serialize the value's class name.
+
+        """
+        return value.__class__.__name__
+</code></pre>
+<h3 id="raising-validation-errors"><a class="toclink" href="#raising-validation-errors">Raising validation errors</a></h3>
+<p>Our <code>ColorField</code> class above currently does not perform any data validation.
+To indicate invalid data, we should raise a <code>serializers.ValidationError</code>, like so:</p>
+<pre><code>def to_internal_value(self, data):
+    if not isinstance(data, six.text_type):
+        msg = 'Incorrect type. Expected a string, but got %s'
+        raise ValidationError(msg % type(data).__name__)
+
+    if not re.match(r'^rgb\([0-9]+,[0-9]+,[0-9]+\)$', data):
+        raise ValidationError('Incorrect format. Expected `rgb(#,#,#)`.')
+
+    data = data.strip('rgb(').rstrip(')')
+    red, green, blue = [int(col) for col in data.split(',')]
+
+    if any([col &gt; 255 or col &lt; 0 for col in (red, green, blue)]):
+        raise ValidationError('Value out of range. Must be between 0 and 255.')
+
+    return Color(red, green, blue)
+</code></pre>
+<p>The <code>.fail()</code> method is a shortcut for raising <code>ValidationError</code> that takes a message string from the <code>error_messages</code> dictionary. For example:</p>
+<pre><code>default_error_messages = {
+    'incorrect_type': 'Incorrect type. Expected a string, but got {input_type}',
+    'incorrect_format': 'Incorrect format. Expected `rgb(#,#,#)`.',
+    'out_of_range': 'Value out of range. Must be between 0 and 255.'
+}
+
+def to_internal_value(self, data):
+    if not isinstance(data, six.text_type):
+        self.fail('incorrect_type', input_type=type(data).__name__)
+
+    if not re.match(r'^rgb\([0-9]+,[0-9]+,[0-9]+\)$', data):
+        self.fail('incorrect_format')
+
+    data = data.strip('rgb(').rstrip(')')
+    red, green, blue = [int(col) for col in data.split(',')]
+
+    if any([col &gt; 255 or col &lt; 0 for col in (red, green, blue)]):
+        self.fail('out_of_range')
+
+    return Color(red, green, blue)
+</code></pre>
+<p>This style keeps your error messages cleaner and more separated from your code, and should be preferred.</p></div>
+        
+    </div>
+
+    <footer class="col-md-12 text-center">
+        <hr>
+        <p>
+        <small>Copyright (c) 2018, Deys Timofey All rights reserved.<br></small>
+        
+        <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p></small>
+    </footer>
+
+    <script src="../../js/jquery-1.10.2.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+    <script src="../../js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script>
+    var base_url = '../..';
+    </script>
+    <script data-main="../../mkdocs/js/search.js" src="../../mkdocs/js/require.js"></script>
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        From here you can search these documents. Enter your search terms below.
+                    </p>
+                    <form role="form">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                        </div>
+                    </form>
+                    <div id="mkdocs-search-results"></div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </body>
+
+</html>

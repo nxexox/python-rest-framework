@@ -1,7 +1,11 @@
-# Python Rest Framework
+# [Python Rest Framework][docs]
+
+[![pypi-version]][pypi]
 
 Python Rest Framework is a full-fledged rest api engine.
 You can concentrate all your strength on business logic, take care of the rest of the Python Rest Framework.
+
+Full documentation for the project is available at [https://nxexox.github.io/python-rest-framework/][docs].
 
 ## Requirements
 
@@ -50,3 +54,7 @@ Now we process the request body with a serializer
         print(ser.validated_data)
     else:
         print(ser.errors)
+
+[docs]: https://nxexox.github.io/python-rest-framework/
+[pypi-version]: https://img.shields.io/pypi/v/djangorestframework.svg
+[pypi]: https://pypi.org/project/djangorestframework/

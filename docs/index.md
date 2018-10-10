@@ -1,4 +1,4 @@
-# [Python Rest Framework][docs]
+# [Python Rest Framework][repo]
 
 [![pypi-version]][pypi]
 [![build-status-image]][travis]
@@ -57,11 +57,10 @@ Now we process the request body with a serializer
     else:
         print(ser.errors)
 
-[docs]: https://nxexox.github.io/python-rest-framework/
+[repo]: https://github.com/nxexox/python-rest-framework/
 [pypi-version]: https://img.shields.io/pypi/v/python-rest-framework.svg
 [pypi]: https://pypi.org/project/Python-Rest-Framework/
 [build-status-image]: https://travis-ci.org/nxexox/python-rest-framework.svg?branch=master
 [travis]: https://travis-ci.org/encode/python-rest-framework?branch=master
-[coverage-status-image]: https://codecov.io/gh/codecov/python-rest-framework/branch/master/graph/badge.svg
-[codecov]: https://codecov.io/gh/codecov/example-python
-
+[coverage-status-image]: https://codecov.io/gh/nxexox/python-rest-framework/branch/master/graph/badge.svg
+[codecov]: https://codecov.io/gh/nxexox/python-rest-framework

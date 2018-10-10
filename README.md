@@ -62,3 +62,6 @@ Now we process the request body with a serializer
 [pypi]: https://pypi.org/project/Python-Rest-Framework/
 [build-status-image]: https://travis-ci.org/nxexox/python-rest-framework.svg?branch=master
 [travis]: https://travis-ci.org/encode/python-rest-framework?branch=master
+[coverage-status-image]: https://codecov.io/gh/codecov/python-rest-framework/branch/master/graph/badge.svg
+[codecov]: https://codecov.io/gh/codecov/example-python
+

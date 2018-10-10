@@ -6,6 +6,7 @@ from .serializers import Serializer, ListSerializer
 from .fields import (
     BooleanField, CharField, IntegerField, FloatField, ListField
 )
+from .exceptions import ValidationError
 
 
 __all__ = (

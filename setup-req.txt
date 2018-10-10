@@ -2,5 +2,4 @@
 twine==1.12.1
 
 # for docs
-sphinx==1.8.1
-recommonmark==0.4.0
+mkdocs==1.0.4

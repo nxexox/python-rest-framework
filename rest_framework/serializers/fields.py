@@ -7,7 +7,8 @@ import collections
 
 import six
 
-from rest_framework.exceptions import ValidationError, SkipError
+from rest_framework.exceptions import SkipError
+from rest_framework.serializers.exceptions import ValidationError
 from rest_framework.utils import html
 from rest_framework.serializers.validators import (
     RequiredValidator, MaxLengthValidator, MinLengthValidator, MaxValueValidator, MinValueValidator
@@ -309,12 +310,12 @@ class CharField(Field):
         'max_length': 'Значение должно быть короче {max_length} символов.'
     }
 
-    def __init__(self, max_length=None, min_length=None, trim_whitespace=False, allow_blank=True, *args, **kwargs):
+    def __init__(self, min_length=None, max_length=None, trim_whitespace=False, allow_blank=True, *args, **kwargs):
         """
         Филд для текста.
 
-        :param int max_length: Максимальная длина строки.
         :param int min_length: Минимальная длина строки.
+        :param int max_length: Максимальная длина строки.
         :param bool trim_whitespace: Обрезать ли пробелы в начале и конце строки?
         :param bool allow_blank: Разрешить ли пустую строку?
 
@@ -588,8 +589,9 @@ class ListField(Field):
         'min_length': 'Длина массива должна быть больше или равна {min_length} элементов.',
         'max_length': 'Длина массива должна быть меньше или равна {max_length} элементов.'
     }
+    child = None
 
-    def __init__(self, child, min_length=None, max_length=None, allow_empty=False, *args, **kwargs):
+    def __init__(self, child=None, min_length=None, max_length=None, allow_empty=False, *args, **kwargs):
         """
         Филд для списка объектов.
 
@@ -606,7 +608,7 @@ class ListField(Field):
         self.allow_empty = bool(allow_empty)
 
         # Проверяем поле child.
-        if not isinstance(child, Field):
+        if all((not isinstance(child, Field), not isinstance(self.child, Field))):
             raise TypeError('`child=` должен быть экземпляром rest_framework.serializers.Field класса.')
         self.child.bind(field_name='', parent=self)  # Биндим child поле.
 
@@ -641,7 +643,7 @@ class ListField(Field):
 
     def to_representation(self, value):
         """
-        Преобразование объекта в валидный list объект.
+        Преобразование объекта в валидный json list объект.
 
         :param list value: Объект, который стоит преобразовать.
 

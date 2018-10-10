@@ -9,7 +9,8 @@ from collections import OrderedDict
 import six
 
 from rest_framework.serializers.fields import Field
-from rest_framework.exceptions import ValidationError, SkipError
+from rest_framework.exceptions import SkipError
+from rest_framework.serializers.exceptions import ValidationError
 from rest_framework.utils import html
 
 
@@ -63,7 +64,7 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
 
         """
         super().__init__(*args, **kwargs)
-        self._instance = instance
+        self.instance = instance
         if isinstance(data, dict):
             self.initial_data = data
 
@@ -179,7 +180,7 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
         :rtype: dict
 
         """
-        return self._dict_fields.copy()
+        return self._dict_fields
 
     @property
     def data(self):
@@ -201,8 +202,8 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
             raise AssertionError(msg)
 
         if not hasattr(self, '_data'):
-            if self._instance is not None and not getattr(self, '_errors', None):
-                self._data = self.to_representation(self._instance)
+            if self.instance is not None and not getattr(self, '_errors', None):
+                self._data = self.to_representation(self.instance)
             elif hasattr(self, '_validated_data') and not getattr(self, '_errors', None):
                 self._data = self.to_representation(self._validated_data)
             else:

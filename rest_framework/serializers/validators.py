@@ -2,10 +2,10 @@
 Валидаторы.
 
 """
-from rest_framework.exceptions import ValidationError
+from rest_framework.serializers.exceptions import ValidationError
 
 
-class BaseSerializer(object):
+class BaseValidator(object):
     """
     Базовый класс для валидатора.
 
@@ -31,7 +31,7 @@ class BaseSerializer(object):
         raise NotImplementedError('`.__call__(self, value)` должен быть определен.')
 
 
-class RequiredValidator(BaseSerializer):
+class RequiredValidator(BaseValidator):
     """
     Валидатор на обязательность поля.
 
@@ -51,14 +51,14 @@ class RequiredValidator(BaseSerializer):
             raise ValidationError(self.message)
 
 
-class MinLengthValidator(BaseSerializer):
+class MinLengthValidator(BaseValidator):
     """
     Валидатор для минимальной длины.
 
     """
     message = 'Значение должно быть длиннее {min_length}.'
 
-    def __init__(self, min_length=None, *args, **kwargs):
+    def __init__(self, min_length, *args, **kwargs):
         """
         Создаем валидатор.
 
@@ -81,14 +81,14 @@ class MinLengthValidator(BaseSerializer):
             raise ValidationError(self.message.format(dict(min_length=self.min_length)))
 
 
-class MaxLengthValidator(BaseSerializer):
+class MaxLengthValidator(BaseValidator):
     """
     Валидатор для максимальной длины.
 
     """
     message = 'Значение должно быть короче {max_length}.'
 
-    def __init__(self, max_length=None, *args, **kwargs):
+    def __init__(self, max_length, *args, **kwargs):
         """
         Создаем валидатор.
 
@@ -111,7 +111,7 @@ class MaxLengthValidator(BaseSerializer):
             raise ValidationError(self.message.format(dict(max_length=self.max_length)))
 
 
-class MinValueValidator(BaseSerializer):
+class MinValueValidator(BaseValidator):
     """
     Валидатор для минимального значения.
 
@@ -141,7 +141,7 @@ class MinValueValidator(BaseSerializer):
             raise ValidationError(self.message.format(dict(min_value=self.min_value)))
 
 
-class MaxValueValidator(BaseSerializer):
+class MaxValueValidator(BaseValidator):
     """
     Валидатор для максимального значения.
 

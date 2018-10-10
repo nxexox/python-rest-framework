@@ -10,7 +10,7 @@ README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
 setup(
     name=rest_framework.__title__,
     version=rest_framework.__version__,
-    packages=find_packages(exclude=('tests', 'docs')),  # Выбрасываем из сборки лишнее.
+    packages=find_packages(exclude=('tests', 'docs', 'docs_theme')),  # Выбрасываем из сборки лишнее.
     include_package_data=True,  # Включаем данные пакета.
     test_suite='rest_framework.tests',  # Включаем тесты.
     license='Apache 2.0',  # Ставим лицензию

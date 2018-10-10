@@ -3,7 +3,3 @@ twine==1.12.1
 
 # for docs
 mkdocs==1.0.4
-
-# for tests
-codecov==2.0.15
-coverage==4.5.1

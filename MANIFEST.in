@@ -7,3 +7,4 @@ global-exclude *.py[co]
 
 recursive-exclude rest_framework/tests/*/* *
 recursive-exclude docs_theme/*/* *
+recursive-exclude requirements/*/* *

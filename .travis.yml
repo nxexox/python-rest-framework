@@ -16,7 +16,7 @@ script:
 
 after_success:
   - codecov  # report to coverage.
-  # build docs.
+  # build docs. FIXME: NOT WORKING
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
       pip install -r requirements/requirements-setup.txt;
       mkdocs gh-deploy --remote-branch https://${GH_TOKEN}@github.com/nxexox/python-rest-framework.git;

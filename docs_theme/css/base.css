@@ -171,3 +171,8 @@ div.source-links {
     -moz-border-radius: 6px 0 6px 6px;
     border-radius: 6px 0 6px 6px;
 }
+
+p.badges{
+    height: 20px;
+    text-align: right;
+}

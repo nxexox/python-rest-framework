@@ -1,8 +1,18 @@
-# [Python Rest Framework][repo]
+<p class="badges">
+    <a href="https://pypi.org/project/Python-Rest-Framework/">
+        <img src="https://img.shields.io/pypi/v/python-rest-framework.svg" class="status-badge">
+    </a>
+    <a href="https://travis-ci.org/encode/python-rest-framework?branch=master">
+        <img src="https://travis-ci.org/nxexox/python-rest-framework.svg?branch=master" class="status-badge">
+    </a>
+    <a href="https://codecov.io/gh/nxexox/python-rest-framework">
+        <img src="https://codecov.io/gh/nxexox/python-rest-framework/branch/master/graph/badge.svg" class="status-badge">
+    </a>
+</p>
 
-[![pypi-version]][pypi]
-[![build-status-image]][travis]
-[![coverage-status-image]][codecov]
+---
+
+# [Python Rest Framework][repo]
 
 Python Rest Framework is a full-fledged rest api engine.
 You can concentrate all your strength on business logic, take care of the rest of the Python Rest Framework.
@@ -58,9 +68,3 @@ Now we process the request body with a serializer
         print(ser.errors)
 
 [repo]: https://github.com/nxexox/python-rest-framework/
-[pypi-version]: https://img.shields.io/pypi/v/python-rest-framework.svg
-[pypi]: https://pypi.org/project/Python-Rest-Framework/
-[build-status-image]: https://travis-ci.org/nxexox/python-rest-framework.svg?branch=master
-[travis]: https://travis-ci.org/encode/python-rest-framework?branch=master
-[coverage-status-image]: https://codecov.io/gh/nxexox/python-rest-framework/branch/master/graph/badge.svg
-[codecov]: https://codecov.io/gh/nxexox/python-rest-framework

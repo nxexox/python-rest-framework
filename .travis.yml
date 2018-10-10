@@ -1,3 +1,4 @@
+
 language: python
 cache: pip
 
@@ -10,8 +11,11 @@ install:
   pip install -r requirements/requirements-app.txt -r requirements/requirements-tests.txt
 
 script:
-  - python -m unittest rest_framework/tests/__init__.py
-  - coverage run -m unittest rest_framework/tests/__init__.py
+  - python -m unittest rest_framework/tests/__init__.py  # run tests
+  - coverage run -m unittest rest_framework/tests/__init__.py  # run coverage tests
 
 after_success:
   - codecov
+  if: branch = master
+    - pip install -r requirements/requirements-setup.txt
+    - mkdocs gh-deploy

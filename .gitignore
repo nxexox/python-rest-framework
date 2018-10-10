@@ -4,6 +4,7 @@
 *.cache
 *.sqlite3
 *.egg*
+*.coverage
 .benchmarks
 
 __pycache__/

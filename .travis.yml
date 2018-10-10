@@ -8,6 +8,11 @@ python:
 
 install:
   pip install -r requirements.txt
+  pip install codecov
 
 script:
   - python -m unittest rest_framework/tests/__init__.py
+  - coverage run rest_framework/tests/__init__.py
+
+after_success:
+  - codecov

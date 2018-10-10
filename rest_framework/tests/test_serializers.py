@@ -12,7 +12,8 @@ from rest_framework.serializers.fields import (
     CharField, BooleanField, IntegerField, FloatField, ListField
 )
 from rest_framework.serializers.serializers import BaseSerializer, Serializer, ListSerializer
-from rest_framework.exceptions import ValidationError, SkipError
+from rest_framework.exceptions import SkipError
+from rest_framework.serializers.exceptions import ValidationError
 
 from rest_framework.tests.serializers_for_tests import (
     SerializerPrimitiveField, SerializerMixinSingle, SerializerMixinMany, SerializerMixinRequired
@@ -144,7 +145,7 @@ class BaseSerializerTestClass(TestCase):
         """
         # Создаем без всего.
         ser = self.serializer_class()
-        assert ser._instance is None, '`._instance` должен быть None. Он `{}`.'.format(ser._instance)
+        assert ser.instance is None, '`.instance` должен быть None. Он `{}`.'.format(ser.instance)
         assert getattr(ser, 'initial_data', None) is None, '`.initial_data` должен быть None. Он `{}`.'.format(
             getattr(ser, 'initial_data', None)
         )
@@ -152,7 +153,7 @@ class BaseSerializerTestClass(TestCase):
         # Создаем с пустым объектом.
         obj = type('object', (object,), {})
         ser = self.serializer_class(obj)
-        assert ser._instance == obj, '`._instance` должен быть {}. Он `{}`.'.format(obj, ser._instance)
+        assert ser.instance == obj, '`.instance` должен быть {}. Он `{}`.'.format(obj, ser.instance)
         assert getattr(ser, 'initial_data', None) is None, '`.initial_data` должен быть None. Он `{}`.'.format(
             getattr(ser, 'initial_data', None)
         )
@@ -160,7 +161,7 @@ class BaseSerializerTestClass(TestCase):
         # Создаем с данными.
         obj = {}
         ser = self.serializer_class(data=obj)
-        assert ser._instance is None, '`._instance` должен быть None. Он `{}`.'.format(ser._instance)
+        assert ser.instance is None, '`.instance` должен быть None. Он `{}`.'.format(ser.instance)
         assert getattr(ser, 'initial_data', None) == obj, '`.initial_data` должен быть {}. Он `{}`.'.format(
             obj, getattr(ser, 'initial_data', None)
         )
@@ -392,7 +393,7 @@ class SerializerUserTestCase(TestCase):
                 del data[k]
         assert len(data) == 0, 'Все данные в `.validated_data` должны совпадать с данными в `data`.'
 
-    def test_instance_object_serializer(self):
+    def testinstance_object_serializer(self):
         """
         Тестирование instance атрибута для сериалайзера.
         Скармливаем объект.
@@ -422,7 +423,7 @@ class SerializerUserTestCase(TestCase):
                 del data[k]
         assert len(data) == 0, 'Размер данных должен совпадать с исходным. Осталось: {}.'.format(data)
 
-    def test_instance_dict_serializer(self):
+    def testinstance_dict_serializer(self):
         """
         Тестирование instance атрибута для сериалайзера с примитивами.
         Скармливаем словарь.

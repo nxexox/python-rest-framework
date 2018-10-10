@@ -15,4 +15,7 @@ __all__ = (
 
     # serializers
     'Serializer', 'ListSerializer',
+
+    # exceptions
+    'ValidationError',
 )

@@ -6,7 +6,8 @@ from unittest import TestCase
 
 import six
 
-from rest_framework.exceptions import ValidationError, SkipError
+from rest_framework.exceptions import SkipError
+from rest_framework.serializers.exceptions import ValidationError
 from rest_framework.serializers.fields import (
     Field, CharField, IntegerField, FloatField, BooleanField, ListField,
     get_attribute

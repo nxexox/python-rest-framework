@@ -11,7 +11,7 @@ install:
 
 script:
   - python -m unittest rest_framework/tests/__init__.py
-  - coverage run rest_framework/tests/__init__.py
+  - coverage run -m unittest rest_framework/tests/__init__.py
 
 after_success:
   - codecov

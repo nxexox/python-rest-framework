@@ -60,5 +60,5 @@ Now we process the request body with a serializer
 [docs]: https://nxexox.github.io/python-rest-framework/
 [pypi-version]: https://img.shields.io/pypi/v/python-rest-framework.svg
 [pypi]: https://pypi.org/project/Python-Rest-Framework/
-[build-status-image]: https://secure.travis-ci.org/encode/django-rest-framework.svg?branch=master
+[build-status-image]: https://travis-ci.org/nxexox/python-rest-framework.svg?branch=master
 [travis]: https://travis-ci.org/encode/python-rest-framework?branch=master

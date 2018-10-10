@@ -19,5 +19,5 @@ after_success:
   # build docs.
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
       pip install -r requirements/requirements-setup.txt;
-      mkdocs gh-deploy;
+      mkdocs gh-deploy --remote-branch https://${GH_TOKEN}@github.com/nxexox/python-rest-framework.git
     fi

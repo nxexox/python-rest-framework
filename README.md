@@ -1,44 +1,52 @@
-# Python-Rest-Framework
-Python Rest Framework
+# Python Rest Framework
+
+Python Rest Framework is a full-fledged rest api engine.
+You can concentrate all your strength on business logic, take care of the rest of the Python Rest Framework.
+
+## Requirements
+
+* Python (3.4, 3.5, 3.6, 3.7)
+* six
+
+## Installation
+
+Install using `pip`, including any optional packages you want...
+
+    pip install python-rest-framework
+
+...or clone the project from github.
+
+    git clone git@github.com:nxexox/python-rest-framework.git
 
 
-## TODO:
+## Example
 
-- [x] Сериалайзер должен вести себя как поле, что бы можно было делать вложенность
-- [x] Научить сериалайзер работать не с одним объектом а с множеством. many=True
-- [x] Научиться понимать что данные неверные до того, как мы пробрасываем их в валидаторы
-- [x] Сериалайзер должен вести себя как поле, что бы можно было делать вложенность
-- [x] Научить сериалайзер object -> dict
-- [x] Научиться вложенные сериалайзеры работать как обязательные.
-- [ ] Сделать `child` у ListField необязаельным. Если не указан, то хаваем что дают.
-- [ ] Добавить Dict, Json филды.
-- [ ] Добавить Date, DateTime, Time филды.
-- [ ] Сделать рендеры и парсеры, прописать в доке по serializers.
-- [ ] Добавить SerializerMethodField.
-- [ ] Добавить документацию по методам филдов.
-- [ ] Протестировать сериалайзеры, и дофиксить баги.
-- - [x] Протестировать юзер кейсы использования.
-- - [ ] Протестировать все методы и логику взаимодействия внутри сериалайзера.
-- [ ] Написать APIView, и все CRUDGenericView
-- [ ] Научиться парсить тело запроса что бы преобразовывать в валидный дикт и пробрасывать в сериалайзер
-- [ ] Научиться делать хэндлеры с ошибками и ывбрасывать их через self.fail или Исключение
-- [ ] Перевести все на english.
+For example, we will serialize the data from the request object.
 
+First we write the serializer
 
-```python
->>> from rest_framework.serializers.serializers import Serializer
->>> from rest_framework.serializers.fields import CharField, IntegerField
+    from rest_framework.serializers import (
+        Serializer, CharField, IntegerField, ListField, FloatField
+    )
 
-class Test(Serializer):
-    char_field = CharField(required=False, min_length=10)
-    int_field = IntegerField(required=True)
+    # Example serializer for parsing body data from web request.
+    class ExampleSerializer(Serializer):
+        char_field = CharField(label='This char field', required=True)
+        int_field = IntegerField(label='This int field', required=True)
+        list_float_field = ListField(child=FloatField(), required=True, min_length=2)
 
-ser = Test(data={field_name: field_value,...})
-res_valid = ser.is_valid()  # ser.is_valid(raise_exception=True)
+---
 
-if res_valid:
-    print(ser.validated_data)
-else:
-    print(ser.errors)
+Now we process the request body with a serializer
 
-```
+    # web request data
+    data = {
+        'char_field': 'example', 'int_field': 1,
+        'list_float_field': [1.0, 1.1, 1.2]
+    }
+
+    ser = ExampleSerializer(data=data)
+    if ser.is_valid():
+        print(ser.validated_data)
+    else:
+        print(ser.errors)

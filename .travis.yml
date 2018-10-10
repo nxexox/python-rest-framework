@@ -6,3 +6,4 @@ install:
 
 script:
   - python rest_framework/tests/__init__.py
+

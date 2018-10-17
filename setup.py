@@ -10,10 +10,10 @@ README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
 setup(
     name=rest_framework.__title__,
     version=rest_framework.__version__,
-    packages=find_packages(exclude=('tests', 'docs', 'docs_theme', 'requirements')),  # Выбрасываем из сборки лишнее.
-    include_package_data=True,  # Включаем данные пакета.
-    test_suite='rest_framework.tests',  # Включаем тесты.
-    license='Apache 2.0',  # Ставим лицензию
+    packages=find_packages(exclude=('tests', 'docs', 'docs_theme', 'requirements')),  # We throw away from the assembly too much.
+    include_package_data=True,
+    test_suite='rest_framework.tests',  # Include tests.
+    license='Apache 2.0',  # Put the license.
     description='Python Rest Framework. Box utils for easy makes rest api on python',
     long_description=README,
     url=rest_framework.__url__,

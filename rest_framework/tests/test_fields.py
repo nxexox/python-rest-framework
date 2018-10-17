@@ -1,7 +1,8 @@
 """
-Тестирование филдов.
+Fields testing
 
 """
+import datetime
 from unittest import TestCase
 
 import six
@@ -10,6 +11,7 @@ from rest_framework.exceptions import SkipError
 from rest_framework.serializers.exceptions import ValidationError
 from rest_framework.serializers.fields import (
     Field, CharField, IntegerField, FloatField, BooleanField, ListField,
+    TimeField, DateField, DateTimeField,
     get_attribute
 )
 from rest_framework.serializers.validators import (
@@ -19,79 +21,79 @@ from rest_framework.serializers.validators import (
 
 class BaseFieldTestCase(TestCase):
     """
-    Тестирование базового класса филда.
+    Testing base field class.
 
     """
     field_class = Field
     abstract_methods = {
         'to_internal_value': {'data': None},
         'to_representation': {'value': None},
-    }  # Пользовательские абтсрактные методы.
-    requirement_arguments_for_field = {}  # Обязательные аргументы для создания филда.
+    }  # Custom abstract methods.
+    requirement_arguments_for_field = {}  # Required arguments for creating a field.
 
     to_representation_cases = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': []}
         {},
-    )  # Кейсы, для проверки работоспособности representation.
+    )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': []}
         {},
-    )  # Кейсы для проверки работоспособности to_internal.
+    )  # Cases, to test the performance of `.to_internal_value()`.
     run_validation_cases = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': []}
         {},
-    )  # Кейсы для проверки работоспособности run_validation.
+    )  # Cases, to test the performance of `.run_validation()`.
 
-    field_error_messages = {}  # Пользовательский список ключей ошибок у филда.
+    field_error_messages = {}  # Custom field error key list.
 
     _fields_vals = {
         'required': True, 'default': None, 'label': None, 'validators': [],
         'error_messages': {}, 'default_error_messages': {}, 'default_validators': []
     }
-    __error_messages = {'required': None, 'null': None}  # Дефолтный список ошибок.
+    __error_messages = {'required': None, 'null': None}  # Default list of errors.
 
-    # Класс для тестирования на пустоту.
+    # Class for testing for empty.
     class Empty:
         pass
 
     @classmethod
     def setUpClass(cls):
         """
-        Дополняем данные для каждого поля отдельно.
+        We supplement the data for each field separately.
 
         """
         cls.__error_messages.update(cls.field_error_messages)
 
     def assert_base_fields(self, field, **additional_fields):
         """
-        Проверяет на все базовые филды и на дополнительные.
+        Checks on all base fields and extras.
 
-        :param rest_framework.serializers.fields.Field field: Объект филда.
-        :param additional_fields: Словарь дополнительных филдов для проверки.
+        :param rest_framework.serializers.fields.Field field: Field object.
+        :param additional_fields: Dict additional attributes to check.
 
         """
         copy_fields = self._fields_vals.copy()
         copy_fields.update(additional_fields)
-        msg = 'Неверное значение в %s у поля: {}. Ожидалось: {}, Пришло: {}.' % field.__class__.__name__
+        msg = 'Invalid value in %s for field: {}. Expected: {}, Reality: {}.' % field.__class__.__name__
 
         for key, val in copy_fields.items():
             field_val = getattr(field, key, self.Empty())
-            # Пробуем проверить тремя способами в зависимости от типа.
-            if isinstance(val, (bool, type(None))):  # Сначала сингл типы.
+            # We try to check in three ways, depending on the type.
+            if isinstance(val, (bool, type(None))):  # First single types.
                 assert val is field_val, msg.format(key, val, field_val)
-            elif isinstance(val, (six.string_types + six.integer_types + (float,))):  # Теперь примитивы.
+            elif isinstance(val, (six.string_types + six.integer_types + (float,))):  # Now primitives.
                 assert val == field_val, msg.format(key, val, field_val)
-            else:  # Если объект сложный.
+            else:  # If the object is complex.
                 assert isinstance(val, type(field_val)), msg.format(key, val, type(field_val))
 
     def create_params(self, **params):
         """
-        Создание параметров, для создания объекта филда.
+        Creating parameters to create a field object.
 
-        :return: Параметры для создания филда.
+        :return: Parameters for creating a field.
         :rtype: dict
 
         """
@@ -101,32 +103,32 @@ class BaseFieldTestCase(TestCase):
 
     def assert_bind(self, field, field_name=None, parent=None, label=None):
         """
-        Проверяет последствия действия метода bind.
+        Checks the effects of the bind method.
 
-        :param rest_framework.serializers.fields.Field field: Объект который проверяем.
-        :param str field_name: Название филда.
-        :param object parent: Родительский филд.
-        :param str label: Label филда.
+        :param rest_framework.serializers.fields.Field field: Object for check.
+        :param str field_name: Field name.
+        :param object parent: Parent field.
+        :param str label: Label field.
 
         """
-        assert field.label == label, '`.label` должен быть {}, а пришло {}.'.format(label, field.label)
-        assert field.parent == parent, '`.parent` должен быть {},  а пришло {}.'.format(parent, field.parent)
+        assert field.label == label, '`.label` expected {}, reality {}.'.format(label, field.label)
+        assert field.parent == parent, '`.parent` expected {},  reality {}.'.format(parent, field.parent)
         assert field.field_name == field_name, \
-            '`.field_name` должен быть {}, а пришло {}.'.format(field_name, field.field_name)
+            '`.field_name` expected {}, reality {}.'.format(field_name, field.field_name)
 
     def create_method_for_get_attribute(self, field_name=None, call_bind=True,
                                         default=None, required=None, attr=None, set_self=True, **kwargs):
         """
-        Создание атрибута у объекта, что бы протестировать `field.get_attribute()`
+        Creating an attribute on an object to test `field.get_attribute ()`
 
-        :param str field_name: Название филда.
-        :param bool call_bind: Нужно ли вызывать bind метод у филда?
-        :param object default: Значение по умолчанию.
-        :param bool required: Обязательно ли поле.
-        :param object attr: Сам стрибут, который ставим.
-        :param bool set_self: Нужно ли устанавливать ссылку классу родителю.
+        :param str field_name: Field name.
+        :param bool call_bind: Do I need to call the bind method in a field?
+        :param object default: Default value.
+        :param bool required: Is required field?
+        :param object attr: The attribute itself that we put.
+        :param bool set_self: Do I need to set the link to the class parent?.
 
-        :return: Созданный и готовый к тестированию Field.
+        :return: Created and ready for testing Field.
         :rtype: rest_framework.serializers.fields.Field
 
         """
@@ -139,156 +141,156 @@ class BaseFieldTestCase(TestCase):
 
     def __test_method_cases(self, method_name):
         """
-        Тестирование функции по кейсам.
+        Testing methods by cases.
 
-        :param str method_name: Название метода, который стоит протестировать по кейсам.
+        :param str method_name: Method name for testing by cases.
 
         """
-        # Проверяем все кейсы.
+        # Check all cases
         for case in getattr(self, '%s_cases' % method_name, []):
-            # Пропускаем тест.
+            # Skip case.
             if not case:
                 continue
 
             try:
-                # Достаем данные.
+                # Get the data.
                 data, result = case.get('data', {}), case.get('return', None)
                 params, exceptions = case.get('params', {}), case.get('exceptions', {})
 
-                data = data or {}  # Превращаем None в словарь.
+                data = data or {}  # Transform None into dict.
 
-                # Строим филд и ищем метод для тестирования.
+                # Building a field and looking for a method to test..
                 field = self.field_class(**self.create_params(**params))
                 method = getattr(field, method_name, self.Empty())
                 if isinstance(method, self.Empty):
-                    self.fail('Тестирование по кейсам не удалось. Не удалось найти метод `{}` у класса `{}`.'.format(
+                    self.fail('Testing by cases failed. Method not found `{}` have class `{}`.'.format(
                         method_name, field.__class__.__name__
                     ))
 
-                # Если ожидаются ошибки.
+                # If errors are expected.
                 if exceptions:
                     try:
                         res = method(**data)
-                        self.fail('В методе `{}.{}()` кейс `{}` не выкинул исключение. Метод вернул: `{}`.'.format(
+                        self.fail('In method `{}.{}()` case `{}` not raise error. Method return: `{}`.'.format(
                             field.__class__.__name__, method_name, case, res
                         ))
                     except tuple(exceptions):
                         pass
                 else:
-                    # Если ошибок не ожидается.
+                    # If no errors are expected.
                     res = method(**data)
                     assert res == result, \
-                        'В методе `{}.{}()` кейс {} вернул неверный результат `{}`'.format(
+                        'In method `{}.{}()` case {} return incorrect result `{}`'.format(
                             field.__class__.__name__, method_name, case, res
                         )
             except Exception as e:
-                self.fail('Во время проверки кейса `{}` для метода `{}.{}` произошла неожиданная ошибка: `{}: {}`'.format(
+                self.fail('During the inspection of the case `{}` for method `{}.{}` an unexpected error occurred: `{}: {}`'.format(
                     case, self.field_class.__class__.__name__, method_name, e.__class__.__name__, e
                 ))
 
     def test_default_create(self):
         """
-        Тестирование создания c дефолтными настройками.
+        Testing creation with default settings.
 
         """
-        self.assert_base_fields(self.field_class(**self.create_params()))  # Сначала создание с дефолтными.
+        self.assert_base_fields(self.field_class(**self.create_params()))  # First make default.
 
-        # Теперь создание с настройками.
+        # Now create with settings.
         params = self.create_params(required=False)
         self.assert_base_fields(self.field_class(**params), **params)
 
-        # Смотрим как default влияет на required.
+        # See how default affects required..
         params = self.create_params(default='')
         self.assert_base_fields(self.field_class(**params), required=False, **params)
 
-        # Смотрим как required влияет на validators.
+        # See how required affects validators..
         field = self.field_class(**self.create_params(required=True))
         assert isinstance(field.validators, list), \
-            '`.validators` должен быть list, а пришло {}'.format(type(field.validators))
+            '`.validators` must be list, reality {}'.format(type(field.validators))
         assert len(field.validators) == 1, \
-            'В `.validators` должен быть 1 валидатор, а их {}'.format(len(field.validators))
+            'In `.validators` must be 1 validator, reality {}'.format(len(field.validators))
         assert isinstance(field.validators[0], RequiredValidator), \
-            'В `.validators` должен быть `RequiredValidator`. Пришло: {}'.format(type(field.validators[0]))
-        # Теперь проверяем, что валидатора нет.
+            'In `.validators` must be `RequiredValidator`. Reality: `{}`'.format(type(field.validators[0]))
+        # Now we check that there is no validator.
         field = self.field_class(**self.create_params(required=False))
         assert isinstance(field.validators, list), \
-            '`.validators` должен быть list, а пришло {}'.format(type(field.validators))
+            '`.validators` must be list, reality {}'.format(type(field.validators))
         assert len(field.validators) == 0, \
-            'В `.validators` не должно быть валидаторов, а их {}'.format(len(field.validators))
+            'In `.validators` there should be no validators, reality `{}`'.format(len(field.validators))
 
-        # Проверяем собщения об ошибке.
+        # Check for error messages.
         field, messages_keys = self.field_class(**self.create_params()), self.__error_messages
         for key in field.error_messages:
-            assert key in messages_keys, 'В `.error_messages` должен быть ключ {}.'.format(key)
+            assert key in messages_keys, 'In `.error_messages` must be key `{}`.'.format(key)
 
-        # Обновляем словарь ошибок, и пробуем с кастомной ошибкой.
+        # We update the dictionary of errors, and we try with a custom error.
         new_error_message = self.__error_messages.copy()
         new_error_message['test'] = None
         field = self.field_class(**self.create_params(error_messages={'test': 'test'}))
         messages_keys = new_error_message
 
         for key in field.error_messages:
-            assert key in messages_keys, 'В `.error_messages` должен быть ключ {}.'.format(key)
+            assert key in messages_keys, 'In `.error_messages` must be key `{}`.'.format(key)
 
     def test_bind(self):
         """
-        Тестирование bind метода.
+        Testing bind method.
 
         """
-        # Сначала дефолтные.
+        # First default.
         field = self.field_class(**self.create_params())
         field.bind('test_label', self)
         self.assert_bind(field, 'test_label', self, 'Test label')
 
-        # Теперь ставим label.
+        # Now change label.
         field = self.field_class(**self.create_params(label='test_label'))
         field.bind('test_label', self)
         self.assert_bind(field, 'test_label', self, 'test_label')
 
     def test_fail(self):
         """
-        Тестирование метода fail.
+        Testing fail method.
 
         """
-        # Тестируем без своих ошибок.
+        # We test without our errors.
         field = self.field_class(**self.create_params())
         try:
             field.fail('required')
-            self.fail('`.fail()` должен выбрасывать исключение `ValidationError`.')
+            self.fail('`.fail()` must throw as exception `ValidationError`.')
         except ValidationError:
             pass
         try:
             field.fail('test')
-            self.fail('`.fail()` должен выбрасывать исключение `AssertionError`.')
+            self.fail('`.fail()` must throw as exception `AssertionError`.')
         except AssertionError:
             pass
 
-        # Теперь добавляем свое сообщение об ошибке.
+        # Now add custom error message
         field = self.field_class(**self.create_params(error_messages={'test': '{test}-test'}))
         try:
             field.fail('test', test='test')
-            self.fail('`.fail()` должен выбрасывать исключение `ValidationError`.')
+            self.fail('`.fail()` must throw as exception `ValidationError`.')
         except ValidationError as e:
-            assert e.detail == 'test-test', 'Сообщение об ошибке должно быть `{}`, пришло `{}`.'.format(
+            assert e.detail == 'test-test', 'The error message should be `{}`, reality `{}`.'.format(
                 'test-test', e.detail
             )
 
     def test_abstract_methods(self):
         """
-        Тестирование абстрактных методов.
+        Testing abstract methods.
 
         """
         field = self.field_class(**self.create_params())
         for method_name, method_params in self.abstract_methods.items():
             try:
                 getattr(field, method_name, lambda: None)(**method_params)
-                self.fail('Метод `.{}` должен выбрасывать исключение `NotImplementedError`.'.format(method_name))
+                self.fail('Method `.{}` must throw as exception `NotImplementedError`.'.format(method_name))
             except NotImplementedError:
                 pass
 
     def test_to_internal_value(self):
         """
-        Тест преобразования данных в валидный питон объект.
+        A test for converting data to a valid python object.
 
         """
         if 'to_internal_value' not in self.abstract_methods:
@@ -296,7 +298,7 @@ class BaseFieldTestCase(TestCase):
 
     def test_to_representation(self):
         """
-        Тест преобразования данных в валидный JSON объект.
+        Test data conversion to a valid JSON object.
 
         """
         if 'to_representation' not in self.abstract_methods:
@@ -304,24 +306,24 @@ class BaseFieldTestCase(TestCase):
 
     def test_get_default(self):
         """
-        Тестирование get_default метода.
+        Testing the get_default method.
 
         """
         field = self.field_class(**self.create_params())
         res = field.get_default()
-        assert res is None, '`.get_default()` должен возвращать None, вернул: {}.'.format(res)
+        assert res is None, '`.get_default()` must return None, reality: {}.'.format(res)
 
         field = self.field_class(**self.create_params(default=1))
         res = field.get_default()
-        assert res == 1, '`.get_default()` должен возвращать 1, вернул: {}.'.format(res)
+        assert res == 1, '`.get_default()` must return 1, reality: {}.'.format(res)
 
         field = self.field_class(**self.create_params(default=lambda: 100))
         res = field.get_default()
-        assert res == 100, '`.get_default()` должен вернуть 100, вернул: {}.'.format(res)
+        assert res == 100, '`.get_default()` must return 100, reality: {}.'.format(res)
 
     def test_get_attribute(self):
         """
-        Тестирование метода get_attribute.
+        Testing get_attribute method.
 
         """
         params = dict(
@@ -329,110 +331,110 @@ class BaseFieldTestCase(TestCase):
             attr=self.test_get_attribute, set_self=True
         )
 
-        # Сначала нормальную работу.
+        # First normal work.
         res = self.create_method_for_get_attribute(**params).get_attribute(self)
         assert res == self.test_get_attribute, \
-            '`.get_attribute()` должен возвращать {}, вернул {}.'.format(self.test_get_attribute, res)
+            '`.get_attribute()` must return {}, reality {}.'.format(self.test_get_attribute, res)
 
-        # Теперь пробуем несуществующий поискать и вернуть default.
+        # Now we try non-existent to look for and return default.
         params.update(default=100, call_bind=False, attr=None, set_self=False)
         res = self.create_method_for_get_attribute(**params).get_attribute(self)
-        assert res == 100, '`.get_attribute()` должен возвращать 100, вернул {}.'.format(res)
+        assert res == 100, '`.get_attribute()` must return 100, reality {}.'.format(res)
 
-        # Смотрим, что если поле обязательное и нет default, кидает исключение `SkipError`.
+        # We see that if the field is mandatory and there is no default, it throws the exception `SkipError`.
         params.update(required=True, default=None)
         try:
             self.create_method_for_get_attribute(**params).get_attribute(self)
-            self.fail('`.get_attribute()` должен выбросить исключение `SkipError`.')
+            self.fail('`.get_attribute()` must throw as exception `SkipError`.')
         except SkipError:
             pass
 
-        # Теперь пробуем оригинальное исключение получить.
+        # Now we try to get the original exception.
         params.update(field_name=None, required=False, call_bind=True)
         try:
             res = self.create_method_for_get_attribute(label='test', **params).get_attribute(self)
-            self.fail('`.get_attribute()` должен выбросить исключение `TypeError`, а вернул `{}`.'.format(res))
+            self.fail('`.get_attribute()` must throw as exception `TypeError`, return `{}`.'.format(res))
         except TypeError:
             pass
         except Exception as e:
-            self.fail('`.get_attribute()` должен выбросить исключение `TypeError`, а выбросил {}.'.format(type(e)))
+            self.fail('`.get_attribute()` must throw as exception `TypeError`, reality {}.'.format(type(e)))
 
     def test_validate_empty_values(self):
         """
-        Тестирование валидации на пустой тип.
+        Testing validation on an empty type.
 
         """
-        # Сначала с дефолтными настройками.
+        # First default settings.
         field = self.field_class(**self.create_params(required=False))
         is_empty, data = field.validate_empty_values(None)
-        assert is_empty is True, '`.validate_empty_values()` должен вернуть True.'
-        assert data is None, '`.validate_empty_values()` должен вернуть None.'
+        assert is_empty is True, '`.validate_empty_values()` must return True.'
+        assert data is None, '`.validate_empty_values()` must return None.'
 
-        # Теперь проверяем рекакцию на обязательность.
+        # Now we check the response to the binding.
         field = self.field_class(**self.create_params(required=True))
         try:
             field.validate_empty_values(None)
-            self.fail('`.validate_empty_values()` должен выбросить исключение `ValidationError`.')
+            self.fail('`.validate_empty_values()` must throw as exception `ValidationError`.')
         except ValidationError:
             pass
 
-        # Теперь проверяем на нормальность данных.
+        # Now we check for normal data
         field = self.field_class(**self.create_params(required=True))
         is_empty, data = field.validate_empty_values(123)
-        assert is_empty is False, '`.validate_empty_values()` должен вернуть False.'
-        assert data == 123, '`.validate_empty_values()` должен вернуть 123.'
+        assert is_empty is False, '`.validate_empty_values()` must return False.'
+        assert data == 123, '`.validate_empty_values()` must return 123.'
 
     def test_run_validation(self):
         """
-        Тестирование запуска валидации.
+        Testing run_validation method
 
         """
         self.__test_method_cases('run_validation')
 
     def test_run_validation_base_field(self):
         """
-        Тестирование запуска валидации для базового филда.
+        Testing start validation for base field.
 
         """
-        to_internal_value = lambda x: x  # Делаем заглушку для внутренней функции.
-        # Проверяем, на дефолтных настройках.
+        to_internal_value = lambda x: x  # We do a mock for internal function.
+        # Check on default settings.
         field = self.field_class(**self.create_params())
         setattr(field, 'to_internal_value', to_internal_value)
         res = field.run_validation(123)
-        assert res == 123, '`.run_validation()` должен вернуть 123.'
+        assert res == 123, '`.run_validation()` must return 123.'
 
-        # Проверяем, когда поле обязательное.
+        # Check when the field is required.
         field = self.field_class(**self.create_params(required=True))
         setattr(field, 'to_internal_value', to_internal_value)
         res = field.run_validation(123)
-        assert res == 123, '`.run_validation()` должен вернуть 123.'
+        assert res == 123, '`.run_validation()` must return 123.'
 
-        # Теперь пробуем заставить валидатор работать.
+        # Now we try to make validator work.
         try:
             field.run_validation(None)
-            self.fail('`.run_validation()` должен выбросить исключение `ValidationError`.')
+            self.fail('`.run_validation()` must throw as exception `ValidationError`.')
         except ValidationError:
             pass
 
     def test_run_validators(self):
         """
-        Тестирует работы валидаторов.
+        Testing work validators
 
         """
-        # Проверяем без валидаторов.
+        # Check without validators.
         field = self.field_class(**self.create_params(required=False, validators=[]))
         field.run_validators(123)
 
-        # Проверяем дефолтными валидаторами.
+        # Check with default validators.
         field = self.field_class(**self.create_params(required=True, validators=[]))
         field.run_validators(123)
         try:
             field.run_validators(None)
-            self.fail('`.run_validators()` должен выбросить исключение `ValidationError`.')
+            self.fail('`.run_validators()` must throw as exception `ValidationError`.')
         except ValidationError:
             pass
 
-        # Проверяем кастомными валидаторами.
+        # Check with custom validators.
         def test_validator(value):
             if value == 1:
                 raise ValidationError(1)
@@ -441,35 +443,35 @@ class BaseFieldTestCase(TestCase):
         field.run_validators(10)
         try:
             field.run_validators(1)
-            self.fail('`.run_validators()` должен выбросить исключение `ValidationError`.')
+            self.fail('`.run_validators()` must throw as exception `ValidationError`.')
         except ValidationError:
             pass
 
 
 class CharFieldTest(BaseFieldTestCase):
     """
-    Тестирование CharField.
+    Testing CharField.
 
     """
     field_class = CharField
-    abstract_methods = {}  # Пользовательские абтсрактные методы.
+    abstract_methods = {}  # Custom abstract methods.
     field_error_messages = {
         'invalid': None,
         'blank': None,
         'min_length': None,
         'max_length': None
-    }  # Пользовательский список ошибок.
+    }  # Custom errors list.
     to_representation_cases = (
         {'data': {'value': '123'}, 'return': '123'},
         {'data': {'value': 123}, 'return': '123'},
         {'data': {'value': 'qwe'}, 'return': 'qwe'}
-    )  # Кейсы, для проверки работоспособности representation.
+    )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
         {'data': {'data': '123'}, 'return': '123'},
         {'data': {'data': True}, 'exceptions': (ValidationError,)},
         {'data': {'data': BaseFieldTestCase.Empty()}, 'exceptions': (ValidationError,)},
         {'data': {'data': None}, 'exceptions': (ValidationError,)}
-    )  # Кейсы для проверки работоспособности to_internal.
+    )  # Cases, to test the performance of `.to_internal_value()`.
     run_validation_cases = (
         {'data': {'data': '123'}, 'return': '123'},
         {'data': {'data': 123}, 'return': '123'},
@@ -480,50 +482,50 @@ class CharFieldTest(BaseFieldTestCase):
         {'data': {'data': ''}, 'params': {'allow_blank': True}, 'return': ''},
         {'data': {'data': '   '}, 'params': {'allow_blank': True, 'trim_whitespace': True}, 'return': ''},
         {'data': {'data': '   '}, 'params': {'allow_blank': False, 'trim_whitespace': True}, 'exceptions': (ValidationError,)},
-    )  # Кейсы для проверки работоспособности run_validation.
+    )  # Cases, to test the performance of `.run_validation()`.
 
     def test_init(self):
         """
-        Тестирование создания.
+        Testing create.
 
         """
         params = dict(max_length=10, min_length=20, trim_whitespace=False, allow_blank=True, required=True)
         field = self.field_class(**params)
 
-        # Смотрим на валидаторы.
-        assert len(field.validators) == 3, '`.validators` должен иметь длину 3, он {}'.format(len(field.validators))
+        # Look at validators.
+        assert len(field.validators) == 3, '`.validators` must have length 3, reality {}'.format(len(field.validators))
         for v in field.validators:
             assert isinstance(v, (RequiredValidator, MaxLengthValidator, MinLengthValidator)), \
-                'Валидатор должен быть `RequiredValidator, MaxLengthValidator, MinLengthValidator`, он `{}`'.format(
+                'Validator must be `RequiredValidator, MaxLengthValidator, MinLengthValidator`, reality `{}`'.format(
                     type(v)
                 )
 
-        # Смотрим, что без них тоже можно.
+        # Look that without them too it is possible.
         params.update(max_length=None, min_length=None)
         field = self.field_class(**params)
-        assert len(field.validators) == 1, '`.validators` должен иметь длину 1, он {}'.format(len(field.validators))
+        assert len(field.validators) == 1, '`.validators` must have length 1, reality {}'.format(len(field.validators))
         for v in field.validators:
-            assert isinstance(v, RequiredValidator), 'Валидатор должен быть `RequiredValidator`, он `{}`'.format(type(v))
+            assert isinstance(v, RequiredValidator), 'Validator must be `RequiredValidator`, reality `{}`'.format(type(v))
 
 
 class TestIntegerField(BaseFieldTestCase):
     """
-    Тестирование IntegerField.
+    Testing IntegerField.
 
     """
     field_class = IntegerField
-    abstract_methods = {}  # Пользовательские абтсрактные методы.
+    abstract_methods = {}  # Custom abstract methods.
     field_error_messages = {
         'invalid': None,
         'min_value': None,
         'max_value': None,
         'max_string_length': None
-    }  # Пользовательский список ошибок.
+    }  # Custom errors list.
     to_representation_cases = (
         {'data': {'value': 123}, 'return': 123},
         {'data': {'value': '123'}, 'return': 123},
         {'data': {'value': 'qwe'}, 'exceptions': (ValueError,)},
-    )  # Кейсы, для проверки работоспособности representation.
+    )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
         {'data': {'data': 123}, 'return': 123},
         {'data': {'data': '123'}, 'return': 123},
@@ -533,7 +535,7 @@ class TestIntegerField(BaseFieldTestCase):
         {'data': {'data': False}, 'exceptions': (ValidationError,)},
         {'data': {'data': '11' * IntegerField.MAX_STRING_LENGTH}, 'exceptions': (ValidationError,)},
         {'data': {'data': None}, 'exceptions': (ValidationError,)},
-    )  # Кейсы для проверки работоспособности to_internal.
+    )  # Cases, to test the performance of `.to_internal_value()`.
     run_validation_cases = (
         {'data': {'data': 123}, 'return': 123},
         {'data': {'data': '123'}, 'return': 123},
@@ -552,27 +554,27 @@ class TestIntegerField(BaseFieldTestCase):
         {'data': {'data': 10}, 'params': {'max_value': 11, 'min_value': 5}, 'return': 10},
         {'data': {'data': 10}, 'params': {'max_value': 10, 'min_value': 10}, 'return': 10},
         {'data': {'data': 10}, 'params': {'max_value': 5, 'min_value': 5}, 'exceptions': (ValidationError,)},
-    )  # Кейсы для проверки работоспособности run_validation.
+    )  # Cases, to test the performance of `.run_validation()`.
 
 
 class TestFloatField(BaseFieldTestCase):
     """
-    Тестирование FloatField.
+    Testing FloatField.
 
     """
     field_class = FloatField
-    abstract_methods = {}  # Пользовательские абтсрактные методы.
+    abstract_methods = {}  # Custom abstract methods.
     field_error_messages = {
         'invalid': None,
         'min_value': None,
         'max_value': None,
         'max_string_length': None
-    }  # Пользовательский список ошибок.
+    }  # Custom errors list.
     to_representation_cases = (
         {'data': {'value': 123}, 'return': 123.0},
         {'data': {'value': '123'}, 'return': 123.0},
         {'data': {'value': 'qwe'}, 'exceptions': (ValueError,)},
-    )  # Кейсы, для проверки работоспособности representation.
+    )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
         {'data': {'data': 123}, 'return': 123.0},
         {'data': {'data': '123'}, 'return': 123.0},
@@ -582,7 +584,7 @@ class TestFloatField(BaseFieldTestCase):
         {'data': {'data': False}, 'return': 0.0},
         {'data': {'data': '11' * IntegerField.MAX_STRING_LENGTH}, 'exceptions': (ValidationError,)},
         {'data': {'data': None}, 'exceptions': (ValidationError,)},
-    )  # Кейсы для проверки работоспособности to_internal.
+    )  # Cases, to test the performance of `.to_internal_value()`.
     run_validation_cases = (
         {'data': {'data': 123}, 'return': 123.0},
         {'data': {'data': '123'}, 'return': 123.0},
@@ -601,16 +603,16 @@ class TestFloatField(BaseFieldTestCase):
         {'data': {'data': 10}, 'params': {'max_value': 11, 'min_value': 5}, 'return': 10.0},
         {'data': {'data': 10}, 'params': {'max_value': 10, 'min_value': 10}, 'return': 10.0},
         {'data': {'data': 10}, 'params': {'max_value': 5, 'min_value': 5}, 'exceptions': (ValidationError,)},
-    )  # Кейсы для проверки работоспособности run_validation.
+    )  # Cases, to test the performance of `.run_validation()`.
 
 
 class TestBooleanField(BaseFieldTestCase):
     """
-    Тестирование BooleanField.
+    Testing BooleanField.
 
     """
     field_class = BooleanField
-    abstract_methods = {}  # Пользовательские абтсрактные методы.
+    abstract_methods = {}  # Custom abstract methods.
     field_error_messages = {'invalid': None}
     to_representation_cases = (
         {'data': {'value': True}, 'return': True},
@@ -623,7 +625,7 @@ class TestBooleanField(BaseFieldTestCase):
         {'data': {'value': 'null'}, 'return': None},
         {'data': {'value': ''}, 'return': None},
         {'data': {'value': '100'}, 'return': True}
-    )  # Кейсы, для проверки работоспособности representation.
+    )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
         {'data': {'data': True}, 'return': True},
         {'data': {'data': False}, 'return': False},
@@ -635,7 +637,7 @@ class TestBooleanField(BaseFieldTestCase):
         {'data': {'data': 'null'}, 'return': None},
         {'data': {'data': ''}, 'return': None},
         {'data': {'data': '100'}, 'exceptions': (ValidationError,)},
-    )  # Кейсы для проверки работоспособности to_internal.
+    )  # Cases, to test the performance of `.to_internal_value()`.
     run_validation_cases = (
         {'data': {'data': True}, 'return': True},
         {'data': {'data': False}, 'return': False},
@@ -647,19 +649,19 @@ class TestBooleanField(BaseFieldTestCase):
         {'data': {'data': 'null'}, 'params': {'required': False}, 'return': None},
         {'data': {'data': ''}, 'params': {'required': False}, 'return': None},
         {'data': {'data': '100'}, 'exceptions': (ValidationError,)},
-    )  # Кейсы для проверки работоспособности run_validation.
+    )  # Cases, to test the performance of `.run_validation()`.
 
 
 class TestListField(BaseFieldTestCase):
     """
-    Тестирование ListField.
+    Testing ListField.
 
     """
     field_class = ListField
-    abstract_methods = {}  # Пользовательские абтсрактные методы.
+    abstract_methods = {}  # Custom abstract methods.
     requirement_arguments_for_field = {
         'child': CharField(required=False)
-    }  # Обязательные аргументы для создания филда.
+    }  # Required arguments for creating a field.
     field_error_messages = {
         'not_a_list': None,
         'empty': None,
@@ -678,7 +680,7 @@ class TestListField(BaseFieldTestCase):
         {'data': {'value': [True, True, True]}, 'return': ['True', 'True', 'True']},
         {'data': {'value': ['123', 123, True, None]}, 'return': ['123', '123', 'True', None]},
         {'data': {'value': None}, 'exceptions': (TypeError,)},
-    )  # Кейсы, для проверки работоспособности representation.
+    )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
         {'data': {'data': ''}, 'exceptions': (ValidationError,)},
         {'data': {'data': {}}, 'exceptions': (ValidationError,)},
@@ -687,10 +689,10 @@ class TestListField(BaseFieldTestCase):
         {'data': {'data': []}, 'params': {'allow_empty': False}, 'exceptions': (ValidationError,)},
         {'data': {'data': ['123', '123', '123']}, 'return': ['123', '123', '123']},
         {'data': {'data': [123, 123, 123]}, 'return': ['123', '123', '123']},
-        # Ошибки тут будут, потому что CharField не хавает True False None в качестве строки.
+        # Errors will be here, because CharField does not get True False No as a string.
         {'data': {'data': [True, True, True]}, 'exceptions': (ValidationError,)},
         {'data': {'data': ['123', 123, True, None]}, 'exceptions': (ValidationError,)},
-    )  # Кейсы для проверки работоспособности to_internal.
+    )  # Cases, to test the performance of `.to_internal_value()`.
     run_validation_cases = (
         {'data': {'data': ''}, 'exceptions': (ValidationError,)},
         {'data': {'data': {}}, 'exceptions': (ValidationError,)},
@@ -699,7 +701,7 @@ class TestListField(BaseFieldTestCase):
         {'data': {'data': []}, 'params': {'allow_empty': False}, 'exceptions': (ValidationError,)},
         {'data': {'data': ['123', '123', '123']}, 'return': ['123', '123', '123']},
         {'data': {'data': [123, 123, 123]}, 'return': ['123', '123', '123']},
-        # Ошибки тут будут, потому что CharField не хавает True False None в качестве строки.
+        # Errors will be here, because CharField does not get True False No as a string.
         {'data': {'data': [True, True, True]}, 'exceptions': (ValidationError,)},
         {'data': {'data': ['123', 123, True, None]}, 'exceptions': (ValidationError,)},
         {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 2, 'child': IntegerField()}, 'return': [1, 1, 1]},
@@ -713,4 +715,134 @@ class TestListField(BaseFieldTestCase):
         {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 1, 'max_length': 5, 'child': IntegerField()}, 'return': [1, 1, 1]},
         {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 1, 'max_length': 3, 'child': IntegerField()}, 'return': [1, 1, 1]},
         {'data': {'data': [1, 1, 1]}, 'params': {'min_length': 1, 'max_length': 2}, 'exceptions': (ValidationError,)},
-    )  # Кейсы для проверки работоспособности run_validation.
+        {'data': {'data': [1, True, '1']}, 'params': {'child': None}, 'return': [1, True, '1']}  # Check empty child field.
+    )  # Cases, to test the performance of `.run_validation()`.
+
+
+class TestTimeField(BaseFieldTestCase):
+    """
+    Testing TimeField.
+
+    """
+    field_class = TimeField
+    abstract_methods = {}  # Custom abstract methods.
+    requirement_arguments_for_field = {}  # Required arguments for creating a field.
+    field_error_messages = {
+        'invalid': None,
+        'time': None
+    }
+
+    to_representation_cases = (
+        {'data': {'value': datetime.time()}, 'return': '00:00:00'},
+        {'data': {'value': datetime.time(10, 10)}, 'return': '10:10:00'},
+        {'data': {'value': '10:10:10'}, 'return': '10:10:10'},
+        {'data': {'value': 'test'}, 'return': 'test'},  # TODO: fix
+        {'data': {'value': None}, 'return': None},
+        {"data": {'value': type('object', (object,), {})}, 'exceptions': (AttributeError,)},  # Not valid object.
+    )  # Cases, to test the performance of `.to_representation()`.
+    to_internal_value_cases = (
+        {'data': {'data': '00:00:00'}, 'return': datetime.time(0, 0, 0)},
+        {'data': {'data': '10:10:10'}, 'return': datetime.time(10, 10, 10)},
+        {'data': {'data': '10:10'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': datetime.time()}, 'return': datetime.time()},
+        {'data': {'data': datetime.time(10, 10)}, 'return': datetime.time(10, 10)},
+    )  # Cases, to test the performance of `.to_internal_value()`.
+    run_validation_cases = (
+        {'data': {'data': '00:00:00'}, 'return': datetime.time(0, 0, 0)},
+        {'data': {'data': '10:10:10'}, 'return': datetime.time(10, 10, 10)},
+        {'data': {'data': '10:10'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': datetime.time()}, 'return': datetime.time()},
+        {'data': {'data': datetime.time(10, 10)}, 'return': datetime.time(10, 10)},
+        {'data': {'data': None}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'default': datetime.time()}, 'return': datetime.time()},
+    )  # Cases, to test the performance of `.run_validation()`.
+
+
+class TestDateField(BaseFieldTestCase):
+    """
+    Testing DateField.
+
+    """
+    field_class = DateField
+    abstract_methods = {}  # Custom abstract methods.
+    requirement_arguments_for_field = {}  # Required arguments for creating a field.
+    field_error_messages = {
+        'invalid': None,
+        'datetime': None
+    }
+
+    to_representation_cases = (
+        {'data': {'value': datetime.date(2018, 1, 1)}, 'return': '2018-01-01'},
+        {'data': {'value': datetime.date(2018, 10, 10)}, 'return': '2018-10-10'},
+        {'data': {'value': datetime.date(2018, 10, 10)}, 'params': {'format': '%d.%m.%Y'}, 'return': '10.10.2018'},
+        {'data': {'value': datetime.datetime.now()}, 'exceptions': (AssertionError,)},
+        {'data': {'value': 'test'}, 'return': 'test'},  # TODO: fix
+        {'data': {'value': None}, 'return': None},
+        {"data": {'value': type('object', (object,), {})}, 'exceptions': (AttributeError,)},  # Not valid object.
+    )  # Cases, to test the performance of `.to_representation()`.
+    to_internal_value_cases = (
+        {'data': {'data': '2018-01-01'}, 'return': datetime.date(2018, 1, 1)},
+        {'data': {'data': datetime.date(2018, 1, 1)}, 'return': datetime.date(2018, 1, 1)},
+        {'data': {'data': '2018-10'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': '1.1.2018'}, 'params': {'input_format': '%d.%m.%Y'}, 'return': datetime.date(2018, 1, 1)},
+        {'data': {'data': datetime.datetime.now()}, 'exceptions': (ValidationError,)},
+        {'data': {'data': '2018-10'}, 'params': {'input_format': '%Y-%m'}, 'return': datetime.date(2018, 10, 1)},
+    )  # Cases, to test the performance of `.to_internal_value()`.
+    run_validation_cases = (
+        {'data': {'data': '2018-01-01'}, 'return': datetime.date(2018, 1, 1)},
+        {'data': {'data': datetime.date(2018, 1, 1)}, 'return': datetime.date(2018, 1, 1)},
+        {'data': {'data': '2018-10'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': '1.1.2018'}, 'params': {'input_format': '%d.%m.%Y'}, 'return': datetime.date(2018, 1, 1)},
+        {'data': {'data': datetime.datetime.now()}, 'exceptions': (ValidationError,)},
+        {'data': {'data': '2018-10'}, 'params': {'input_format': '%Y-%m'}, 'return': datetime.date(2018, 10, 1)},
+        {'data': {'data': None}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'default': datetime.date(2018, 1, 1)}, 'return': datetime.date(2018, 1, 1)},
+    )  # Cases, to test the performance of `.run_validation()`.
+
+
+class TestDateTimeField(BaseFieldTestCase):
+    """
+    Testing DateTimeField.
+
+    """
+    field_class = DateTimeField
+    abstract_methods = {}  # Custom abstract methods.
+    requirement_arguments_for_field = {}  # Required arguments for creating a field.
+    field_error_messages = {
+        'invalid': None,
+        'date': None,
+    }
+    __now = datetime.datetime.now()
+    __now_for_test = datetime.datetime(__now.year, __now.month, __now.day, __now.hour, __now.minute, __now.second)
+
+    to_representation_cases = (
+        {'data': {'value': datetime.datetime(2018, 1, 1)}, 'return': '2018-01-01 00:00:00'},
+        {'data': {'value': datetime.datetime(2018, 10, 10)}, 'return': '2018-10-10 00:00:00'},
+        {'data': {'value': datetime.datetime(2018, 10, 10)}, 'params': {'format': '%d.%m.%Y'}, 'return': '10.10.2018'},
+        {'data': {'value': datetime.datetime(2018, 1, 1, 1, 1, 1)}, 'return': '2018-01-01 01:01:01'},
+        {'data': {'value': datetime.datetime(2018, 1, 1, 1, 1, 1)}, 'params': {'format': '%d.%m.%Y %H-%M-%S'}, 'return': '01.01.2018 01-01-01'},
+        {'data': {'value': 'test'}, 'return': 'test'},  # TODO: fix
+        {'data': {'value': None}, 'return': None},
+        {"data": {'value': type('object', (object,), {})}, 'exceptions': (AttributeError,)},  # Not valid object.
+    )  # Cases, to test the performance of `.to_representation()`.
+    to_internal_value_cases = (
+        {'data': {'data': '2018-01-01 00:00:00'}, 'return': datetime.datetime(2018, 1, 1)},
+        {'data': {'data': datetime.datetime(2018, 1, 1)}, 'return': datetime.datetime(2018, 1, 1)},
+        {'data': {'data': '2018-10'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': '1.1.2018'}, 'params': {'input_format': '%d.%m.%Y'}, 'return': datetime.datetime(2018, 1, 1)},
+        {'data': {'data': __now_for_test.strftime(DateTimeField.input_format)}, 'return': __now_for_test},
+        {'data': {'data': '2018-10'}, 'params': {'input_format': '%Y-%m'}, 'return': datetime.datetime(2018, 10, 1)},
+    )  # Cases, to test the performance of `.to_internal_value()`.
+    run_validation_cases = (
+        {'data': {'data': '2018-01-01 00:00:00'}, 'return': datetime.datetime(2018, 1, 1)},
+        {'data': {'data': datetime.datetime(2018, 1, 1)}, 'return': datetime.datetime(2018, 1, 1)},
+        {'data': {'data': '2018-10'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': '1.1.2018'}, 'params': {'input_format': '%d.%m.%Y'}, 'return': datetime.datetime(2018, 1, 1)},
+        {'data': {'data': __now_for_test.strftime(DateTimeField.input_format)}, 'return': __now_for_test},
+        {'data': {'data': '2018-10'}, 'params': {'input_format': '%Y-%m'}, 'return': datetime.datetime(2018, 10, 1)},
+        {'data': {'data': None}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'default': datetime.datetime(2018, 1, 1)}, 'return': datetime.datetime(2018, 1, 1)},
+    )  # Cases, to test the performance of `.run_validation()`.

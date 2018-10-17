@@ -1,5 +1,5 @@
 """
-Коллекции.
+Collections.
 
 """
 import copy
@@ -9,7 +9,7 @@ import six
 
 class MultiValueDictKeyError(KeyError):
     """
-    Кастомный KeyError.
+    Custom KeyError.
 
     """
     pass
@@ -17,9 +17,9 @@ class MultiValueDictKeyError(KeyError):
 
 class MultiValueDict(dict):
     """
-    Словарь, позволяющий хранить множество значений в одном ключе.
-    Сделали что бы решить проблему cgi.parse_qs,
-    которая возвращает список для каждого ключа, хотя в большинстве веб формы дают пары ключ значение.
+    A dictionary that allows you to store multiple values in one key.
+    We’ve done to solve the cgi.parse_qs problem,
+    which returns a list for each key, although most web forms give key value pairs.
 
 
     >>> d = MultiValueDict({'name': ['Adrian', 'Simon'], 'position': ['Developer']})
@@ -37,34 +37,34 @@ class MultiValueDict(dict):
     """
     def __init__(self, key_to_list_mapping=()):
         """
-        Словарь, позволяющий хранить множество значений в одном ключе.
-        Сделали что бы решить проблему cgi.parse_qs,
-        которая возвращает список для каждого ключа, хотя в большинстве веб формы дают пары ключ значение.
+        A dictionary that allows you to store multiple values in one key.
+        We’ve done to solve the cgi.parse_qs problem,
+        which returns a list for each key, although most web forms give key value pairs.
 
-        :param iter key_to_list_mapping: Данные для инициализации.
+        :param iter key_to_list_mapping: Data for initializing.
 
         """
         super(MultiValueDict, self).__init__(key_to_list_mapping)
 
     def __getitem__(self, key):
         """
-        Возвращает последнее значение для этого ключа или [] если это пустой список.
-        Если не найдено кидаем ошибку.
+        Returns the last value for this key or [] if this is an empty list.
+        If not found we throw an error.
 
-        :param object key: Ключ, по которому ищем.
+        :param object key: Key for search.
 
-        :return: Найденое значение.
+        :return: Found value.
         :rtype: object
 
-        :raise KeyError: Если не нашли ключ.
+        :raise KeyError: Id If you did not find the key.
 
         """
-        # Сначала ищем в словаре массив.
+        # First we look for an array in the dict.
         try:
             list_ = super(MultiValueDict, self).__getitem__(key)
         except KeyError:
             raise MultiValueDictKeyError(repr(key))
-        # Теперь берем последнее значение.
+        # Now take the last value.
         try:
             return list_[-1]
         except IndexError:
@@ -72,19 +72,19 @@ class MultiValueDict(dict):
 
     def __setitem__(self, key, value):
         """
-        Ставим в качестве значения массив.
+        Set an array as a value.
 
-        :param object key: Ключ, ко которому ставим.
-        :param object value: Значение которое ставим.
+        :param object key: Key for set.
+        :param object value: Value for set.
 
         """
         super(MultiValueDict, self).__setitem__(key, [value])
 
     def __copy__(self):
         """
-        Делаем копирование словаря. ак же копируем все значения, т.к. они массивы.
+        Make a copy of the dictionary. We also copy all the values, since they are arrays.
 
-        :return: Скопированный словарь.
+        :return: Copied dict.
         :rtype: MultiValueDict
 
         """
@@ -95,11 +95,9 @@ class MultiValueDict(dict):
 
     def __deepcopy__(self, memo=None):
         """
-        Делаем глубокое копирование всего словаря.
+        Make a deep copy of the entire dictionary.
 
-        :param memo: ???
-
-        :return: Скопированный словарь.
+        :return: Copied dict.
         :rtype: MultiValueDict
 
         """
@@ -116,7 +114,7 @@ class MultiValueDict(dict):
 
     def __getstate__(self):
         """
-        Делаем свое состояние для пикла объекта.
+        We make our state for the pickle object.
 
         :return: Сохраняем в _data данные для setstate.
         :rtype: MultiValueDict
@@ -128,11 +126,11 @@ class MultiValueDict(dict):
 
     def __setstate__(self, obj_dict):
         """
-        Развораяиваем что запикали в dict.
+        Expand that pickle in dict.
 
-        :param dict obj_dict: Данные которые надо развернуть.
+        :param dict obj_dict: The data that must be deployed.
 
-        :return: Развернутые и преобразованные данные.
+        :return: Expanded and Transformed Data.
         :rtype: MultiValueDict
 
         """
@@ -143,54 +141,54 @@ class MultiValueDict(dict):
 
     def get(self, key, default=None):
         """
-        Возврвщаем последнее значение из найденных.
-        Если ничего не нашли, или значение по ключу пусто, возвращаем `default=`.
+        We return the last value found.
+        If nothing is found, or the key value is empty, return `default =`.
 
         """
-        # Ищем по ключу.
+        # Search on key.
         try:
             val = self[key]
         except KeyError:
             return default
-        # Возвращаем что нашли.
+        # Return what you find.
         if val == []:
             return default
         return val
 
     def _getlist(self, key, default=None, force_list=False):
         """
-        Возвращаем лист значение для ключа.
+        Return list value for key.
 
-        :param object key: Ключ, по которому достаем.
-        :param object default: Дефолтное значение.
-        :param bool force_list: Нужно ли делать копию значения?
+        :param object key: The key for which we get.
+        :param object default: Default value.
+        :param bool force_list: Do I need to make a copy of the value?
 
-        :return: Список значени или `default=`.
+        :return: List values or `default=`.
         :rtype: list
 
         """
         try:
-            # Достаем по ключу.
+            # Get on the key.
             values = super(MultiValueDict, self).__getitem__(key)
         except KeyError:
-            # Если не нашли.
+            # If not found.
             if default is None:
                 return []
             return default
         else:
-            # Если нашли, то возвращаем. Если надо делаем копию.
+            # If found, then return. If you need to make a copy.
             if force_list:
                 values = list(values) if values is not None else None
             return values
 
     def getlist(self, key, default=None):
         """
-        Возвращает список значений по ключу. Если ключ не найден, возвращает `default=`.
+        Returns a list of values by key. If the key is not found, returns `default =`.
 
-        :param object key: Ключ, по которому ищем.
-        :param object default: Дефолтное значение.
+        :param object key: Key for search.
+        :param object default: Default value.
 
-        :return: Список значений.
+        :return: List values.
         :rtype: list
 
         """
@@ -198,22 +196,22 @@ class MultiValueDict(dict):
 
     def setlist(self, key, list_):
         """
-        Устанавливаем массив значений по ключу.
+        Set list values on the key.
 
-        :param object key: Ключ, по котормоу ставим.
-        :param list list_: Список значений, которые ставим.
+        :param object key: Key for set.
+        :param list list_: List values for set.
 
         """
         super(MultiValueDict, self).__setitem__(key, list_)
 
     def setdefault(self, key, default=None):
         """
-        Возвращаем значение по ключу, если не нашли тогда ставим `default=` и возвращаем его.
+        Return the value by key, if not found then put `default =` and return it.
 
-        :param object key: Ключ, по которому возвращаем.
-        :param object default: Дефолтное значение, которое стоит установить.
+        :param object key: Key for return
+        :param object default: Default value to set.
 
-        :return: Значение по ключу.
+        :return: Value on the key.
         :rtype: object
 
         """
@@ -223,12 +221,12 @@ class MultiValueDict(dict):
 
     def setlistdefault(self, key, default_list=None):
         """
-        Возвращаем список значений по ключу, если не нашли ставим `default_list=`.
+        Return the list of values by key, if they are not found, put `default_list =`.
 
-        :param object key: Ключ, по которому ставим.
-        :param list default_list: Список значений по умолчанию.
+        :param object key: Key for set.
+        :param list default_list: List values on default.
 
-        :return: Значение по ключу.
+        :return: Value o the key.
         :rtype: list
 
         """
@@ -241,19 +239,19 @@ class MultiValueDict(dict):
 
     def appendlist(self, key, value):
         """
-        Добавляем значение в список, найденный по ключу.
+        Add a value to the list found by key.
 
-        :param object key: Ключ, по которому ищем.
-        :param object value: Значение, которое стоит добавить.
+        :param object key: Key for search.
+        :param object value: Value for append.
 
         """
         self.setlistdefault(key).append(value)
 
     def items(self):
         """
-        Генератор по значениям словаря.
+        Generator based on dictionary values.
 
-        :return: Генератор по словарю. tuple(key, value)
+        :return: Generator on dict. tuple(key, value)
         :rtype: Generator[Tuple[object, object], None, None]
 
         """
@@ -262,9 +260,9 @@ class MultiValueDict(dict):
 
     def lists(self):
         """
-        Генератор по словарю. В качестве значения список значений по ключу.
+        Dictionary Generator. As a value, a list of values by key.
 
-        :return: Генератор по словарю. tuple(key, value)
+        :return: Generator on dict. tuple(key, value)
         :rtype: Generator[Tuple[object, list], None, None]
 
         """
@@ -272,9 +270,9 @@ class MultiValueDict(dict):
 
     def values(self):
         """
-        Генератор по значениям. Возвращает последнее найденное значение.
+        Generator by values. Returns the last found value.
 
-        :return: Последнее найденное в списке по ключу значение.
+        :return: Last found in the list by key value.
         :rtype: object
 
         """
@@ -283,9 +281,9 @@ class MultiValueDict(dict):
 
     def copy(self):
         """
-        Делаем поверхностную копию объекта.
+        Make a shallow light of the object.
 
-        :return: Копия словаря.
+        :return: Copied dict.
         :rtype: MultiValueDict
 
         """
@@ -293,36 +291,36 @@ class MultiValueDict(dict):
 
     def update(self, *args, **kwargs):
         """
-        Расширяет текущий словарь, данными. Не заменяем значения по одному ключу, а дополняем их.
+        Extends the current dictionary data. We do not replace the values by one key, but supplement them.
 
         """
-        # Мы не можем принять несколько словарей как позиционные аргументы.
+        # We cannot accept several dictionaries as positional arguments.
         if len(args) > 1:
-            raise TypeError("Ожидался один позиционный аргумент, получено `%d`" % len(args))
+            raise TypeError("Expected one positional argument, reality `%d`" % len(args))
 
         if args:
             other_dict = args[0]
-            # Если это тоже словарь массивов.
+            # If this is also a dict of arrays.
             if isinstance(other_dict, MultiValueDict):
                 for key, value_list in other_dict.lists():
                     self.setlistdefault(key).extend(value_list)
             else:
-                # Если это простой словарь.
+                # If this is also a dict of arrays.
                 try:
                     for key, value in other_dict.items():
                         self.setlistdefault(key).append(value)
                 except TypeError:
-                    raise ValueError("`MultiValueDict.update()` принимает либо `MultiValueDict` либо `dict`")
+                    raise ValueError("`MultiValueDict.update ()` accepts either `MultiValueDict` or` dict`")
 
-        # Дополняем позиционными аршументами.
+        # Supplement with positional documents.
         for key, value in six.iteritems(kwargs):
             self.setlistdefault(key).append(value)
 
     def dict(self):
         """
-        Возвращаем простой словарь со списками значений.
+        We return a simple dictionary with lists of values.
 
-        :return: Простой словарь.
+        :return: Simple dict.
         :rtype: dict
 
         """

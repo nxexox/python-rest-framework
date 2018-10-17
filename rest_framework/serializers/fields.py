@@ -1,9 +1,10 @@
 """
-Филды для сериалайзера.
+Fields for serializers.
 
 """
 import re
 import collections
+import datetime
 
 import six
 
@@ -15,63 +16,70 @@ from rest_framework.serializers.validators import (
 )
 
 MISSING_ERROR_MESSAGE = (
-    'Выброшено ValidationError исключение для `{class_name}`, '
-    'но ключа `{key}` не найдено в словаре `error_messages`.'
-)  # Дефолтное сообщение об ошибке, для случаев когда нет сообщения.
+    'Raise `ValidationError` exception for `{class_name}`, '
+    'not found key `{key}` in dict `error_messages`.'
+)  # Default error message, for situation not error key in error_messages dict.
+# Default formats for parse, transformed datetime.
+DEFAULT_DATE_FORMAT = '%Y-%m-%d'
+DEFAULT_TIME_FORMAT = '%H:%M:%S'
+DEFAULT_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+DEFAULT_INPUT_DATE_FORMAT = '%Y-%m-%d'
+DEFAULT_INPUT_TIME_FORMAT = '%H:%M:%S'
+DEFAULT_INPUT_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
 def get_attribute(obj, attr_name):
     """
-    Возвращаем атрибут объекта. Умеет работать со словарями.
+    Return object attribute. Can work with dictionaries.
 
-    :param object obj: Объект, у которго ищем атрибут.
-    :param str attr_name: Название атрибута.
+    :param object obj: Object for search attribute.
+    :param str attr_name: Attribute name.
 
-    :return: Найденный атрибут либо исключение.
+    :return: Found attribute or exception.
     :rtype: object
 
-    :raise AttributeError: Если не нашли атрибут.
+    :raise AttributeError: If attribute not found.
 
     """
-    # Ищем атрибут.
+    # Search attribute.
     if isinstance(obj, collections.Mapping):
         attr = obj[attr_name]
     else:
         attr = getattr(obj, attr_name)
 
-    # Возвращаем.
+    # Return.
     return attr
 
 
 class Field(object):
     """
-    Базовый филд.
+    Base field.
 
     """
     default_error_messages = {
-        'required': 'Это поле обязательное.',
-        'null': 'Это поле не может быть null.'
+        'required': 'This field is required.',
+        'null': 'This field cannot be null.'
     }
-    default_validators = []  # Дефолтный валидаторы для поля.
+    default_validators = []  # Default validators for field.
 
     def __init__(self, required=True, default=None, label=None, validators=None, error_messages=None):
         """
-        Базовый филд.
+        Base field.
 
-        :param bool required: Обязательное ли поле.
-        :param object default: Значение по умолчанию. Если установлено, тогда поле необязательное.
-        :param str label: Название поля.
-        :param list validators: Список валидаторов для поля.
-        :param dict error_messages: Словарь с кастомным описанием ошибок.
+        :param bool required: This is required field?
+        :param object default: Default value. If set, then the field is optional.
+        :param str label: Field name.
+        :param list validators: Validators for field.
+        :param dict error_messages: Dictionary with custom error description.
 
         """
         self.label = label
         self.default = default
         self.required = bool(required) if self.default is None else False
-        # Добаляем валидатор для обязательности поля.
+        # Added validator for check on required field.
         self._validators = ([RequiredValidator()] if self.required else []) + (validators or [])[:]
 
-        # Формируем словарь с ошибками.
+        # Make errors dict.
         messages = {}
         for cls in reversed(self.__class__.__mro__):
             messages.update(getattr(cls, 'default_error_messages', {}))
@@ -80,26 +88,24 @@ class Field(object):
 
     def bind(self, field_name, parent):
         """
-        Инициализирует имя поля и экземпляр родителя.
-        Вызывается когда поле добавляется к экземпляру родителя.
+        Initialization field name and parent instance .
+        Called when a field is added to an instance of the parent..
 
-        :param str field_name: Название поля.
-        :param Serializer parent: Класс сериалайзера, на котором находиться филд.
-
-        :return:
+        :param str field_name: Field name.
+        :param Serializer parent: Serializer class on which the field is located.
 
         """
         self.field_name = field_name
         self.parent = parent
 
-        # Сами ставим label, если его нету.
+        # We put the label ourselves if it's not there.
         if self.label is None:
             self.label = field_name.replace('_', ' ').capitalize()
 
     @property
     def validators(self):
         """
-        :return: Список валидаторов поля.
+        :return: List validators for this field.
         :rtype: list
 
         """
@@ -110,19 +116,19 @@ class Field(object):
     @validators.setter
     def validators(self, validators):
         """
-        Даем доступ к изменению списка валидаторов.
+        We give access to change the list of validators.
 
-        :param list validators: Новый список валидаторов.
+        :param list validators: New list validators for this field.
 
         """
         self._validators = validators
 
     def get_validators(self):
         """
-        Возвращает дефолтные валидаторы.
-        Используется для формирования списка валидаторовЮ если они не определены явно.
+        Return default validators.
+        Used to generate a list of validators if they are not explicitly defined.
 
-        :return: Список дефолтных валидаторов.
+        :return: List default validators.
         :rtype: list
 
         """
@@ -130,57 +136,58 @@ class Field(object):
 
     def fail(self, key, **kwargs):
         """
-        Кидаем нормальную ошибку, если что то пошло не так во время обработки данных.
+        We throw a normal error if something went wrong during data processing.
 
-        :param str key: Тип ошибки. Ключ для словаря self.default_error_messages
-        :param kwargs: Данные для форматирования сообщение о ошибке.
+        :param str key: Error type. Key for dict `self.default_error_messages`.
+        :param kwargs: Data to format error message.
 
-        :return:
+        :raise AssertionError: If you have not found the key in the `self.error_messages`.
+        :raise ValidationError: If you find the key in the `self.error_messages`.
 
         """
-        # Пробуем достать сообщение об ошибке.
+        # Trying to get an error message.
         try:
             msg = self.error_messages[key]
         except KeyError:
-            # Если не смогли говорим об этом, использую общее сообщение.
+            # If we could not talk about it, I use a general message.
             class_name = self.__class__.__name__
             msg = MISSING_ERROR_MESSAGE.format(class_name=class_name, key=key)
             raise AssertionError(msg)
 
-        # Форматируем сообщение и кидаем ошибку.
+        # Format the message and throw an error.
         message_string = msg.format(**kwargs)
         raise ValidationError(message_string, code=key)
 
     def to_internal_value(self, data):
         """
-        Преобразование данных в python объект.
+        Data transformation to python object.
 
-        :param object data: Данные для преобразования.
+        :param object data: Data for transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: object
 
         """
-        raise NotImplementedError('`to_internal_value()` должен быть определен.')
+        raise NotImplementedError('`to_internal_value()` must be implemented.')
 
     def to_representation(self, value):
         """
-        Преобразование объекта в валидный JSON объект.
+        Transformation an object to a valid JSON object.
 
-        :param object value: Объект, который стоит преобразовать.
+        :param object value: The object to transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: object
 
         """
-        raise NotImplementedError('`to_representation()` должен быть определен.')
+        raise NotImplementedError('`to_representation()` must be implemented.')
 
     def get_default(self):
         """
-        Возвращаем дефолтное значение.
-        Если необходимо, изначально вызываем callable объект для получения дефолтного значениея.
+        Return default value.
+        If necessary, initially call the callable object to get the default value..
 
-        :return: Дефолтное значение.
+        :return: Default value.
         :rtype: object
 
         """
@@ -190,33 +197,33 @@ class Field(object):
 
     def get_attribute(self, instance):
         """
-        Ищет и возвращает атрибут у объекта.
+        Searches for and returns an attribute on an object..
 
-        :return: Атрибут объекта.
+        :return: Object attribute value.
         :rtype: object
 
-        :raise ValidationError: Если не удалось найти поле.
-        :raise Exception: Если во время поиска возникла ошибка.
+        :raise SkipError: If you could not find the field and the field is required.
+        :raise Exception: If an error occurred during the search.
 
         """
         try:
-            # Пробуем достать данные.
+            # Trying to get an attribute.
             return get_attribute(instance, self.field_name)
         except (KeyError, AttributeError) as e:
-            # Если есть дефолтное значение, тогда его.
+            # If there is a default value, then it.
             if self.default is not None:
                 return self.get_default()
-            # Если нет дефолтного и поле обязательное, ругаемся.
+            # If there is no default and the field is required, we swear.
             if self.required:
                 raise SkipError(self.error_messages['required'])
 
-            # Иначе сообщаем об этом инциденте разработчику.
+            # Otherwise, we report this incident to the developer..
             msg = (
-                'Выброщено {exc_type} при попытке получить значение для поля '
-                '`{field}` у сериалайзера `{serializer}`.\nВозможно поле '
-                'сериалайзера названо неверно и не соотвествует ни одному '
-                'атрибуту или ключу у объекта `{instance}`.\n'
-                'Текст оригинального исключения: {exc}.'.format(
+                'Got {exc_type} when attempting to get a value for field '
+                '`{field}` on serializer `{serializer}`.\nThe serializer '
+                'field might by named incorrectly and not match '
+                'any attribute or key on the `{instance}` object.\n'
+                'Original exception text was: {exc}.'.format(
                     exc_type=type(e).__name__,
                     field=self.field_name,
                     serializer=self.parent.__name__,
@@ -228,96 +235,97 @@ class Field(object):
 
     def validate_empty_values(self, data):
         """
-        Смотрит, пустое ли пришло значение.
+        Check if the value is empty.
 
-        :param object data: Данные для проверки.
+        :param object data: Data for check.
 
-        :return: Результат проверки, и актуальные данные.
-                 Если есть дефолтное значение и не передано ничего, возвращает дефолтное.
-                 Кортеж: (is None, actual data)
+        :return: The result of check, and current data.
+                 If there is a default value and nothing is passed, returns the default.
+                 Tuple: (is None, actual data)
         :rtype: tuple
-        :raise ValidationError: Если валидацию на пустое поле не прошли.
+
+        :raise ValidationError: If validation on an empty field did not pass.
 
         """
-        # Обрабатываем.
+        # Process.
         is_empty, data = data is None, data if data is not None else self.default
 
-        # Валидируем.
+        # Validating.
         if is_empty and not self.required:
             return is_empty, data
 
-        # Если пустое и оно не обязательно, тогад нечего тут валидировать и преобразовывать.
+        # If empty and not necessary, then there is nothing to validate and transformed.
         if is_empty:
             raise ValidationError(self.error_messages['required'])
 
-        # Возвращаем.
+        # Return.
         return is_empty, data
 
     def run_validation(self, data):
         """
-        Запускает преобразование данных потом валидацию.
+        Starts data transformed, then validation..
 
-        :param object data: Данные, которые стоит провалидировать, преобразовать и т.д.
+        :param object data: Data worth checking, transformed, etc..
 
-        :return: Преобразованные провалидированные данные.
+        :return: Transformed Validated Data.
         :rtype: object
 
-        :raise ValidationError: Если поле не прошло валидацию.
+        :raise ValidationError: If the field failed validation.
 
         """
-        # Сначала валидируем на обязательность.
+        # First, we validate to be bound.
         is_empty, data = self.validate_empty_values(data)
 
-        # Обрабатываем сырые данные.
+        # Process raw data.
         value = self.to_internal_value(data)
-        # Запускаем валидаторы.
+        # Run validators.
         self.run_validators(value)
 
         return value
 
     def run_validators(self, value):
         """
-        Валидирует данные по всем валидаторам филда
+        Validates all field validators.
 
-        :param object value: Данные для валидации.
+        :param object value: Data for validation.
 
-        :raise ValidationError: Если валидацию не прошли.
+        :raise ValidationError: If validation fails.
 
         """
         errors = []
 
         for validator in self.validators or []:
             try:
-                # Прогоняем каждым сериалайзером.
+                # Run each validator.
                 validator(value)
             except ValidationError as e:
                 errors.append(e.detail)
 
-        # Проверяем на ошибки.
+        # Check on errors.
         if errors:
             raise ValidationError(errors)
 
 
 class CharField(Field):
     """
-    Филд для текста.
+    Field for text.
 
     """
     default_error_messages = {
-        'invalid': 'Не валидная строка.',
-        'blank': 'Это поле не может быть пустым.',
-        'min_length': 'Значение должно быть длиннее {min_length} символов.',
-        'max_length': 'Значение должно быть короче {max_length} символов.'
+        'invalid': 'Not a valid string.',
+        'blank': 'This field may not be blank.',
+        'min_length': 'Ensure this field has at least {min_length} characters.',
+        'max_length': 'Ensure this field has no more than {max_length} characters.'
     }
 
     def __init__(self, min_length=None, max_length=None, trim_whitespace=False, allow_blank=True, *args, **kwargs):
         """
-        Филд для текста.
+        Field for text.
 
-        :param int min_length: Минимальная длина строки.
-        :param int max_length: Максимальная длина строки.
-        :param bool trim_whitespace: Обрезать ли пробелы в начале и конце строки?
-        :param bool allow_blank: Разрешить ли пустую строку?
+        :param int min_length: Minimum length string.
+        :param int max_length: Maximum length string.
+        :param bool trim_whitespace: Whether to trim spaces at the beginning and end of a line?
+        :param bool allow_blank: Allow empty string?
 
         """
         super().__init__(*args, **kwargs)
@@ -326,7 +334,7 @@ class CharField(Field):
         self.trim_whitespace = trim_whitespace
         self.allow_blank = allow_blank
 
-        # Добавляем валидаторы.
+        # Added validators.
         if self.max_length:
             message = self.error_messages['max_length'].format(max_length=self.max_length)
             self.validators.append(MaxLengthValidator(max_length, message=message))
@@ -336,11 +344,11 @@ class CharField(Field):
 
     def run_validation(self, data=None):
         """
-        Проверяем на пустую строку тут, что бы она не проваливалась в подклассы в `.to_internal_value()`.
+        We check for an empty string here, so that it does not fall into subclasses in `.to_internal_value ()`.
 
-        :param object data: Данные для валидации.
+        :param object data: Data for validation.
 
-        :return: Провалидированные обработанные данные.
+        :return: Transformed Validated Data.
         :rtype: str
 
         """
@@ -352,26 +360,28 @@ class CharField(Field):
 
     def to_internal_value(self, data):
         """
-        Преобразование данных в python str объект.
+        Data transformation to python object.
 
-        :param object data: Данные для преобразования.
+        :param str data: Data for transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: str
 
+        :raise ValidationError: If not valid data.
+
         """
-        # Числа как строки пропускаем, но bool как строки кажется уже ошибка разработчика.
+        # We skip numbers as strings, but bool as strings seems to be a developer error.
         if isinstance(data, bool) or not isinstance(data, six.string_types + six.integer_types + (float,)):
             self.fail('invalid')
         return six.text_type(data)
 
     def to_representation(self, value):
         """
-        Преобразование объекта в валидный str объект.
+        Transformation an object to a valid JSON object.
 
-        :param object value: Объект, который стоит преобразовать.
+        :param str value: The object to transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: str
 
         """
@@ -380,31 +390,31 @@ class CharField(Field):
 
 class IntegerField(Field):
     """
-    Филд для целого числа.
+    Field for integer number.
 
     """
     default_error_messages = {
-        'invalid': 'Не валидное значение.',
-        'min_value': 'Значение должно быть больше или равно {min_value}.',
-        'max_value': 'Значение должно быть меньше или равно {max_value}.',
-        'max_string_length': 'Строка слишком длинная.'
+        'invalid': 'A valid integer is required.',
+        'min_value': 'Ensure this value is greater than or equal to {min_value}.',
+        'max_value': 'Ensure this value is less than or equal to {max_value}.',
+        'max_string_length': 'String value too large.'
     }
-    MAX_STRING_LENGTH = 1000  # Ограничиваем максимальный размер числа.
-    re_decimal = re.compile(r'\.0*\s*$')  # '1.0' это инт, а это не инт '1.2'
+    MAX_STRING_LENGTH = 1000  # We limit the maximum length.
+    re_decimal = re.compile(r'\.0*\s*$')  # '1.0' is int, is not int '1.2'
 
     def __init__(self, min_value=None, max_value=None, *args, **kwargs):
         """
-        Филд для целого числа.
+        Field for integer number.
 
-        :param int min_value: Минимальное значение.
-        :param int max_value: Максимальное значение.
+        :param int min_value: Minimum value.
+        :param int max_value: Maximum value.
 
         """
         super().__init__(*args, **kwargs)
         self.min_value = min_value if min_value is None else int(min_value)
         self.max_value = max_value if max_value is None else int(max_value)
 
-        # Добавляем валидаторы.
+        # Added validators.
         if self.min_value:
             message = self.error_messages['min_value'].format(min_value=self.min_value)
             self.validators.append(MinValueValidator(self.min_value, message=message))
@@ -414,15 +424,17 @@ class IntegerField(Field):
 
     def to_internal_value(self, data):
         """
-        Преобразование данных в python int объект.
+        Data transformation to python object.
 
-        :param Union[str, int, float] data: Данные для преобразования.
+        :param Union[str, int, float] data: Data for transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: int
 
+        :raise ValidationError: Id not valid data.
+
         """
-        # Смотрим, не хотят ли нам память забить?
+        # We look, do not want us to score a memory?
         if isinstance(data, six.text_type) and len(data) > self.MAX_STRING_LENGTH:
             self.fail('max_string_length')
 
@@ -434,11 +446,11 @@ class IntegerField(Field):
 
     def to_representation(self, value):
         """
-        Преобразование объекта в валидный int объект.
+        Transformation an object to a valid JSON object.
 
-        :param int value: Объект, который стоит преобразовать.
+        :param int value: The object to transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: int
 
         """
@@ -447,30 +459,30 @@ class IntegerField(Field):
 
 class FloatField(Field):
     """
-    Филд для числа с плавающей точкой.
+    Field for floating number.
 
     """
     default_error_messages = {
-        'invalid': 'Не валидное значение.',
-        'min_value': 'Значение должно быть больше или равно {min_value}.',
-        'max_value': 'Значение должно быть меньше или равно {max_value}.',
-        'max_string_length': 'Строка слишком длинная.'
+        'invalid': 'A valid integer is required.',
+        'min_value': 'Ensure this value is greater than or equal to {min_value}.',
+        'max_value': 'Ensure this value is less than or equal to {max_value}.',
+        'max_string_length': 'String value too large.'
     }
-    MAX_STRING_LENGTH = 1000  # Ограничиваем максимальный размер числа.
+    MAX_STRING_LENGTH = 1000  # We limit the maximum length.
 
     def __init__(self, min_value=None, max_value=None, *args, **kwargs):
         """
-        Филд для числа с плавающей точкой.
+        Field for floating number.
 
-        :param float min_value: Минимальное значение.
-        :param float max_value: Максимальное значение.
+        :param float min_value: Minimum value.
+        :param float max_value: Maximum value.
 
         """
         super().__init__(*args, **kwargs)
         self.min_value = min_value if min_value is None else int(min_value)
         self.max_value = max_value if max_value is None else int(max_value)
 
-        # Добавляем валидаторы.
+        # Added validators.
         if self.min_value:
             message = self.error_messages['min_value'].format(min_value=self.min_value)
             self.validators.append(MinValueValidator(self.min_value, message=message))
@@ -480,15 +492,17 @@ class FloatField(Field):
 
     def to_internal_value(self, data):
         """
-        Преобразование данных в python float объект.
+        Data transformation to python object.
 
-        :param Union[str, int, float] data: Данные для преобразования.
+        :param Union[str, int, float] data: Data for transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: float
 
+        :raise ValidationError: If not valid data.
+
         """
-        # Смотрим, не хотят ли нам память забить?
+        # We look, do not want us to score a memory?
         if isinstance(data, six.text_type) and len(data) > self.MAX_STRING_LENGTH:
             self.fail('max_string_length')
 
@@ -499,11 +513,11 @@ class FloatField(Field):
 
     def to_representation(self, value):
         """
-        Преобразование объекта в валидный int объект.
+        Transformation an object to a valid JSON object.
 
-        :param float value: Объект, который стоит преобразовать.
+        :param float value: The object to transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: float
 
         """
@@ -512,11 +526,11 @@ class FloatField(Field):
 
 class BooleanField(Field):
     """
-    Филд для boolean типа.
+    Field for boolean type.
 
     """
     default_error_messages = {
-        'invalid': '"{input}" должен быть валидным boolean типом.'
+        'invalid': '"{input}" must be a valid boolean type.'
     }
     TRUE_VALUES = {
         't', 'T',
@@ -525,7 +539,7 @@ class BooleanField(Field):
         'on', 'On', 'ON',
         '1', 1,
         True
-    }  # Словарь с True вариантами.
+    }  # Dict with True options.
     FALSE_VALUES = {
         'f', 'F', 'n',
         'N', 'no', 'NO', 'No',
@@ -533,17 +547,19 @@ class BooleanField(Field):
         'off', 'Off', 'OFF',
         '0', 0, 0.0,
         False
-    }  # Словарь с False вариантами.
-    NULL_VALUES = {'n', 'N', 'null', 'Null', 'NULL', '', None}  # Словарь с NULL вариантами.
+    }  # Dictionary with False options.
+    NULL_VALUES = {'n', 'N', 'null', 'Null', 'NULL', '', None}  # Dictionary with NULL options.
 
     def to_internal_value(self, data):
         """
-        Преобразование данных в python bool объект.
+        Data transformation to python object.
 
-        :param bool data: Данные для преобразования.
+        :param Union[str, int, float, bool] data: Data for transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: bool
+
+        :raise ValidationError: If not valid data.
 
         """
         try:
@@ -553,66 +569,107 @@ class BooleanField(Field):
                 return False
             elif data in self.NULL_VALUES:
                 return None
-        except TypeError:  # Если пришел не хэшируемый тип.
+        except TypeError:  # If the non-hash type came.
             pass
         self.fail('invalid', input=data)
 
     def to_representation(self, value):
         """
-        Преобразование объекта в валидный bool объект.
+        Transformation an object to a valid JSON object.
 
-        :param bool value: Объект, который стоит преобразовать.
+        :param Union[str, int, float, bool] value: The object to transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: bool
 
         """
-        # Сначала ищем в таблице соотвествий.
+        # First we look for in the match table.
         if value in self.NULL_VALUES:
             return None
         if value in self.TRUE_VALUES:
             return True
         elif value in self.FALSE_VALUES:
             return False
-        # Если не нашли, пробуем сами преобразовать.
+        # If not found, try to transform.
         return bool(value)
+
+
+class _UnvalidatedField(Field):
+    """
+    Field, which is forwarding data as is.
+
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Field, which is forwarding data as is
+
+        """
+        super(_UnvalidatedField, self).__init__(*args, **kwargs)
+        self.allow_blank = True
+
+    def to_internal_value(self, data):
+        """
+        Data transformation to python object.
+
+        :param object data: Data for transformation.
+
+        :return: Source value.
+        :rtype: object
+
+        :raise ValidationError: If not valid data.
+
+        """
+        return data
+
+    def to_representation(self, value):
+        """
+        Transformation an object to a valid JSON object.
+
+        :param object value: The object to transformation.
+
+        :return: Source value.
+        :rtype: object
+
+        """
+        return value
 
 
 class ListField(Field):
     """
-    Филд для списка объектов.
+    Field for list objects.
 
     """
     default_error_messages = {
-        'not_a_list': 'Ожидался массив элементов но получен "{input_type}".',
-        'empty': 'Массив не может быть пустым.',
-        'min_length': 'Длина массива должна быть больше или равна {min_length} элементов.',
-        'max_length': 'Длина массива должна быть меньше или равна {max_length} элементов.'
+        'not_a_list': 'Expected a list of items but got type "{input_type}".',
+        'empty': 'This list may not be empty.',
+        'min_length': 'Ensure this field has at least {min_length} elements.',
+        'max_length': 'Ensure this field has no more than {max_length} elements.'
     }
-    child = None
+    child = _UnvalidatedField()
 
     def __init__(self, child=None, min_length=None, max_length=None, allow_empty=False, *args, **kwargs):
         """
-        Филд для списка объектов.
+        Field for list objects.
 
-        :param rest_framework.serializers.Field child: Филд, описывающий тип элементов массива.
-        :param int min_length: Минимальная длина массива.
-        :param int max_length: Максимальная длина массива.
-        :param bool allow_empty: Разрешить ли пустой массив?
+        :param rest_framework.serializers.Field child: Field describing the type of array elements.
+        :param int min_length: Minimum length list.
+        :param int max_length: Maximum length list.
+        :param bool allow_empty: Allow empty array?
 
         """
         super().__init__(*args, **kwargs)
-        self.child = child
+        self.child = child or self.child
         self.min_length = min_length
         self.max_length = max_length
         self.allow_empty = bool(allow_empty)
 
-        # Проверяем поле child.
+        # Check field `child`.
         if all((not isinstance(child, Field), not isinstance(self.child, Field))):
-            raise TypeError('`child=` должен быть экземпляром rest_framework.serializers.Field класса.')
-        self.child.bind(field_name='', parent=self)  # Биндим child поле.
+            raise ValueError('`child=` or `self.child` must be Field.')
 
-        # Добавляем валидаторы.
+        self.child.bind(field_name='', parent=self)  # Bind child field.
+
+        # Added validators.
         if self.max_length:
             message = self.error_messages['max_length'].format(max_length=self.max_length)
             self.validators.append(MaxLengthValidator(max_length, message=message))
@@ -622,12 +679,14 @@ class ListField(Field):
 
     def to_internal_value(self, data):
         """
-        Преобразование данных в python list объект.
+        Data transformation to python list object.
 
-        :param iter data: Данные для преобразования.
+        :param iter data: Data for transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: list
+
+        :raise ValidationError: If not valid data.
 
         """
         if html.is_html_input(data):
@@ -643,12 +702,274 @@ class ListField(Field):
 
     def to_representation(self, value):
         """
-        Преобразование объекта в валидный json list объект.
+        Transformation an object to a valid JSON list object.
 
-        :param list value: Объект, который стоит преобразовать.
+        :param iter value: The object to transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: list
 
         """
         return [self.child.to_representation(item) if item is not None else None for item in value]
+
+
+class DateField(Field):
+    """
+    Field for date object.
+
+    """
+    default_error_messages = {
+        'invalid': 'Date has wrong format. Use one of these formats instead: {format}.',
+        'datetime': 'Expected a date but got a datetime.',
+    }
+    datetime_parser = datetime.datetime.strptime
+    format = DEFAULT_DATE_FORMAT
+    input_format = DEFAULT_INPUT_DATE_FORMAT
+
+    def __init__(self, format=None, input_format=None, *args, **kwargs):
+        """
+        Field for date object.
+
+        :param str format: Format for parse string date.
+        :param str input_format: Format for transformed object to string.
+
+        """
+        if format is not None:
+            self.format = format
+        if input_format is not None:
+            self.input_format = input_format
+        super().__init__(*args, **kwargs)
+
+    def to_internal_value(self, data):
+        """
+        Data transformation to python datetime object.
+
+        :param str data: Data for transformation.
+
+        :return: Transformed data.
+        :rtype: datetime.date
+
+        :raise ValidationError: If not valid data.
+
+        """
+        # Get the format.
+        input_format = getattr(self, 'input_format', DEFAULT_INPUT_DATE_FORMAT)
+
+        # Check on the datetime object.
+        if isinstance(data, datetime.datetime):
+            self.fail('datetime')
+
+        # Check on the date object.
+        if isinstance(data, datetime.date):
+            return data
+
+        # Parsed data value from string.
+        try:
+            parsed = self.datetime_parser(data, input_format)
+        except (ValueError, TypeError):
+            pass
+        else:
+            # Return value.
+            return parsed.date()
+
+        # Throw exception.
+        self.fail('invalid', format=data)
+
+    def to_representation(self, value):
+        """
+        Transformation an object to a valid JSON date object.
+
+        :param datetime.date value: The object to transformation.
+
+        :return: Transformed data.
+        :rtype: str
+
+        """
+        # Check on the empty.
+        if not value:
+            return None
+
+        # Check format and value type.
+        output_format = getattr(self, 'format', DEFAULT_DATE_FORMAT)
+        if output_format is None or isinstance(value, six.string_types):
+            return value
+
+        # Applying a `DateField` to a datetime value is almost always
+        # not a sensible thing to do, as it means naively dropping
+        # any explicit or implicit timezone info.
+        assert not isinstance(value, datetime.datetime), (
+            'Expected a `date`, but got a `datetime`. Refusing to coerce, '
+            'as this may mean losing timezone information. Use a custom '
+            'read-only field and deal with timezone issues explicitly.'
+        )
+
+        return value.strftime(output_format)
+
+
+class TimeField(Field):
+    """
+    Field for time object.
+
+    """
+    default_error_messages = {
+        'invalid': 'Time has wrong format. Use one of these formats instead: {format}.',
+    }
+    datetime_parser = datetime.datetime.strptime
+    format = DEFAULT_TIME_FORMAT
+    input_format = DEFAULT_INPUT_TIME_FORMAT
+
+    def __init__(self, format=None, input_format=None, *args, **kwargs):
+        """
+        Field for time object.
+
+        :param str format: Format for parse string time.
+        :param str input_format: Format for transformed object to string.
+
+        """
+        if format is not None:
+            self.format = format
+        if input_format is not None:
+            self.input_format = input_format
+        super().__init__(*args, **kwargs)
+
+    def to_internal_value(self, data):
+        """
+        Data transformation to python datetime object.
+
+        :param str data: Data for transformation.
+
+        :return: Transformed data.
+        :rtype: datetime.time
+
+        :raise ValidationError: If not valid data.
+
+        """
+        # Get the format.
+        input_format = getattr(self, 'input_format', DEFAULT_INPUT_TIME_FORMAT)
+
+        # Check on the date object.
+        if isinstance(data, datetime.time):
+            return data
+
+        # Parsed data value from string.
+        try:
+            parsed = self.datetime_parser(data, input_format)
+        except (ValueError, TypeError):
+            pass
+        else:
+            # Return value.
+            return parsed.time()
+
+        # Throw exception.
+        self.fail('invalid', format=data)
+
+    def to_representation(self, value):
+        """
+        Transformation an object to a valid JSON time object.
+
+        :param datetime.time value: The object to transformation.
+
+        :return: Transformed data.
+        :rtype: str
+
+        """
+        # Check on None.
+        if value in (None, ''):
+            return None
+
+        # Check format and value type.
+        output_format = getattr(self, 'format', DEFAULT_TIME_FORMAT)
+        if output_format is None or isinstance(value, six.string_types):
+            return value
+
+        # Applying a `TimeField` to a datetime value is almost always
+        # not a sensible thing to do, as it means naively dropping
+        # any explicit or implicit timezone info.
+        assert not isinstance(value, datetime.datetime), (
+            'Expected a `time`, but got a `datetime`. Refusing to coerce, '
+            'as this may mean losing timezone information. Use a custom '
+            'read-only field and deal with timezone issues explicitly.'
+        )
+
+        return value.strftime(output_format)
+
+
+class DateTimeField(Field):
+    """
+    Field for datetime.
+
+    """
+    default_error_messages = {
+        'invalid': 'Datetime has wrong format. Use one of these formats instead: {format}.',
+        'date': 'Expected a datetime but got a date.',
+    }
+    datetime_parser = datetime.datetime.strptime
+    format = DEFAULT_DATETIME_FORMAT
+    input_format = DEFAULT_INPUT_DATETIME_FORMAT
+
+    def __init__(self, format=None, input_format=None, *args, **kwargs):
+        """
+        Field for time object.
+
+        :param str format: Format for parse string time.
+        :param str input_format: Format for transformed object to string.
+
+        """
+        if format is not None:
+            self.format = format
+        if input_format is not None:
+            self.input_format = input_format
+
+        super(DateTimeField, self).__init__(*args, **kwargs)
+
+    def to_internal_value(self, data):
+        """
+        Data transformation to python datetime object.
+
+        :param str data: Data for transformation.
+
+        :return: Transformed data.
+        :rtype: datetime.datetime
+
+        :raise ValidationError: If not valid data.
+
+        """
+        # Get the format.
+        input_format = getattr(self, 'input_format', DEFAULT_INPUT_DATETIME_FORMAT)
+
+        # Check ot the data ot datetime object.
+        if isinstance(data, datetime.date):
+            if not isinstance(data, datetime.datetime):
+                self.fail('date')
+            else:
+                return data
+
+        # Parsed and return data.
+        try:
+            return self.datetime_parser(data, input_format)
+        except (ValueError, TypeError):
+            pass
+
+        # Throw error.
+        self.fail('invalid', format=data)
+
+    def to_representation(self, value):
+        """
+        Transformation an object to a valid JSON datetime object.
+
+        :param datetime.datetime value: The object to transformation.
+
+        :return: Transformed data.
+        :rtype: str
+
+        """
+        # Check on empty.
+        if not value:
+            return None
+
+        # Check format.
+        output_format = getattr(self, 'format', DEFAULT_DATETIME_FORMAT)
+        if output_format is None or isinstance(value, six.string_types):
+            return value
+
+        return value.strftime(output_format)

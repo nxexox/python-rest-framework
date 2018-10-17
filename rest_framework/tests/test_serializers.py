@@ -1,7 +1,7 @@
 """
-Тестирование сериалайзеров.
-1. Тестируем отдельо методы и логику вызовов.
-2. Тестируем внешний интерфейс, как они должны работать.
+Testing serializers.
+1. Test methods and call logic separately.
+2. We test the external interface as they should work.
 
 """
 import collections
@@ -22,7 +22,7 @@ from rest_framework.tests.serializers_for_tests import (
 
 class BaseSerializerTestClass(TestCase):
     """
-    Класс для тестирования логики и методов сериалайзера.
+    Class for testing logic and serializer methods.
 
     """
     serializer_class = BaseSerializer
@@ -34,51 +34,51 @@ class BaseSerializerTestClass(TestCase):
         'errors': {}
     }
     validate_cases = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки,
-        # create_ser - функция, принимающая на вход params и озвращающяя сериалайзер, готовый для тестирования.
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
+        # create_ser - is a function that accepts params as input and a serializer that is ready for testing.
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': [], 'create_ser': lambda params: serializer}
         {},
     )
     to_internal_value_cases = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки,
-        # create_ser - функция, принимающая на вход params и озвращающяя сериалайзер, готовый для тестирования.
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
+        # create_ser - is a function that accepts params as input and a serializer that is ready for testing.
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': [], 'create_ser': lambda params: serializer}
         {},
     )
     to_representation_cases = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки,
-        # create_ser - функция, принимающая на вход params и озвращающяя сериалайзер, готовый для тестирования.
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
+        # create_ser - is a function that accepts params as input and a serializer that is ready for testing.
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': [], 'create_ser': lambda params: serializer}
         {},
     )
     is_valid_cases = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки,
-        # create_ser - функция, принимающая на вход params и озвращающяя сериалайзер, готовый для тестирования.
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
+        # create_ser - is a function that accepts params as input and a serializer that is ready for testing.
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': [], 'create_ser': lambda params: serializer}
         {},
     )
     validated_data_cases = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки,
-        # create_ser - функция, принимающая на вход params и озвращающяя сериалайзер, готовый для тестирования.
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
+        # create_ser - is a function that accepts params as input and a serializer that is ready for testing.
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': [], 'create_ser': lambda params: serializer}
         {},
     )
     errors = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки,
-        # create_ser - функция, принимающая на вход params и озвращающяя сериалайзер, готовый для тестирования.
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
+        # create_ser - is a function that accepts params as input and a serializer that is ready for testing.
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': [], 'create_ser': lambda params: serializer}
         {},
     )
 
-    # Класс для тестирования на пустоту.
+    # Class for testing on empty.
     class Empty:
         pass
 
     def create_params(self, **params):
         """
-        Создание параметров, для создания сериалайзера.
+        Create params, for create serializer.
 
-        :return: Параметры для создания сериалайзера.
+        :return: Params for create serializers.
         :rtype: dict
 
         """
@@ -86,26 +86,26 @@ class BaseSerializerTestClass(TestCase):
 
     def __test_method_cases(self, method_name):
         """
-        Тестирование функции по кейсам.
+        Testing methods on cases.
 
-        :param str method_name: Название метода, который стоит протестировать по кейсам.
+        :param str method_name: Method name for cases testing.
 
         """
-        # Проверяем все кейсы.
+        # Check all cases.
         for case in getattr(self, '%s_cases' % method_name, []):
-            # Пропускаем тест.
+            # Skip case.
             if not case:
                 continue
 
             try:
-                # Достаем данные.
+                # Get the data.
                 data, result = case.get('data', {}), case.get('return', None)
                 params, exceptions = case.get('params', {}), case.get('exceptions', {})
                 create_ser = case.get('create_ser', None)
 
-                data = data or {}  # Превращаем None в словарь.
+                data = data or {}  # Transform None into dict.
 
-                # Строим сериалайзер и ищем метод для тестирования.
+                # Building a serializer and looking for a method to test..
                 if callable(create_ser):
                     serializer = create_ser(**self.create_params(**params))
                 else:
@@ -113,83 +113,83 @@ class BaseSerializerTestClass(TestCase):
 
                 method = getattr(serializer, method_name, self.Empty())
                 if isinstance(method, self.Empty):
-                    self.fail('Тестирование по кейсам не удалось. Не удалось найти метод `{}` у класса `{}`.'.format(
+                    self.fail('Testing on cases failed. Method not found `{}` have class `{}`.'.format(
                         method_name, serializer.__class__.__name__
                     ))
 
-                # Если ожидаются ошибки.
+                # If errors are expected.
                 if exceptions:
                     try:
                         res = method(**data) if callable(method) else method
-                        self.fail('В методе `{}.{}()` кейс `{}` не выкинул исключение. Метод вернул: `{}`.'.format(
+                        self.fail('In method `{}.{}()` case `{}` not raise error. Method return: `{}`.'.format(
                             serializer.__class__.__name__, method_name, case, res
                         ))
                     except tuple(exceptions):
                         pass
                 else:
-                    # Если ошибок не ожидается.
+                    # If no errors are expected.
                     res = method(**data) if callable(method) else method
                     assert res == result, \
-                        'В методе `{}.{}()` кейс {} вернул неверный результат `{}`'.format(
+                        'In method `{}.{}()` case {} return incorrect result `{}`'.format(
                             serializer.__class__.__name__, method_name, case, res
                         )
             except Exception as e:
-                self.fail('Во время проверки кейса `{}` для метода `{}.{}` произошла неожиданная ошибка: `{}: {}`'.format(
+                self.fail('During the inspection of the case  `{}` for method `{}.{}` an unexpected error occurred: `{}: {}`'.format(
                     case, self.serializer_class.__class__.__name__, method_name, e.__class__.__name__, e
                 ))
 
     def test_init(self):
         """
-        Тестирование создания.
+        Testing create.
 
         """
-        # Создаем без всего.
+        # Create with as empty data.
         ser = self.serializer_class()
-        assert ser.instance is None, '`.instance` должен быть None. Он `{}`.'.format(ser.instance)
-        assert getattr(ser, 'initial_data', None) is None, '`.initial_data` должен быть None. Он `{}`.'.format(
+        assert ser.instance is None, '`.instance` must be None. Reality `{}`.'.format(ser.instance)
+        assert getattr(ser, 'initial_data', None) is None, '`.initial_data` must be None. Reality `{}`.'.format(
             getattr(ser, 'initial_data', None)
         )
 
-        # Создаем с пустым объектом.
+        # Create with as empty object.
         obj = type('object', (object,), {})
         ser = self.serializer_class(obj)
-        assert ser.instance == obj, '`.instance` должен быть {}. Он `{}`.'.format(obj, ser.instance)
-        assert getattr(ser, 'initial_data', None) is None, '`.initial_data` должен быть None. Он `{}`.'.format(
+        assert ser.instance == obj, '`.instance` must be {}. Reality `{}`.'.format(obj, ser.instance)
+        assert getattr(ser, 'initial_data', None) is None, '`.initial_data` must be None. Reality `{}`.'.format(
             getattr(ser, 'initial_data', None)
         )
 
-        # Создаем с данными.
+        # Create with data.
         obj = {}
         ser = self.serializer_class(data=obj)
-        assert ser.instance is None, '`.instance` должен быть None. Он `{}`.'.format(ser.instance)
-        assert getattr(ser, 'initial_data', None) == obj, '`.initial_data` должен быть {}. Он `{}`.'.format(
+        assert ser.instance is None, '`.instance` must be None. Reality `{}`.'.format(ser.instance)
+        assert getattr(ser, 'initial_data', None) == obj, '`.initial_data` must be {}. Reality `{}`.'.format(
             obj, getattr(ser, 'initial_data', None)
         )
 
     def test_validate_cases(self):
         """
-        Тестируем проброс данных.
+        We test data forwarding.
 
         """
         self.__test_method_cases('validate')
 
     def test_abstract_methods(self):
         """
-        Тестирование абстрактных методов.
+        Testing abstract merhods.
 
         """
         field = self.serializer_class(**self.create_params())
         for method_name, method_params in self.abstract_methods.items():
             try:
-                # Работает как для методов, так и для абстрактных свойств.
+                # Works for both methods and abstract properties.
                 getattr(field, method_name, lambda: None)(**method_params)
-                self.fail('Метод `.{}` должен выбрасывать исключение `NotImplementedError`.'.format(method_name))
+                self.fail('Method `.{}` must throw as exception `NotImplementedError`.'.format(method_name))
             except NotImplementedError:
                 pass
 
     def test_to_internal_value_cases(self):
         """
-        Тестирование преобразования данных в python объект.
+        A test for converting data to a valid python object.
 
         """
         if 'to_internal_value' not in self.abstract_methods:
@@ -197,7 +197,7 @@ class BaseSerializerTestClass(TestCase):
 
     def test_to_representation_cases(self):
         """
-        Тестирование реобрзования объектв в валидный JSON.
+        Test data conversion to a valid JSON object.
 
         """
         if 'to_representation' not in self.abstract_methods:
@@ -205,7 +205,7 @@ class BaseSerializerTestClass(TestCase):
 
     def test_is_valid_cases(self):
         """
-        Тестирование валидации и обработки данных.
+        Testing validation and data processing.
 
         """
         if 'is_valid' in self.abstract_methods:
@@ -213,7 +213,7 @@ class BaseSerializerTestClass(TestCase):
 
     def test_validated_data_cases(self):
         """
-        Тестирование свойства валидатед дата.
+        Testing validated_date property.
 
         """
         if 'validated_data' not in self.abstract_methods:
@@ -221,7 +221,7 @@ class BaseSerializerTestClass(TestCase):
 
     def test_errors(self):
         """
-        Тестирование свойства ошибок.
+        Test errors property.
 
         """
         if 'errors' not in self.abstract_methods:
@@ -229,30 +229,30 @@ class BaseSerializerTestClass(TestCase):
 
     def test_fields(self):
         """
-        Тестирование свойства филдов.
+        Testing the properties of fields.
 
         """
         pass
 
     def test_data(self):
         """
-        Тестирование свойства с провалидированными преобразованными данными.
+        Testing properties with validated converted data.
 
         """
         pass
 
 
-# TODO: Доделать кейсы.
+# TODO: Finish cases
 class SerializerTestClass(TestCase):
     """
-    Тестирование класса сериалайзера по методам.
+    Testing class serializer methods.
 
     """
     serializer_class = Serializer
     abstract_methods = {}
     validate_cases = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки,
-        # create_ser - функция, принимающая на вход params и озвращающяя сериалайзер, готовый для тестирования.
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
+        # create_ser - is a function that accepts params as input and a serializer that is ready for testing.
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': [], 'create_ser': lambda params: serializer}
         {'data': {'data': {}}, 'return': {}},
         {'data': {'data': None}, 'return': None},
@@ -272,15 +272,15 @@ class SerializerTestClass(TestCase):
         {},
     )
     errors = (
-        # data - вход, return - выход, params - вход __init__, exceptions - ожидаемые ошибки,
-        # create_ser - функция, принимающая на вход params и озвращающяя сериалайзер, готовый для тестирования.
+        # data - arguments, return - return, params - arguments __init__, exceptions - expected errors
+        # create_ser - is a function that accepts params as input and a serializer that is ready for testing.
         # {'data': {}, 'return': None, 'params': {}, 'exceptions': [], 'create_ser': lambda params: serializer}
         {},
     )
 
     def create_serializer(self):
         """
-        Функция создания сериалайзера для последующего тестирования методов.
+        The function of creating a serializer for subsequent testing of methods.
 
         """
         pass
@@ -288,23 +288,23 @@ class SerializerTestClass(TestCase):
 
 class SerializerUserTestCase(TestCase):
     """
-    Тестирование сериалайзера на использование.
-    Когда пишим тесты, достаточно наследоваться от класса,
-    Определить атрибут serializer_class,
-    Реализовать методы: create_params.
+    Testing serializer for use.
+    When we write tests, it is enough to inherit from the class,
+    Define the attribute serializer_class,
+    Implement methods: create_params.
 
     """
     serializer_class = SerializerPrimitiveField
     fullness_types = ('empty', 'middle', 'full', 'validation_error')
-    # TODO: Додумать что делать с дефолтными значеними.
+    # TODO: To think what to do with default values.
 
     def __create_object(self, data):
         """
-        Рекурсивное создание объекта из словаря.
+        Recursive creation of an object from a dictionary.
 
-        :param dict data: Данные, которые прератяться в в атрибуты объекта.
+        :param dict data: Data that is being converted to in object attributes.
 
-        :return: Созданный объект.
+        :return: Created object.
         :rtype: object
 
         """
@@ -315,27 +315,27 @@ class SerializerUserTestCase(TestCase):
 
     def __create_params(self, fullness=None):
         """
-        Создаем данные для сериалайзера. Внутренний метод, прослойка перед пользовательским.
+        Create data for serializer. Internal method, the layer before the user.
 
-        :param str fullness: Тип создания данных: `empty`, `middle`, `full`, `validation_error`.
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`,` validation_error`.
 
-        :return: Словарь с данными.
+        :return: Data dict.
         :rtype: dict
 
         """
         if fullness not in self.fullness_types:
-            self.fail('Тип генерируемых данных должен быть одним из `{}`, пришло `{}`.'.format(
+            self.fail('The type of data to be generated must be one of `{}`, reality `{}`.'.format(
                 self.fullness_types, fullness
             ))
         return self.create_params(fullness)
 
     def create_params(self, fullness):
         """
-        Создаем данные для сериалайзера.
+        Create data for serializer.
 
-        :param str fullness: Тип создания данных: `empty`, `middle`, `full`, `validation_error`.
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`,` validation_error`.
 
-        :return: Словарь с данными.
+        :return: Data dict.
         :rtype: dict
 
         """
@@ -350,124 +350,130 @@ class SerializerUserTestCase(TestCase):
 
     def test_data_serializer(self):
         """
-        Тестирование data атрибута для сериалайзера.
+        Testing the data attribute for a serializer.
 
         """
-        # Сначала скармливаем ему пустые данные.
+        # First we feed him empty data.
         ser = self.serializer_class(data=self.__create_params(fullness='empty'))
-        assert ser.is_valid() is False, '`.is_valid()` должен вернуть False.'
-        assert isinstance(ser.errors, collections.Mapping), '`.errors` должен быть словарем.'
-        assert len(ser.errors) > 0, '`.errors` должен содержать ошибки.'
-        assert isinstance(ser.validated_data, collections.Mapping), '`.validated_data` должен быть словарем.'
-        assert len(ser.validated_data) == 0, '`.validated_data` должен быть пустым.'
+        assert ser.is_valid() is False, '`.is_valid()` must return False.'
+        assert isinstance(ser.errors, collections.Mapping), \
+            '`.errors` must be dict. Reality: {}.'.format(type(ser.errors))
+        assert len(ser.errors) > 0, '`.errors` must contain errors.'
+        assert isinstance(ser.validated_data, collections.Mapping), \
+            '`.validated_data` must be dict. Reality: {}.'.format(type(ser.validated_data))
+        assert len(ser.validated_data) == 0, '`.validated_data` must be empty. Reality: {},'.format(ser.validated_data)
 
-        # Проверяем что исключение выбрасывается в случае ошибок.
+        # We check that the exception is thrown in case of errors.
         ser = self.serializer_class(data=self.__create_params(fullness='validation_error'))
         try:
             ser.is_valid(raise_exception=True)
-            self.fail('`.is_valid(raise_exception=True)` должен выбросить исключение `ValidationError`.')
+            self.fail('`.is_valid(raise_exception=True)` must throw as exception `ValidationError`.')
         except ValidationError:
             pass
 
-        # Теперь скармливаем данные частично.
+        # Now we feed the data partially.
         ser = self.serializer_class(data=self.__create_params(fullness='middle'))
-        assert ser.is_valid() is False, '`.is_valid()` должен вернуть False.'
-        assert isinstance(ser.errors, collections.Mapping), '`.errors` должен быть словарем.'
-        assert len(ser.errors) > 0, '`.errors` должен содержать ошибки.'
-        assert isinstance(ser.validated_data, collections.Mapping), '`.validated_data` должен быть словарем.'
-        assert len(ser.validated_data) == 0, '`.validated_data` должен быть пустым.'
+        assert ser.is_valid() is False, '`.is_valid()` must return False.'
+        assert isinstance(ser.errors, collections.Mapping), \
+            '`.errors` must be dict. Reality: {}.'.format(type(ser.errors))
+        assert len(ser.errors) > 0, '`.errors` must contain errors.'
+        assert isinstance(ser.validated_data, collections.Mapping), \
+            '`.validated_data` must be dict. Reality: {}.'.format(type(ser.validated_data))
+        assert len(ser.validated_data) == 0, '`.validated_data` must be empty. Reality: {}.'.format(ser.validated_data)
 
-        # Теперь скармливаем данные полностью.
+        # Now we feed the data completely.
         data = self.__create_params(fullness='full')
         ser = self.serializer_class(data=data)
-        # Проверяем логику.
-        assert ser.is_valid() is True, '`.is_valid()` должен вернуть True.'
-        assert isinstance(ser.errors, collections.Mapping), '`.errors` должен быть словарем.'
-        assert len(ser.errors) == 0, '`.errors` должен быть пустым.'
-        assert isinstance(ser.validated_data, collections.Mapping), '`.validated_data` должен быть словарем.'
-        assert len(ser.validated_data) > 0, '`.validated_data` должен содержать данные.'
-        # Проверяем, что все данные вернулись верно.
+        # Check logic.
+        assert ser.is_valid() is True, '`.is_valid()` must return True.'
+        assert isinstance(ser.errors, collections.Mapping), \
+            '`.errors` must be dict. Reality: {}.'.format(type(ser.errors))
+        assert len(ser.errors) == 0, '`.errors` must be empty. Reality: {}.'.format(ser.errors)
+        assert isinstance(ser.validated_data, collections.Mapping), \
+            '`.validated_data` must be dict. Reality: {}.'.format(ser.validated_data)
+        assert len(ser.validated_data) > 0, '`.validated_data` must contain data.'
+        # We check that all data is returned correctly.
         for k, v in ser.validated_data.items():
             if k in data:
                 assert v == data[k]
                 del data[k]
-        assert len(data) == 0, 'Все данные в `.validated_data` должны совпадать с данными в `data`.'
+        assert len(data) == 0, 'All data in `.validated_data` must match the data in` data=`.'
 
-    def testinstance_object_serializer(self):
+    def test_instance_object_serializer(self):
         """
-        Тестирование instance атрибута для сериалайзера.
-        Скармливаем объект.
+        Testing the instance attribute for the serializer.
+        Feed the object.
 
         """
-        # Сначала скармливаем ему пустой объект.
+        # First we feed him an empty object.
         ser = self.serializer_class(instance=self.__create_object(self.__create_params(fullness='empty')))
-        assert isinstance(ser.data, collections.Mapping), '`.data` должен быть словарем.'
+        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}'.format(type(ser.data))
 
-        # Теперь скармливаем данные частично.
+        # Now we feed the data partially.
         data = self.__create_params(fullness='middle')
         ser = self.serializer_class(instance=self.__create_object(data))
-        assert isinstance(ser.data, collections.Mapping), '`.data` должен быть словарем.'
+        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
         for k, v in ser.data.items():
             if k in data:
-                assert v == data[k], 'Атрибут `{}` объекта должен быть `{}`, он `{}`.'.format(k, v, data[k])
+                assert v == data[k], 'Object attribute `{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
                 del data[k]
-        assert len(data) == 0, 'Размер данных должен совпадать с исходным. Осталось: {}.'.format(data)
+        assert len(data) == 0, 'The size of the data must match the original. Left: {}.'.format(data)
 
-        # Теперь скармливаем данные полностью.
+        # Now we feed the data completely.
         data = self.__create_params(fullness='full')
         ser = self.serializer_class(instance=self.__create_object(data))
-        assert isinstance(ser.data, collections.Mapping), '`.data` должен быть словарем.'
+        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
         for k, v in ser.data.items():
             if k in data:
-                assert v == data[k], 'Атрибут `{}` объекта должен быть `{}`, он `{}`.'.format(k, v, data[k])
+                assert v == data[k], 'Object attribute `{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
                 del data[k]
-        assert len(data) == 0, 'Размер данных должен совпадать с исходным. Осталось: {}.'.format(data)
+        assert len(data) == 0, 'The size of the data must match the original. Left: {}.'.format(data)
 
-    def testinstance_dict_serializer(self):
+    def test_instance_dict_serializer(self):
         """
-        Тестирование instance атрибута для сериалайзера с примитивами.
-        Скармливаем словарь.
+        Testing the instance attribute for a serializer with primitives.
+        Feed the dictionary.
 
         """
-        # Сначала скармливаем ему пустой объект.
+        # First we feed him an empty object..
         ser = self.serializer_class(instance=self.__create_params(fullness='empty'))
-        assert isinstance(ser.data, collections.Mapping), '`.data` должен быть словарем.'
+        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
 
-        # Теперь скармливаем данные частично.
+        # Now we feed the data partially.
         data = self.__create_params(fullness='middle')
         ser = self.serializer_class(instance=data)
-        assert isinstance(ser.data, collections.Mapping), '`.data` должен быть словарем.'
+        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
         for k, v in ser.data.items():
             if k in data:
-                assert v == data[k], 'Атрибут `{}` объекта должен быть `{}`, он `{}`.'.format(k, v, data[k])
+                assert v == data[k], 'Object attribute`{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
                 del data[k]
-        assert len(data) == 0, 'Размер данных должен совпадать с исходным. Осталось: {}.'.format(data)
+        assert len(data) == 0, 'The size of the data must match the original. Left: {}.'.format(data)
 
-        # Теперь скармливаем данные полностью.
+        # Now we feed the data completely.
         data = self.__create_params(fullness='full')
         ser = self.serializer_class(instance=data)
-        assert isinstance(ser.data, collections.Mapping), '`.data` должен быть словарем.'
+        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
         for k, v in ser.data.items():
             if k in data:
-                assert v == data[k], 'Атрибут `{}` объекта должен быть `{}`, он `{}`.'.format(k, v, data[k])
+                assert v == data[k], 'Object attribute `{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
                 del data[k]
-        assert len(data) == 0, 'Размер данных должен совпадать с исходным. Осталось: {}.'.format(data)
+        assert len(data) == 0, 'The size of the data must match the original. Left: {}.'.format(data)
 
 
 class SerializerSingleMixinTestCase(SerializerUserTestCase):
     """
-    Тестирование сериалайзера с вложенным сериалайзером одного объекта.
+    Testing a serializer with a single object embedded serializer.
 
     """
     serializer_class = SerializerMixinSingle
 
     def create_params(self, fullness):
         """
-        Создаем данные для сериалайзера.
+        Create data for serializer.
 
-        :param str fullness: Тип создания данных: `empty`, `middle`, `full`, `validation_error`.
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`,` validation_error`.
 
-        :return: Словарь с данными.
+        :return: Data dict.
         :rtype: dict
 
         """
@@ -486,18 +492,18 @@ class SerializerSingleMixinTestCase(SerializerUserTestCase):
 
 class SerializerManyMixinTestCase(SerializerUserTestCase):
     """
-    Тестирование сериалайзера с вложенным сериалайзером с множеством объектов.
+    Testing a serializer with an embedded serializer with multiple objects.
 
     """
     serializer_class = SerializerMixinMany
 
     def create_params(self, fullness):
         """
-        Создаем данные для сериалайзера.
+        Create data for serializer.
 
-        :param str fullness: Тип создания данных: `empty`, `middle`, `full`, `validation_error`.
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`,` validation_error`.
 
-        :return: Словарь с данными.
+        :return: Data dict.
         :rtype: dict
 
         """
@@ -516,18 +522,18 @@ class SerializerManyMixinTestCase(SerializerUserTestCase):
 
 class SerializerRequiredMixinTestCase(SerializerUserTestCase):
     """
-    Тестирование сериалайзера с вложенным обязательным сериалайзером.
+    Testing the serializer with the obligatory serializer attached.
 
     """
     serializer_class = SerializerMixinRequired
 
     def create_params(self, fullness):
         """
-        Создаем данные для сериалайзера.
+        Create data for serializer.
 
-        :param str fullness: Тип создания данных: `empty`, `middle`, `full`, `validation_error`.
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`,` validation_error`.
 
-        :return: Словарь с данными.
+        :return: Data dict.
         :rtype: dict
 
         """

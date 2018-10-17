@@ -45,9 +45,9 @@ A dictionary of error codes to error messages.
 
 ---
 
-## Fields
+# Fields
 
-### - BooleanField
+## - BooleanField
 
 A boolean representation that also accepts `None` as a valid value.
 
@@ -57,7 +57,7 @@ When using HTML encoded form input be aware that omitting a value will always be
 
 ---
 
-### - CharField
+## - CharField
 
 A text representation. Optionally validates the text to be shorter than `max_length` and longer than `min_length`.
 
@@ -70,7 +70,7 @@ A text representation. Optionally validates the text to be shorter than `max_len
 
 ---
 
-### - IntegerField
+## - IntegerField
 
 An integer representation.
 
@@ -81,7 +81,7 @@ An integer representation.
 
 ---
 
-### - FloatField
+## - FloatField
 
 A floating point representation.
 
@@ -92,13 +92,13 @@ A floating point representation.
 
 ---
 
-### - ListField
+## - ListField
 
 A field class that validates a list of objects.
 
 **Signature**: `ListField(child=<A_FIELD_INSTANCE>, min_length=None, max_length=None, allow_empty=False)`
 
-- `child` - A field instance that should be used for validating the objects in the list.
+- `child` - A field instance that should be used for validating the objects in the list. If this argument is not provided then objects in the list will not be validated.
 - `min_length` - Validates that the list contains no fewer than this number of elements.
 - `max_length` - Validates that the list contains no more than this number of elements.
 - `allow_blank` - If set to` True`, an empty array should be considered valid. If set to `False`, an empty array is considered invalid and causes a validation error. The default is `False`.
@@ -117,6 +117,49 @@ The `ListField` class also supports a declarative style that allows you to write
 We can now reuse our custom `StringListField` class throughout our application, without having to provide a `child` argument to it.
 
 ---
+
+# Date and time fields
+
+## - DateTimeField
+
+A date and time representation.
+
+**Signature:** `DateTimeField(format=None, input_format=None)`
+
+* `format` - A string representing the output format. If not specified, this defaults to the same value as the `DEFAULT_DATETIME_FORMAT` settings key, which will be `'iso-8601'` unless set. Setting to a format string indicates that `to_representation` return values should be coerced to string output. Format strings are described below. Setting this value to `None` indicates that Python `datetime` objects should be returned by `to_representation`. In this case the datetime encoding will be determined by the renderer.
+* `input_format` - String representing the input format which may be used to parse the date.  If not specified, the `DEFAULT_INPUT_DATETIME_FORMAT` setting will be used, which defaults to `'iso-8601'`.
+
+#### `DateTimeField` format strings.
+
+Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string `'iso-8601'`, which indicates that [ISO 8601][iso8601] style datetimes should be used. (eg `'2013-01-29 12:34:56'`)
+
+When a value of `None` is used for the format `datetime` objects will be returned by `to_representation` and the final output representation will determined by the renderer class.
+
+## - DateField
+
+A date representation.
+
+**Signature:** `DateField(format=None, input_format=None)`
+
+* `format` - A string representing the output format.  If not specified, this defaults to the same value as the `DEFAULT_DATE_FORMAT` settings key, which will be `'iso-8601'` unless set. Setting to a format string indicates that `to_representation` return values should be coerced to string output. Format strings are described below. Setting this value to `None` indicates that Python `date` objects should be returned by `to_representation`. In this case the date encoding will be determined by the renderer.
+* `input_format` - String representing the input format which may be used to parse the date.  If not specified, the `DEFAULT_INPUT_DATE_FORMATS` setting will be used, which defaults to `'iso-8601'`.
+
+#### `DateField` format strings
+
+Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string `'iso-8601'`, which indicates that [ISO 8601][iso8601] style dates should be used. (eg `'2013-01-29'`)
+
+## - TimeField
+
+A time representation.
+
+**Signature:** `TimeField(format=None, input_format=None)`
+
+* `format` - A string representing the output format.  If not specified, this defaults to the same value as the `DEFAULT_TIME_FORMAT` settings key, which will be `'iso-8601'` unless set. Setting to a format string indicates that `to_representation` return values should be coerced to string output. Format strings are described below. Setting this value to `None` indicates that Python `time` objects should be returned by `to_representation`. In this case the time encoding will be determined by the renderer.
+* `input_format` - String representing the input format which may be used to parse the date.  If not specified, the `DEFAULT_INPUT_TIME_FORMATS` setting will be used, which defaults to `'iso-8601'`.
+
+#### `TimeField` format strings
+
+Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string `'iso-8601'`, which indicates that [ISO 8601][iso8601] style times should be used. (eg `'12:34:56'`)
 
 ## Custom fields
 
@@ -217,3 +260,5 @@ The `.fail()` method is a shortcut for raising `ValidationError` that takes a me
         return Color(red, green, blue)
 
 This style keeps your error messages cleaner and more separated from your code, and should be preferred.
+
+[iso8601]: https://www.w3.org/TR/NOTE-datetime

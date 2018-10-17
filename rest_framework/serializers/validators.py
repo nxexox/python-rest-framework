@@ -1,5 +1,5 @@
 """
-Валидаторы.
+Validators.
 
 """
 from rest_framework.serializers.exceptions import ValidationError
@@ -7,44 +7,44 @@ from rest_framework.serializers.exceptions import ValidationError
 
 class BaseValidator(object):
     """
-    Базовый класс для валидатора.
+    base class for validator.
 
     """
     message = ''
 
     def __init__(self, message=None):
         """
-        Базовый класс для валидатора
+        Base class for validator.
 
-        :param str message: Сообщение об ошибке.
+        :param str message: Error message.
 
         """
         self.message = message or self.message
 
     def __call__(self, value):
         """
-        Сама валидация.
+        Validation.
 
-        :param object value: Объект для валидации.
+        :param object value: Object for validation.
 
         """
-        raise NotImplementedError('`.__call__(self, value)` должен быть определен.')
+        raise NotImplementedError('`.__call__(self, value)` must be implemented.')
 
 
 class RequiredValidator(BaseValidator):
     """
-    Валидатор на обязательность поля.
+    Validator on required field.
 
     """
-    message = 'Это поле обязательное.'
+    message = 'This field is required.'
 
     def __call__(self, value):
         """
-        Валидируем.
+        Validation.
 
-        :param iter value: Объект, который валидируем.
+        :param iter value: Object for validation.
 
-        :raise ValidationError: Если не прошли валидацию.
+        :raise ValidationError: If not valid data.
 
         """
         if value is None:
@@ -53,16 +53,16 @@ class RequiredValidator(BaseValidator):
 
 class MinLengthValidator(BaseValidator):
     """
-    Валидатор для минимальной длины.
+    Validator for minimum length.
 
     """
-    message = 'Значение должно быть длиннее {min_length}.'
+    message = 'The value must be longer than {min_length}.'
 
     def __init__(self, min_length, *args, **kwargs):
         """
-        Создаем валидатор.
+        Validator.
 
-        :param int min_length: Минимальная длина.
+        :param int min_length: Minimum length.
 
         """
         super().__init__(*args, **kwargs)
@@ -70,11 +70,11 @@ class MinLengthValidator(BaseValidator):
 
     def __call__(self, value):
         """
-        Валидируем.
+        Validation.
 
-        :param iter value: Объект, который валидируем.
+        :param iter value: Object for validation.
 
-        :raise ValidationError: Если не прошли валидацию.
+        :raise ValidationError: If not valid data.
 
         """
         if len(value) < self.min_length:
@@ -83,16 +83,16 @@ class MinLengthValidator(BaseValidator):
 
 class MaxLengthValidator(BaseValidator):
     """
-    Валидатор для максимальной длины.
+    Validator for maximum length.
 
     """
-    message = 'Значение должно быть короче {max_length}.'
+    message = 'The value must be shorter than {max_length}.'
 
     def __init__(self, max_length, *args, **kwargs):
         """
-        Создаем валидатор.
+        Validator for maximum length.
 
-        :param int min_length: Максимальная длина.
+        :param int min_length: Maximum length.
 
         """
         super().__init__(*args, **kwargs)
@@ -100,11 +100,11 @@ class MaxLengthValidator(BaseValidator):
 
     def __call__(self, value):
         """
-        Валидируем.
+        Validation.
 
-        :param iter value: Объект, который валидируем.
+        :param iter value: Object for validation.
 
-        :raise ValidationError: Если не прошли валидацию.
+        :raise ValidationError: If not valid data.
 
         """
         if len(value) > self.max_length:
@@ -113,16 +113,16 @@ class MaxLengthValidator(BaseValidator):
 
 class MinValueValidator(BaseValidator):
     """
-    Валидатор для минимального значения.
+    Validator for minimal value.
 
     """
-    message = 'Значение должно быть больше или равно {min_value}.'
+    message = 'The value must be greater than or equal to {min_value}.'
 
     def __init__(self, min_value, *args, **kwargs):
         """
-        Создаем валидатор.
+        Validator for minimal value.
 
-        :param object min_value: Минималное значение.
+        :param object min_value: Minimum value.
 
         """
         super().__init__(*args, **kwargs)
@@ -130,11 +130,11 @@ class MinValueValidator(BaseValidator):
 
     def __call__(self, value):
         """
-        Сама валидация.
+        Validation.
 
-        :param object value: Значение, которое нужно провалидировать.
+        :param object value: Value for validation.
 
-        :raise ValidationError: Если валидацию не прошли.
+        :raise ValidationError: If not valid data.
 
         """
         if value < self.min_value:
@@ -143,16 +143,16 @@ class MinValueValidator(BaseValidator):
 
 class MaxValueValidator(BaseValidator):
     """
-    Валидатор для максимального значения.
+    Validator for maximum value.
 
     """
-    message = 'Значение должно быть меньше или равно {max_value}.'
+    message = 'The value must be less than or equal to {max_value}.'
 
     def __init__(self, max_value, *args, **kwargs):
         """
-        Создаем валидатор.
+        Validator for maximum value.
 
-        :param object max_value: Максимальное значение.
+        :param object max_value: Maximum value.
 
         """
         super().__init__(*args, **kwargs)
@@ -160,11 +160,11 @@ class MaxValueValidator(BaseValidator):
 
     def __call__(self, value):
         """
-        Сама валидация.
+        Validation.
 
-        :param object value: Значение, которое нужно провалидировать.
+        :param object value: Value for validation.
 
-        :raise ValidationError: Если валидацию не прошли.
+        :raise ValidationError: If not valid data.
 
         """
         if value > self.max_value:

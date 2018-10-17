@@ -1,5 +1,5 @@
 """
-Утилитки, для работы с сырым html телом запроса.
+Utilities for working with raw html request body.
 
 """
 import re
@@ -9,11 +9,11 @@ from rest_framework.utils.collections import MultiValueDict
 
 def is_html_input(dictionary):
     """
-    Проверяем, это пришла html форма или JSON запрос.
+    We check that it came html form or JSON request.
 
-    :param object dictionary: Объект, с интерфейсом словаря.
+    :param object dictionary: Object with dictionary interface.
 
-    :return: Результат проверки.
+    :return: Check result.
     :rtype: bool
 
     """
@@ -22,9 +22,9 @@ def is_html_input(dictionary):
 
 def parse_html_list(dictionary, prefix=''):
     """
-    Парсим html форму, и достаем листы и словари.
+    Parsing html form, and we get sheets and dicts.
 
-    * Пример массива.
+    * List example.
     {
         '[0]': 'abc',
         '[1]': 'def',
@@ -37,7 +37,7 @@ def parse_html_list(dictionary, prefix=''):
         'hij'
     ]
 
-    * Пример словаря.
+    * Dict example.
     {
         '[0]foo': 'abc',
         '[0]bar': 'def',
@@ -53,26 +53,26 @@ def parse_html_list(dictionary, prefix=''):
     ret = {}
     regex = re.compile(r'^%s\[([0-9]+)\](.*)$' % re.escape(prefix))
 
-    # Бежим по значениям.
+    # We run on the values.
     for field, value in dictionary.items():
-        # Парсим на наличие ключей с [].
+        # Parsing for the presence of keys with [].
         match = regex.match(field)
         if not match:
             continue
 
-        # Пробуем понять, это индекс массива или ключ словаря.
+        # Try to understand, it is an array index or a dict key.
         index, key = match.groups()
         index = int(index)
 
         if not key:
-            # Если массив.
+            # If list.
             ret[index] = value
         elif isinstance(ret.get(index), dict):
-            # Если словарь.
+            # If dict.
             ret[index][key] = value
         else:
-            # Иначе созраняем исходную структуру.
+            # Else save source string.
             ret[index] = MultiValueDict({key: [value]})
 
-    # Возвращаем результат.
+    # Return result.
     return [ret[item] for item in sorted(ret.keys())]

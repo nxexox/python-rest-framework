@@ -1,12 +1,12 @@
 """
-Ошибки в работе сериалайзеров.
+Errors.
 
 """
 
 
 class SkipError(Exception):
     """
-    Ошибка, которую стоит пропускать.
+    An error that is worth missing.
 
     """
     pass

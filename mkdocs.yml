@@ -1,14 +1,13 @@
-site_url: https://www.django-rest-framework.org/
+site_url: https://nxexox.github.io/python-rest-framework/
 site_description: Python Rest Framework - Web APIs for Python
 site_author: Deys Timofey
+site_name: Python Rest Framework
+
 copyright: 'Copyright (c) 2018, Deys Timofey All rights reserved.'
 
 repo_name: GitHub
 repo_url: https://github.com/nxexox/python-rest-framework
 edit_uri: /blob/master/docs/
-
-
-site_name: Python Rest Framework
 
 nav:
   - Home: 'index.md'

@@ -1,5 +1,5 @@
 """
-Сериалайзеры для теста.
+Serializers for tests.
 
 """
 

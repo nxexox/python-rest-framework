@@ -1,5 +1,5 @@
 """
-Сериалайзеры.
+Serializers.
 
 """
 import copy
@@ -17,34 +17,34 @@ from rest_framework.utils import html
 LIST_SERIALIZER_KWARGS = (
     'required', 'default', 'label', 'error_messages', 'allow_empty',
     'instance', 'data', 'min_length', 'max_length'
-)  # Список аргументов, для ListSerializer, что бы контролировать создание many=True.
+)  # The argument list for the ListSerializer to control the creation of many=True.
 
 
 class BaseSerializerMeta(type):
     """
-    Метакласс для создания сериалайзеров.
+    Metaclass to create serializers.
 
     """
     def __new__(cls, name, bases, attrs):
         """
-        Создаем список филдов у сериалайзера.
+        Create a list of fields with the serializer.
 
-        :param str name: Название создаваемого класса.
-        :param tuple bases: Кортеж базовых классов.
-        :param dict attrs: Словарь атрибутов.
+        :param str name: The name of the class being created.
+        :param tuple bases: Base class tuple.
+        :param dict attrs: Attribute dict.
 
         """
-        _dict_fields = OrderedDict()  # Заводим хранилище филдов.
+        _dict_fields = OrderedDict()  # Make storage of fields.
 
-        # Заполняем хранилище филдов.
+        # Fill storage of fields.
         for attr_name, attr_obj in attrs.items():
-            # TODO: Добавить проверку на наличие атрибута.
-            # Заполняем в хранилище
+            # TODO: Add default attribute check.
+            # Fill storage.
             if isinstance(attr_obj, Field):
                 _dict_fields[attr_name] = attr_obj
                 attr_obj.bind(attr_name, cls)
 
-        # Пробрасываем хранилище филдов в сам класс.
+        # Forward storage of fields to the class itself..
         attrs.update(dict(_dict_fields=_dict_fields))
 
         return super().__new__(cls, name, bases, attrs)
@@ -52,15 +52,15 @@ class BaseSerializerMeta(type):
 
 class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
     """
-    Базовый класс сериалайзера.
+    Base class serializer.
 
     """
     def __init__(self, instance=None, data=None, *args, **kwargs):
         """
-        Создание сериалайзера. Сериалайзер должен вести себя как Field, что бы можно было делать вложенность.
+        Creating a serializer. The serializer should behave like a Field so that nesting can be done.
 
-        :param object instance: Python объект для преобразования.
-        :param dict data: Данные, пришедшие в запросе.
+        :param object instance: Python object to transformation.
+        :param dict data: The data that came in the request.
 
         """
         super().__init__(*args, **kwargs)
@@ -70,9 +70,7 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
 
     def __new__(cls, *args, **kwargs):
         """
-        Автоматически создаем классы для `many=True`,
-
-        # :param bool many: Флаг, указывающий это объект будет один или несколько?
+        Automatically create classes for `many = True`,
 
         """
         many = kwargs.pop('many', False)
@@ -83,31 +81,31 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
     @classmethod
     def many_init(cls, *args, **kwargs):
         """
-        Этот метод реализует создание родительского класса `ListSerializer`,
-        когда используется `many=True`. Вы можете настроить его, если вам нужно определить,
-        какие аргументы ключевого слова переданы родительскому элементу,
-        и какие передаются дочернему элементу.
+        This method implements the creation of the parent class `ListSerializer`,
+        when `many = True` is used. You can customize it if you need to determine
+        which keyword arguments are passed to the parent element,
+        and which are passed to the child.
 
         """
-        child_serializer = cls(*args, **kwargs)  # Создаем child сериалайзер.
+        child_serializer = cls(*args, **kwargs)  # Make child serializer.
 
-        # Пробрасываем аргументы к ListSerializer.
+        # Passing arguments to the ListSerializer.
         list_kwargs = {'child': child_serializer}
         list_kwargs.update({
             key: value for key, value in kwargs.items()
             if key in LIST_SERIALIZER_KWARGS
         })
 
-        # Создаем ListSerializer.
+        # Creating ListSerializer.
         return ListSerializer(*args, **list_kwargs)
 
     def validate(self, data):
         """
-        Ручная валидация всех данных сериалайзера.
+        Manual validation of serializer full data.
 
-        :param dict data: Преобразованные и провалидированные данные, для ручной валидации.
+        :param dict data: Transformed and validated data for manual validation.
 
-        :return: Провалидированные данные. Осторожней, вернуть обязательно.
+        :return: Validated data. Be careful, be sure to return.
         :rtype: dict
 
         """
@@ -115,68 +113,68 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
 
     def to_internal_value(self, data):
         """
-        Преобразование данных в python объект.
+        Data transformation to python object.
 
-        :param dict data: Данные для преобразования.
+        :param dict data: Data for transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: dict
 
         """
-        raise NotImplementedError('Необходимо реализовать метод `.to_internal_value()`.')
+        raise NotImplementedError('`.to_internal_value()` must be implemented.')
 
     def to_representation(self, instance):
         """
-        Преобразование объекта в валидный JSON объект.
+        Transformation an object to a valid JSON object.
 
-        :param object instance: Объект, который стоит преобразовать.
+        :param object instance: The object to transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: dict
 
         """
-        raise NotImplementedError('Необходимо реализовать метод `.to_representation()`.')
+        raise NotImplementedError('`.to_representation()` must be implemented.')
 
     def is_valid(self, raise_exception=False):
         """
-        Валидирует данные, пришедшие в сериалайзер.
+        Validates the data that came into the serializer.
 
-        :param bool raise_exception: Швырять ли исключение если валидация не прошла?
+        :param bool raise_exception: Is there an exception if validation fails?
 
-        :return: Результат валидации.
+        :return: Validation result.
         :rtype: bool
 
         """
-        raise NotImplementedError('Необходимо реализовать метод `.is_valid()`.')
+        raise NotImplementedError('`.is_valid()` must be implemented.')
 
     @property
     def validated_data(self):
         """
-        Провалидированные данные.
+        Validated data.
 
-        :return: Провалидированные данные.
+        :return: Validated data.
         :rtype: dict
 
         """
-        raise NotImplementedError('Необходимо реализовать свойство `.validated_data`.')
+        raise NotImplementedError('`.validated_data` must be implemented.')
 
     @property
     def errors(self):
         """
-        Ошибки во время валидации.
+        Errors during validation.
 
-        :return: Ошибки во время валидации.
+        :return: Errors during validation.
         :rtype: dict
 
         """
-        raise NotImplementedError('Необходимо реализовать свойство `.errors`.')
+        raise NotImplementedError('`.errors` must be implemented.')
 
     @property
     def fields(self):
         """
-        Поля сериалайзера.
+        Serializer fields.
 
-        :return: Словарь полей сериалайзера.
+        :return: Dict serializer fields.
         :rtype: dict
 
         """
@@ -185,19 +183,19 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
     @property
     def data(self):
         """
-        Серилизованный объект.
+        Serialized object.
 
-        :return: Серилизованный объект.
+        :return: Serialized object.
         :rtype: dict
 
         """
         if hasattr(self, 'initial_data') and not hasattr(self, '_validated_data'):
             msg = (
-                'Когда сериалайзеру передается аргумент `data`'
-                'должен быть вызван `.is_valid()` перед тем как получить доступ к '
-                'серилизованным `.data` данным.\n'
-                'Вы должны либо изначально вызвать `.is_valid()` или '
-                'использовать `.initial_data`.'
+                'When a serializer is passed a `data` keyword argument you '
+                'must call `.is_valid()` before attempting to access the '
+                'serialized `.data` representation.\n'
+                'You should either call `.is_valid()` first, '
+                'or access `.initial_data` instead.'
             )
             raise AssertionError(msg)
 
@@ -213,59 +211,61 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
 
 class Serializer(BaseSerializer):
     """
-    Базовый класс сериалайзера.
+    Serializer class.
 
     """
     def to_internal_value(self, data):
         """
-        Преобразование данных в python объект.
+        Data transformation to python object.
 
-        :param dict data: Данные для преобразования.
+        :param dict data: Data for transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: dict
+
+        :raise ValidationError: If not valid data.
 
         """
         return self._field_validation(self._dict_fields, data)
 
     def to_representation(self, instance):
         """
-        Преобразование объекта в валидный JSON объект.
+        Transformation an object to a valid JSON object.
 
-        :param object instance: Объект, который стоит преобразовать.
+        :param object instance: The object to transformation.
 
-        :return: Преобразованные данные.
-        :rtype: dict
+        :return: Transformed data.
+        :rtype: object
 
         """
-        res = OrderedDict()  # Хранилище атрибутов.
+        res = OrderedDict()  # Attributes storage.
 
         for field_name, field_val in self._dict_fields.items():
-            # Пробуем достать атрибут.
+            # We try to get the attribute.
             try:
                 attribute = field_val.get_attribute(instance)
             except SkipError:
-                # TODO: Ту делема, кидать ошибку, если атрибута у объекта не нашли, или скипать?
+                # TODO: That thing, throw an error, if the attribute of the object is not found, or skip?
                 continue
 
-            # Пробуем его превратить в JSON валидный формат.
+            # We try to turn it into a JSON valid format.
             res[field_name] = field_val.to_representation(attribute)
 
-        # Возвращаем.
+        # Return.
         return res
 
     def _manual_validate_method(self, field_name, validated_value):
         """
-        Ручная валидация конкретного филда.
+        Manual validation of a specific field.
 
-        :param str field_name: Название филда.
-        :param object validated_value: Значение филда.
+        :param str field_name: Field name.
+        :param object validated_value: Field value.
 
-        :return: Провалидированное значение.
+        :return: Validation value.
         :rtype: object
 
         """
-        # Теперь смотрим, если есть метод ручной валидации, вызываем его.
+        # We look, if there is a method of manual validation, we call it..
         manual_validate_method = getattr(self, 'validate_' + field_name, None)
         if callable(manual_validate_method):
             validated_value = manual_validate_method(validated_value)
@@ -273,31 +273,31 @@ class Serializer(BaseSerializer):
 
     def _field_validation(self, fields_dict, data):
         """
-        Валидируем все филды.
+        Validation add fields
 
-        :param dict fields_dict: Словарь с проинициализированными филдами, по которым валидируем.
-        :param dict data: Данные, которые валидируем.
+        :param dict fields_dict: Dictionary with initialized fields that we validate.
+        :param dict data: Data that is validated.
 
-        :return: Провалидированные и обрабоатанные даные.
-        :raise ValidationError: Если произошли ошибки во время валидации.
+        :return: Validated and transformed data.
+        :raise ValidationError: If errors occurred during validation.
 
         """
         validated_data, errors = OrderedDict(), OrderedDict()
-        # Бежим по филдам.
+        # Running through the fields.
         for field_name, field_obj in fields_dict.items():
             try:
-                # Преобразуем в питон тип и валидируем каждое поле.
+                # Transform to python type and validate each field.
                 validated_val = field_obj.run_validation(data.get(field_name, None))
 
-                # Теперь ручная валидация.
+                # Now manual validation.
                 validated_val = self._manual_validate_method(field_name, validated_val)
 
-                # И если во входящих данных было поле, тогда сохраняем в преобразованном виде.
+                # And if there was a field in the incoming data, then we save it in the converted form.
                 if field_name in data or field_obj.default:
                     validated_data[field_name] = validated_val or field_obj.default
 
             except ValidationError as e:
-                # Если не прошло валидацию, сохраняем ошибку.
+                # If not passed validation, save the error.
                 errors[field_name] = e.detail
 
         if any(errors):
@@ -307,157 +307,161 @@ class Serializer(BaseSerializer):
 
     def is_valid(self, raise_exception=False):
         """
-        Валидирует данные, пришедшие в сериалайзер.
+        Validates the data that came into the serializer.
 
-        :param bool raise_exception: Швырять ли исключение если валидация не прошла?
+        :param bool raise_exception: Whether to throw an exception if validation failed?
 
-        :return: Результат валидации.
+        :return: Validation result.
         :rtype: bool
 
         """
         if not hasattr(self, 'initial_data'):
-            raise AssertionError('Для вызова `.is_valid()` необходимо передать `dict` в конструктор `data=`')
+            raise AssertionError(
+                'Cannot call `.is_valid()` as no `data=` keyword argument '
+                'was passed when instantiating the serializer instance.'
+            )
 
-        # Готовим СТ для результатов.
+        # Preparing storage for results.
         self._errors, self._validated_data = OrderedDict(), OrderedDict()
 
-        # Валидируем все филды.
+        # Validated all fields.
         try:
             self._validated_data = self._field_validation(self._dict_fields, self.initial_data)
         except ValidationError as e:
             self._errors = e.detail
 
-        # Теперь прогоням метод полной ручной валидации.
+        # Now run the full manual validation method.
         try:
             self._validated_data = self.validate(self._validated_data) if not self._errors else self._validated_data
         except ValidationError as e:
             self._errors['errors'] = e.detail
 
-        # Если надо швырануть ошибку, швыряем.
+        # If you need to throw an error, we throw.
         if self._errors and raise_exception:
             self._validated_data = OrderedDict()
             raise ValidationError(self._errors)
 
-        # Возвращаем результат валидации.
+        # Return validation result.
         return not bool(self._errors)
 
     def run_validation(self, data):
         """
-        Запускает валидацию по текущему сериалайзеру.
+        Runs validation on the current serializer..
 
-        :param object data: Данные для валидации.
+        :param object data: Data for validation.
 
-        :return: Провалидированное и преобразованное значение.
+        :return: Transformed and validated data.
         :rtype: dict
 
         """
-        # Сначала проверяем, не пришло ли пустое поле?
+        # We first check to see if an empty field has arrived?
         is_empty, data = self.validate_empty_values(data)
 
-        # Преобразуем в питон тип.
+        # Transformed to python type.
         value = self.to_internal_value(data)
 
-        # Валидируем валидаторами.
+        # Validating validators.
         try:
             self.run_validators(value)
             value = self.validate(value)
-            assert value is not None, '.validate() должен вернуть провалидированное значение'
+            assert value is not None, '`.validate ()` should return a valid value.'
 
         except ValidationError as e:
             raise ValidationError(detail=e.detail)
 
-        # Возвращаем провалидированное и преобразованное значение.
+        # We return the validated and transformed value.
         return value
 
     @property
     def validated_data(self):
         """
-        Провалидированные данные.
+        Validated data.
 
-        :return: Провалидированные данные.
+        :return: Validated data.
         :rtype: dict
 
         """
         if not hasattr(self, '_validated_data'):
-            raise AssertionError('Для получения `.validate_data` нужно сначала вызвать `.is_valid()`.')
+            raise AssertionError('You must call `.is_valid()` before accessing `.validated_data`.')
         return self._validated_data.copy()
 
     @property
     def errors(self):
         """
-        Ошибки во время валидации.
+        Errors during validation.
 
-        :return: Ошибки во время валидации.
+        :return: Errors during validation.
         :rtype: dict
 
         """
         if not hasattr(self, '_errors'):
-            raise AssertionError('Для получения `.errors` нужно сначала вызвать `.is_valid()`.')
+            raise AssertionError('You must call `.is_valid()` before accessing `.errors`.')
         return self._errors.copy()
 
 
 class ListSerializer(Serializer):
     """
-    Сериалайзер для списка объектов.
+    Serializer for the list of objects.
 
     """
-    # TODO: Переписать заново вместе с many_init.
-    child = None  # Дочерний сериалайзер.
+    child = None  # Child serializer.
 
     default_error_messages = {
-        'not_a_list': 'Ожидался массив элементов но получен "{input_type}".',
-        'empty': 'Массив не может быть пустым.',
+        'not_a_list': 'Expected a list of items but got type "{input_type}".',
+        'empty': 'This list may not be empty.',
     }
 
     def __init__(self, child=None, allow_empty=None, *args, **kwargs):
         """
-        Сериалайзер для множества объектов.
+        Serializer for the list of objects.
 
-        :param rest_framework.serializers.Field child: Дочерний сериалайзер.
-        :param bool allow_empty: Разрешить ли пустой массив.
+        :param rest_framework.serializers.Field child: Child serializer.
+        :param bool allow_empty: Allow empty list?
 
         """
         self.child = child or copy.deepcopy(self.child)
         self.allow_empty = bool(allow_empty)
 
-        # Чекаем, что данные корректные.
-        assert self.child is not None, '`child` обязательный аргумент.'
-        assert not inspect.isclass(self.child), '`child` должен быть инициализирован.'
+        # We check that the data is correct.
+        assert self.child is not None, '`child` is a required argument'
+        assert not inspect.isclass(self.child), '`child` has not been instantiated.'
 
-        # инициализируем сериалайзер.
+        # Initializing serializer.
         super(ListSerializer, self).__init__(*args, **kwargs)
-        # Биндим дочерний элемент.
+        # Bind child serializer.
         self.child.bind(field_name='', parent=self)
 
     def to_internal_value(self, data):
         """
-        Преобразование данных в python list объект.
+        Data transformation to python list object.
 
-        :param object data: Данные для преобразования.
+        :param object data: Data for transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: list
 
+        :raise ValidationError: If data not valid.
+
         """
-        # Парсим данные.
+        # Parse data.
         if html.is_html_input(data):
             data = html.parse_html_list(data)
 
-        # Превоначальная валидация что пришел массив.
+        # Initial validation that came in an array.
         if not isinstance(data, list):
             message = self.error_messages['not_a_list'].format(
                 input_type=type(data).__name__
             )
             raise ValidationError({'non_field_errors': [message]}, code='not_a_list')
 
-        # Валидация, что это не пустое значение и можно ли пустое.
+        # Validation that this is not an empty value and whether it is empty.
         if not self.allow_empty and len(data) == 0:
             message = self.error_messages['empty']
             raise ValidationError({'non_field_errors': [message]}, code='empty')
 
-        res, errors = [], []  # Заводим хранилища под результаты.
+        res, errors = [], []  # Make storage for results.
 
-        # Валидируем каждый элемент из списка.
+        # Validating each item from the list.
         for item in data:
             try:
                 value = self.child.run_validation(item)
@@ -468,20 +472,20 @@ class ListSerializer(Serializer):
                 res.append(value)
                 errors.append({})
 
-        # Если преобразование и валидация прошли неуспешно.
+        # If the conversion and validation failed.
         if any(errors):
             raise ValidationError(errors)
 
-        # Возвращаем преобразованные и провалидированные данные.
+        # We return the transformed and validated data.
         return res
 
     def to_representation(self, instance):
         """
-        Преобразование объекта в валидный JSON list объект.
+        Transformation an object to a valid JSON list object.
 
-        :param list instance: Объект, который стоит преобразовать.
+        :param list instance: The object to transformation.
 
-        :return: Преобразованные данные.
+        :return: Transformed data.
         :rtype: list
 
         """
@@ -489,56 +493,59 @@ class ListSerializer(Serializer):
 
     def is_valid(self, raise_exception=False):
         """
-        Валидирует данные, пришедшие в сериалайзер.
+        Validates the data that came into the serializer.
 
-        :param bool raise_exception: Швырять ли исключение если валидация не прошла?
+        :param bool raise_exception: Is there an exception if validation fails?
 
-        :return: Результат валидации.
+        :return: Validation result.
         :rtype: bool
 
         """
         if not hasattr(self, 'initial_data'):
-            raise AssertionError('Для вызова `.is_valid()` необходимо передать `dict` в конструктор `data=`')
+            raise AssertionError(
+                'Cannot call `.is_valid()` as no `data=` keyword argument '
+                'was passed when instantiating the serializer instance.'
+            )
 
-        # Готовим СТ для результатов.
+        # Preparing storage for results.
         self._errors, self._validated_data = [], []
 
-        # Валидируем все филды.
+        # Validating all fields
         try:
             self._validated_data = self.to_internal_value(self.initial_data)
         except ValidationError as e:
             self._errors = e.detail
 
-        # Если надо швырануть ошибку, швыряем.
+        # If you need to throw an error, we throw.
         if self._errors and raise_exception:
             self._validated_data = []
             raise ValidationError(self._errors)
 
-        # Возвращаем результат валидации.
+        # Return validation result.
         return not bool(self._errors)
 
     @property
     def validated_data(self):
         """
-        Провалидированные данные.
+        Validated data.
 
-        :return: Провалидированные данные.
-        :rtype: dict
+        :return: Validated data.
+        :rtype: list
 
         """
         if not hasattr(self, '_validated_data'):
-            raise AssertionError('Для получения `.validate_data` нужно сначала вызвать `.is_valid()`.')
+            raise AssertionError('You must call `.is_valid()` before accessing `.validated_data`.')
         return self._validated_data[:]
 
     @property
     def errors(self):
         """
-        Ошибки во время валидации.
+        Errors during validation.
 
-        :return: Ошибки во время валидации.
-        :rtype: dict
+        :return: Errors during validation.
+        :rtype: list
 
         """
         if not hasattr(self, '_errors'):
-            raise AssertionError('Для получения `.errors` нужно сначала вызвать `.is_valid()`.')
+            raise AssertionError('You must call `.is_valid()` before accessing `.errors`.')
         return self._errors[:]

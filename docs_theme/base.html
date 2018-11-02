@@ -4,10 +4,17 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">{% if config.site_description %}
-    <meta name="description" content="{{ config.site_description }}">{% endif %} {% if config.site_author %}
-    <meta name="author" content="{{ config.site_author }}">{% endif %} {% if page.canonical_url %}
-    <link rel="canonical" href="{{ page.canonical_url }}">{% endif %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="yandex-verification" content="9b2146aad3dab0fa" />
+    {% if config.site_description %}
+        <meta name="description" content="{{ config.site_description }}">
+    {% endif %}
+    {% if config.site_author %}
+        <meta name="author" content="{{ config.site_author }}">
+    {% endif %}
+    {% if page.canonical_url %}
+        <link rel="canonical" href="{{ page.canonical_url }}">
+    {% endif %}
     <link rel="shortcut icon" href="{{ base_url }}/img/favicon.ico">
 
     <title>{% if page.title %}{{ page.title }} - {% endif %}{{ config.site_name }}</title>

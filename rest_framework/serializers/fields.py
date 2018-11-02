@@ -7,6 +7,11 @@ import collections
 import datetime
 import json
 
+try:
+    from json.decoder import JSONDecodeError
+except ImportError:
+    JSONDecodeError = ValueError
+
 import six
 
 from rest_framework.exceptions import SkipError
@@ -1002,7 +1007,7 @@ class JsonField(Field):
 
         try:
             return json.loads(data, encoding='utf8')
-        except (json.decoder.JSONDecodeError, TypeError, ValueError):
+        except (JSONDecodeError, TypeError, ValueError):
             self.fail('invalid')
 
     def to_representation(self, value):

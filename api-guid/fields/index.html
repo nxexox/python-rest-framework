@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="yandex-verification" content="9b2146aad3dab0fa" />
     
         <meta name="description" content="Python Rest Framework - Web APIs for Python">
     
@@ -161,13 +160,6 @@
                 
             <li class="second-level"><a href="#-floatfield">- FloatField</a></li>
                 
-        <li class="first-level "><a href="#composite-fields">Composite fields</a></li>
-            <li class="second-level"><a href="#-listfield">- ListField</a></li>
-                
-            <li class="second-level"><a href="#-jsonfield">- JSONField</a></li>
-                
-            <li class="second-level"><a href="#-dictfield">- DictField</a></li>
-                
         <li class="first-level "><a href="#date-and-time-fields">Date and time fields</a></li>
             <li class="second-level"><a href="#-datetimefield">- DateTimeField</a></li>
                 
@@ -178,8 +170,17 @@
             <li class="second-level"><a href="#-timefield">- TimeField</a></li>
                 
                 <li class="third-level"><a href="#timefield-format-strings">TimeField format strings</a></li>
-            <li class="second-level"><a href="#custom-fields">Custom fields</a></li>
+        <li class="first-level "><a href="#composite-fields">Composite fields</a></li>
+            <li class="second-level"><a href="#-listfield">- ListField</a></li>
                 
+            <li class="second-level"><a href="#-jsonfield">- JSONField</a></li>
+                
+            <li class="second-level"><a href="#-dictfield">- DictField</a></li>
+                
+        <li class="first-level "><a href="#miscellaneous-fields">Miscellaneous fields</a></li>
+            <li class="second-level"><a href="#-serializermethodfield">- SerializerMethodField</a></li>
+                
+        <li class="first-level "><a href="#custom-fields">Custom fields</a></li>
             <li class="second-level"><a href="#examples">Examples</a></li>
                 
                 <li class="third-level"><a href="#a-basic-custom-field">A Basic Custom Field</a></li>
@@ -244,6 +245,36 @@ Set to false if this field is not required to be present during deserialization.
 <li><code>max_value</code> Validate that the number provided is no greater than this value.</li>
 </ul>
 <hr />
+<h1 id="date-and-time-fields"><a class="toclink" href="#date-and-time-fields">Date and time fields</a></h1>
+<h2 id="-datetimefield"><a class="toclink" href="#-datetimefield">- DateTimeField</a></h2>
+<p>A date and time representation.</p>
+<p><strong>Signature:</strong> <code>DateTimeField(format=None, input_format=None)</code></p>
+<ul>
+<li><code>format</code> - A string representing the output format. If not specified, this defaults to the same value as the <code>DEFAULT_DATETIME_FORMAT</code> settings key, which will be <code>'iso-8601'</code> unless set. Setting to a format string indicates that <code>to_representation</code> return values should be coerced to string output. Format strings are described below. Setting this value to <code>None</code> indicates that Python <code>datetime</code> objects should be returned by <code>to_representation</code>. In this case the datetime encoding will be determined by the renderer.</li>
+<li><code>input_format</code> - String representing the input format which may be used to parse the date.  If not specified, the <code>DEFAULT_INPUT_DATETIME_FORMAT</code> setting will be used, which defaults to <code>'iso-8601'</code>.</li>
+</ul>
+<h4 id="datetimefield-format-strings"><a class="toclink" href="#datetimefield-format-strings"><code>DateTimeField</code> format strings.</a></h4>
+<p>Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string <code>'iso-8601'</code>, which indicates that <a href="https://www.w3.org/TR/NOTE-datetime">ISO 8601</a> style datetimes should be used. (eg <code>'2013-01-29 12:34:56'</code>)</p>
+<p>When a value of <code>None</code> is used for the format <code>datetime</code> objects will be returned by <code>to_representation</code> and the final output representation will determined by the renderer class.</p>
+<h2 id="-datefield"><a class="toclink" href="#-datefield">- DateField</a></h2>
+<p>A date representation.</p>
+<p><strong>Signature:</strong> <code>DateField(format=None, input_format=None)</code></p>
+<ul>
+<li><code>format</code> - A string representing the output format.  If not specified, this defaults to the same value as the <code>DEFAULT_DATE_FORMAT</code> settings key, which will be <code>'iso-8601'</code> unless set. Setting to a format string indicates that <code>to_representation</code> return values should be coerced to string output. Format strings are described below. Setting this value to <code>None</code> indicates that Python <code>date</code> objects should be returned by <code>to_representation</code>. In this case the date encoding will be determined by the renderer.</li>
+<li><code>input_format</code> - String representing the input format which may be used to parse the date.  If not specified, the <code>DEFAULT_INPUT_DATE_FORMATS</code> setting will be used, which defaults to <code>'iso-8601'</code>.</li>
+</ul>
+<h4 id="datefield-format-strings"><a class="toclink" href="#datefield-format-strings"><code>DateField</code> format strings</a></h4>
+<p>Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string <code>'iso-8601'</code>, which indicates that <a href="https://www.w3.org/TR/NOTE-datetime">ISO 8601</a> style dates should be used. (eg <code>'2013-01-29'</code>)</p>
+<h2 id="-timefield"><a class="toclink" href="#-timefield">- TimeField</a></h2>
+<p>A time representation.</p>
+<p><strong>Signature:</strong> <code>TimeField(format=None, input_format=None)</code></p>
+<ul>
+<li><code>format</code> - A string representing the output format.  If not specified, this defaults to the same value as the <code>DEFAULT_TIME_FORMAT</code> settings key, which will be <code>'iso-8601'</code> unless set. Setting to a format string indicates that <code>to_representation</code> return values should be coerced to string output. Format strings are described below. Setting this value to <code>None</code> indicates that Python <code>time</code> objects should be returned by <code>to_representation</code>. In this case the time encoding will be determined by the renderer.</li>
+<li><code>input_format</code> - String representing the input format which may be used to parse the date.  If not specified, the <code>DEFAULT_INPUT_TIME_FORMATS</code> setting will be used, which defaults to <code>'iso-8601'</code>.</li>
+</ul>
+<h4 id="timefield-format-strings"><a class="toclink" href="#timefield-format-strings"><code>TimeField</code> format strings</a></h4>
+<p>Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string <code>'iso-8601'</code>, which indicates that <a href="https://www.w3.org/TR/NOTE-datetime">ISO 8601</a> style times should be used. (eg <code>'12:34:56'</code>)</p>
+<hr />
 <h1 id="composite-fields"><a class="toclink" href="#composite-fields">Composite fields</a></h1>
 <h2 id="-listfield"><a class="toclink" href="#-listfield">- ListField</a></h2>
 <p>A field class that validates a list of objects.</p>
@@ -281,37 +312,36 @@ Set to false if this field is not required to be present during deserialization.
     child = CharField()
 </code></pre>
 <hr />
-<h1 id="date-and-time-fields"><a class="toclink" href="#date-and-time-fields">Date and time fields</a></h1>
-<h2 id="-datetimefield"><a class="toclink" href="#-datetimefield">- DateTimeField</a></h2>
-<p>A date and time representation.</p>
-<p><strong>Signature:</strong> <code>DateTimeField(format=None, input_format=None)</code></p>
+<h1 id="miscellaneous-fields"><a class="toclink" href="#miscellaneous-fields">Miscellaneous fields</a></h1>
+<h2 id="-serializermethodfield"><a class="toclink" href="#-serializermethodfield">- SerializerMethodField</a></h2>
+<p>It gets its value by calling a method on the serializer class it is attached to. It can be used to add any sort of data to the serialized representation of your object.</p>
+<p><strong>Signature</strong>: <code>SerializerMethodField(method_name_get=None, method_name_pop=None)</code></p>
 <ul>
-<li><code>format</code> - A string representing the output format. If not specified, this defaults to the same value as the <code>DEFAULT_DATETIME_FORMAT</code> settings key, which will be <code>'iso-8601'</code> unless set. Setting to a format string indicates that <code>to_representation</code> return values should be coerced to string output. Format strings are described below. Setting this value to <code>None</code> indicates that Python <code>datetime</code> objects should be returned by <code>to_representation</code>. In this case the datetime encoding will be determined by the renderer.</li>
-<li><code>input_format</code> - String representing the input format which may be used to parse the date.  If not specified, the <code>DEFAULT_INPUT_DATETIME_FORMAT</code> setting will be used, which defaults to <code>'iso-8601'</code>.</li>
+<li><code>method_name_get</code> - The name of the method on the calling serializer during object scrapping. If not included this defaults to <code>get_&lt;field_name&gt;</code>.</li>
+<li><code>method_name_pop</code> - The name of the method on the calling serializer during validation data. If not included this defaults to <code>pop_&lt;field_name&gt;</code>.</li>
 </ul>
-<h4 id="datetimefield-format-strings"><a class="toclink" href="#datetimefield-format-strings"><code>DateTimeField</code> format strings.</a></h4>
-<p>Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string <code>'iso-8601'</code>, which indicates that <a href="https://www.w3.org/TR/NOTE-datetime">ISO 8601</a> style datetimes should be used. (eg <code>'2013-01-29 12:34:56'</code>)</p>
-<p>When a value of <code>None</code> is used for the format <code>datetime</code> objects will be returned by <code>to_representation</code> and the final output representation will determined by the renderer class.</p>
-<h2 id="-datefield"><a class="toclink" href="#-datefield">- DateField</a></h2>
-<p>A date representation.</p>
-<p><strong>Signature:</strong> <code>DateField(format=None, input_format=None)</code></p>
-<ul>
-<li><code>format</code> - A string representing the output format.  If not specified, this defaults to the same value as the <code>DEFAULT_DATE_FORMAT</code> settings key, which will be <code>'iso-8601'</code> unless set. Setting to a format string indicates that <code>to_representation</code> return values should be coerced to string output. Format strings are described below. Setting this value to <code>None</code> indicates that Python <code>date</code> objects should be returned by <code>to_representation</code>. In this case the date encoding will be determined by the renderer.</li>
-<li><code>input_format</code> - String representing the input format which may be used to parse the date.  If not specified, the <code>DEFAULT_INPUT_DATE_FORMATS</code> setting will be used, which defaults to <code>'iso-8601'</code>.</li>
-</ul>
-<h4 id="datefield-format-strings"><a class="toclink" href="#datefield-format-strings"><code>DateField</code> format strings</a></h4>
-<p>Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string <code>'iso-8601'</code>, which indicates that <a href="https://www.w3.org/TR/NOTE-datetime">ISO 8601</a> style dates should be used. (eg <code>'2013-01-29'</code>)</p>
-<h2 id="-timefield"><a class="toclink" href="#-timefield">- TimeField</a></h2>
-<p>A time representation.</p>
-<p><strong>Signature:</strong> <code>TimeField(format=None, input_format=None)</code></p>
-<ul>
-<li><code>format</code> - A string representing the output format.  If not specified, this defaults to the same value as the <code>DEFAULT_TIME_FORMAT</code> settings key, which will be <code>'iso-8601'</code> unless set. Setting to a format string indicates that <code>to_representation</code> return values should be coerced to string output. Format strings are described below. Setting this value to <code>None</code> indicates that Python <code>time</code> objects should be returned by <code>to_representation</code>. In this case the time encoding will be determined by the renderer.</li>
-<li><code>input_format</code> - String representing the input format which may be used to parse the date.  If not specified, the <code>DEFAULT_INPUT_TIME_FORMATS</code> setting will be used, which defaults to <code>'iso-8601'</code>.</li>
-</ul>
-<h4 id="timefield-format-strings"><a class="toclink" href="#timefield-format-strings"><code>TimeField</code> format strings</a></h4>
-<p>Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string <code>'iso-8601'</code>, which indicates that <a href="https://www.w3.org/TR/NOTE-datetime">ISO 8601</a> style times should be used. (eg <code>'12:34:56'</code>)</p>
+<p>The serializer method referred to by the <code>method_name_get</code> argument should accept a single argument (in addition to <code>self</code>), which is the object being serialized. It should return whatever you want to be included in the serialized representation of the object. For example:</p>
+<pre><code>from datetime.datetime import now
+from rest_framework import serializers
+
+class UserSerializer(serializers.Serializer):
+    days_since_joined = serializers.SerializerMethodField()
+
+    def get_days_since_joined(self, obj):
+        return (now() - obj.date_joined).days
+</code></pre>
+<p>The serializer method referenced by the <code>method_name_pop</code> argument must take one argument (in addition to<code>self</code>), which is the value to process and validate. It must return whatever you want to include in the validated view of the data. For example:</p>
+<pre><code>from datetime.datetime import now
+from rest_framework import serializers
+
+class UserSerializer(serializers.Serializer):
+    rgb = serializers.SerializerMethodField()
+
+    def pop_rgb(self, data):
+        return data.split(';')[1:3]
+</code></pre>
 <hr />
-<h2 id="custom-fields"><a class="toclink" href="#custom-fields">Custom fields</a></h2>
+<h1 id="custom-fields"><a class="toclink" href="#custom-fields">Custom fields</a></h1>
 <p>If you want to create a custom field, you&rsquo;ll need to subclass <code>Field</code> and then override either one or both of the <code>.to_representation()</code> and <code>.to_internal_value()</code> methods.  These two methods are used to convert between the initial datatype, and a primitive, serializable datatype. Primitive datatypes will typically be any of a number, string, boolean, <code>date</code>/<code>time</code>/<code>datetime</code> or <code>None</code>. They may also be any list or dictionary like object that only contains other primitive objects. Other types might be supported, depending on the renderer that you are using.</p>
 <p>The <code>.to_representation()</code> method is called to convert the initial datatype into a primitive, serializable datatype.</p>
 <p>The <code>to_internal_value()</code> method is called to restore a primitive datatype into its internal python representation. This method should raise a <code>serializers.ValidationError</code> if the data is invalid.</p>

@@ -12,11 +12,15 @@ from rest_framework.serializers.exceptions import ValidationError
 from rest_framework.serializers.fields import (
     Field, CharField, IntegerField, FloatField, BooleanField, ListField,
     TimeField, DateField, DateTimeField,
+    JsonField, DictField,
+    SerializerMethodField,
     get_attribute
 )
 from rest_framework.serializers.validators import (
     RequiredValidator, MaxValueValidator, MinValueValidator, MinLengthValidator, MaxLengthValidator
 )
+
+from .serializers_for_tests import SerializerMethodFieldDefault, SerializerMethodFieldSingle
 
 
 class BaseFieldTestCase(TestCase):
@@ -846,3 +850,200 @@ class TestDateTimeField(BaseFieldTestCase):
         {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
         {'data': {'data': None}, 'params': {'default': datetime.datetime(2018, 1, 1)}, 'return': datetime.datetime(2018, 1, 1)},
     )  # Cases, to test the performance of `.run_validation()`.
+
+
+class TestJsonField(BaseFieldTestCase):
+    """
+    Testing JsonField.
+
+    """
+    field_class = JsonField
+    abstract_methods = {}  # Custom abstract methods.
+    requirement_arguments_for_field = {}  # Required arguments for creating a field.
+    field_error_messages = {
+        'invalid': None,
+    }
+
+    to_representation_cases = (
+        {'data': {'value': '123'}, 'return': '"123"'},
+        {'data': {'value': 123}, 'return': '123'},
+        {'data': {'value': {}}, 'return': '{}'},
+        {'data': {'value': []}, 'return': '[]'},
+        {'data': {'value': {'123': 123}}, 'return': '{"123": 123}'},
+        {'data': {'value': {'123': [123, '123']}}, 'return': '{"123": [123, "123"]}'},
+        {'data': {'value': lambda: None}, 'exceptions': (ValidationError,)},
+        {'data': {'value': {123: 123}}, 'return': '{"123": 123}'}
+    )  # Cases, to test the performance of `.to_representation()`.
+    to_internal_value_cases = (
+        {'data': {'data': {}}, 'return': {}},
+        {'data': {'data': []}, 'return': []},
+        {'data': {'data': {123: 123}}, 'return': {123: 123}},
+        {'data': {'data': [123]}, 'return': [123]},
+        {'data': {'data': {123: [123]}}, 'return': {123: [123]}},
+        {'data': {'data': [{123: 123}]}, 'return': [{123: 123}]},
+        {'data': {'data': '123'}, 'return': 123},
+        {'data': {'data': 'asd'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': 123}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'exceptions': (ValidationError,)}
+    )  # Cases, to test the performance of `.to_internal_value()`.
+    run_validation_cases = (
+        {'data': {'data': {}}, 'return': {}},
+        {'data': {'data': []}, 'return': []},
+        {'data': {'data': {123: 123}}, 'return': {123: 123}},
+        {'data': {'data': [123]}, 'return': [123]},
+        {'data': {'data': {123: [123]}}, 'return': {123: [123]}},
+        {'data': {'data': [{123: 123}]}, 'return': [{123: 123}]},
+        {'data': {'data': '123'}, 'return': 123},
+        {'data': {'data': 'asd'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': 123}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},  # TODO: FIXME
+    )  # Cases, to test the performance of `.run_validation()`.
+
+
+class TestDictField(BaseFieldTestCase):
+    """
+    Testing DictField.
+
+    """
+    field_class = DictField
+    abstract_methods = {}  # Custom abstract methods.
+    requirement_arguments_for_field = {}  # Required arguments for creating a field.
+    field_error_messages = {
+        'not_a_dict': None,
+    }
+
+    to_representation_cases = (
+        {'data': {'value': {}}, 'return': {}},
+        {'data': {'value': {'123': 123}}, 'return': {'123': 123}},
+        {'data': {'value': {'123': [123, '123']}}, 'return': {'123': [123, '123']}},
+        {'data': {'value': '123'}, 'exceptions': (AttributeError,)},
+        {'data': {'value': 123}, 'exceptions': (AttributeError,)},
+        {'data': {'value': lambda: None}, 'exceptions': (AttributeError,)},
+        {'data': {'value': {123: 123}}, 'return': {'123': 123}},
+        {'data': {'value': {123: [123]}}, 'params': {'child': IntegerField()}, 'exceptions': (TypeError,)}
+    )  # Cases, to test the performance of `.to_representation()`.
+    to_internal_value_cases = (
+        {'data': {'data': {}}, 'return': {}},
+        {'data': {'data': {123: 123}}, 'return': {'123': 123}},
+        {'data': {'data': {123: [123]}}, 'return': {'123': [123]}},
+        {'data': {'data': '123'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': 'asd'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': 123}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'exceptions': (ValidationError,)},
+        {'data': {'data': {123: [123]}}, 'params': {'child': IntegerField()}, 'exceptions': (ValidationError,)}
+    )  # Cases, to test the performance of `.to_internal_value()`.
+    run_validation_cases = (
+        {'data': {'data': {}}, 'return': {}},
+        {'data': {'data': {123: 123}}, 'return': {'123': 123}},
+        {'data': {'data': {123: [123]}}, 'return': {'123': [123]}},
+        {'data': {'data': '123'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': 'asd'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': 123}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},  # TODO: FIXME
+        {'data': {'data': {123: [123]}}, 'params': {'child': IntegerField()}, 'exceptions': (ValidationError,)}
+    )  # Cases, to test the performance of `.run_validation()`.
+
+
+class TestSerializerMethodField(TestCase):
+    """
+    Testing SerializerMethodField.
+
+    """
+    def test_default_validation(self):
+        """
+        Testing default methods.
+
+        """
+        ser = SerializerMethodFieldDefault(data={'test': 'test'})
+        ser.is_valid()
+        assert ser.validated_data['test'] == 'test', 'Expected `test`. Reality: `{}`.'.format(ser.validated_data['test'])
+
+        ser = SerializerMethodFieldDefault(data={'test': 'test'})
+        setattr(ser, 'pop_test', lambda *args: None)
+        ser.is_valid()
+        assert ser.validated_data['test'] is None, 'Expected `None`. Reality: `{}`.'.format(ser.validated_data['test'])
+
+        ser = SerializerMethodFieldDefault(data={'test': 'test'})
+        setattr(ser, 'pop_test', lambda *args: 123)
+        ser.is_valid()
+        assert ser.validated_data['test'] == 123, 'Expected `123`. Reality: `{}`.'.format(ser.validated_data['test'])
+
+    def test_default_serializing(self):
+        """
+        Testing serializing object.
+
+        """
+        # Standard value.
+        obj = type('Object', (object,), {'test': 'test'})
+        ser = SerializerMethodFieldDefault(instance=obj)
+        assert isinstance(ser.data, dict), 'Expected type: `dict`. Reality: `{}`.'.format(type(ser.data))
+        assert len(ser.data) == 1, 'Expected single value in data. Reality: `{}`.'.format(ser.data)
+        assert ser.data['test'] == 'test', 'Expected value `test`. Reality: `{}`.'.format(ser.data['test'])
+
+        ser = SerializerMethodFieldDefault(instance=obj)
+        setattr(ser, 'get_test', lambda *args: None)
+        assert isinstance(ser.data, dict), 'Expected type: `dict`. Reality: `{}`.'.format(type(ser.data))
+        assert len(ser.data) == 1, 'Expected single value in data. Reality: `{}`.'.format(ser.data)
+        assert ser.data['test'] is None, 'Expected value `None`. Reality: `{}`.'.format(ser.data['test'])
+
+        ser = SerializerMethodFieldDefault(instance=obj)
+        setattr(ser, 'get_test', lambda *args: 123)
+        assert isinstance(ser.data, dict), 'Expected type: `dict`. Reality: `{}`.'.format(type(ser.data))
+        assert len(ser.data) == 1, 'Expected single value in data. Reality: `{}`.'.format(ser.data)
+        assert ser.data['test'] == 123, 'Expected value `123`. Reality: `{}`.'.format(ser.data['test'])
+
+    def test_single_method_validation(self):
+        """
+        Testing single method.
+
+        """
+        ser = SerializerMethodFieldSingle(data={'test': 'test'})
+        ser.is_valid()
+        assert ser.validated_data['test'] == 'test', 'Expected `test`. Reality: `{}`.'.format(ser.validated_data['test'])
+
+        ser = SerializerMethodFieldSingle(data={'test': 'test'})
+        setattr(ser, 'test_test', lambda *args: None)
+        ser.is_valid()
+        assert ser.validated_data['test'] is None, 'Expected `None`. Reality: `{}`.'.format(ser.validated_data['test'])
+
+        ser = SerializerMethodFieldSingle(data={'test': 'test'})
+        setattr(ser, 'test_test', lambda *args: 123)
+        ser.is_valid()
+        assert ser.validated_data['test'] == 123, 'Expected `123`. Reality: `{}`.'.format(ser.validated_data['test'])
+
+        ser = SerializerMethodFieldSingle(data={'test': 'test'})
+        setattr(ser, 'pop_test', lambda *args: 123)
+        ser.is_valid()
+        assert ser.validated_data['test'] == 'test', 'Expected `test`. Reality: `{}`.'.format(ser.validated_data['test'])
+
+    def test_single_method_serializing(self):
+        """
+        Testing serializing object.
+
+        """
+        # Standard value.
+        obj = type('Object', (object,), {'test': 'test'})
+        ser = SerializerMethodFieldSingle(instance=obj)
+        assert isinstance(ser.data, dict), 'Expected type: `dict`. Reality: `{}`.'.format(type(ser.data))
+        assert len(ser.data) == 1, 'Expected single value in data. Reality: `{}`.'.format(ser.data)
+        assert ser.data['test'] == 'test', 'Expected value `test`. Reality: `{}`.'.format(ser.data['test'])
+
+        ser = SerializerMethodFieldSingle(instance=obj)
+        setattr(ser, 'test_test', lambda *args: None)
+        assert isinstance(ser.data, dict), 'Expected type: `dict`. Reality: `{}`.'.format(type(ser.data))
+        assert len(ser.data) == 1, 'Expected single value in data. Reality: `{}`.'.format(ser.data)
+        assert ser.data['test'] is None, 'Expected value `None`. Reality: `{}`.'.format(ser.data['test'])
+
+        ser = SerializerMethodFieldSingle(instance=obj)
+        setattr(ser, 'test_test', lambda *args: 123)
+        assert isinstance(ser.data, dict), 'Expected type: `dict`. Reality: `{}`.'.format(type(ser.data))
+        assert len(ser.data) == 1, 'Expected single value in data. Reality: `{}`.'.format(ser.data)
+        assert ser.data['test'] == 123, 'Expected value `123`. Reality: `{}`.'.format(ser.data['test'])
+
+        ser = SerializerMethodFieldSingle(instance=obj)
+        setattr(ser, 'get_test', lambda *args: 123)
+        assert isinstance(ser.data, dict), 'Expected type: `dict`. Reality: `{}`.'.format(type(ser.data))
+        assert len(ser.data) == 1, 'Expected single value in data. Reality: `{}`.'.format(ser.data)
+        assert ser.data['test'] == 'test', 'Expected value `test`. Reality: `{}`.'.format(ser.data['test'])

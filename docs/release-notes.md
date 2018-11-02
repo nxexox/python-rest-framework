@@ -8,6 +8,13 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.1.4
+
+**Date**: [25th October 2018].
+
+* Add [`JsonField`][JsonField], [`DictField`][DictField]
+* Add [`SerializerMethodField`][SerializerMethodField]
+
 ### 0.1.3
 
 **Date**: [17th October 2018].
@@ -28,3 +35,6 @@ Major version numbers (x.0.0) are reserved for substantial project milestones.
 [TimeField]: api-guid/fields.md#-timefield
 [DateTimeField]: api-guid/fields.md#-datetimefield
 [ListField]: api-guid/fields.md#-listfield
+[JsonField]: api-guid/fields.md#-jsonfield
+[DictField]: api-guid/fields.md#-dictfield
+[SerializerMethodField]: api-guid/fields.md#-serializermethodfield

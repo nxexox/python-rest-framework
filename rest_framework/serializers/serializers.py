@@ -9,6 +9,7 @@ from collections import OrderedDict
 import six
 
 from rest_framework.serializers.fields import Field
+from rest_framework.serializers.helpers import BindingDict
 from rest_framework.exceptions import SkipError
 from rest_framework.serializers.exceptions import ValidationError
 from rest_framework.utils import html
@@ -34,18 +35,17 @@ class BaseSerializerMeta(type):
         :param dict attrs: Attribute dict.
 
         """
-        _dict_fields = OrderedDict()  # Make storage of fields.
+        _declared_fields = OrderedDict()  # Make storage of fields.
 
         # Fill storage of fields.
         for attr_name, attr_obj in attrs.items():
             # TODO: Add default attribute check.
             # Fill storage.
             if isinstance(attr_obj, Field):
-                _dict_fields[attr_name] = attr_obj
-                attr_obj.bind(attr_name, cls)
+                _declared_fields[attr_name] = attr_obj
 
-        # Forward storage of fields to the class itself..
-        attrs.update(dict(_dict_fields=_dict_fields))
+        # Forward storage of fields to the class itself.
+        attrs.update(dict(_declared_fields=_declared_fields))
 
         return super().__new__(cls, name, bases, attrs)
 
@@ -172,13 +172,36 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
     @property
     def fields(self):
         """
-        Serializer fields.
+        Serializer fields. Create _fields attribute BindingDict type.
+        Call bind method on all fields.
+        Return deep copy dict.
 
         :return: Dict serializer fields.
+        :rtype: rest_framework.serializers.helpers.BindingDict
+
+        """
+        if not hasattr(self, '_fields'):
+            self._fields = BindingDict(self)
+            # TODO: FIXME Architecture. many call bind methods. On create serializer object
+            # Call bind method. In metaclass not access to create class.
+            for field_name, field_obj in self.get_fields().items():
+                self._fields[field_name] = field_obj
+
+        return self._fields
+
+    def get_fields(self):
+        """
+        Returns a dictionary of {field_name: field_instance}.
+        Every new serializer is created with a clone of the field instances.
+        This allows users to dynamically modify the fields on a serializer
+        instance without affecting every other serializer instance.
+
+        :return: Deep copy declare fields.
         :rtype: dict
 
         """
-        return self._dict_fields
+        
+        return copy.deepcopy(self._declared_fields)
 
     @property
     def data(self):
@@ -226,7 +249,7 @@ class Serializer(BaseSerializer):
         :raise ValidationError: If not valid data.
 
         """
-        return self._field_validation(self._dict_fields, data)
+        return self._field_validation(self.fields, data)
 
     def to_representation(self, instance):
         """
@@ -240,7 +263,7 @@ class Serializer(BaseSerializer):
         """
         res = OrderedDict()  # Attributes storage.
 
-        for field_name, field_val in self._dict_fields.items():
+        for field_name, field_val in self.fields.items():
             # We try to get the attribute.
             try:
                 attribute = field_val.get_attribute(instance)
@@ -326,7 +349,7 @@ class Serializer(BaseSerializer):
 
         # Validated all fields.
         try:
-            self._validated_data = self._field_validation(self._dict_fields, self.initial_data)
+            self._validated_data = self._field_validation(self.fields, self.initial_data)
         except ValidationError as e:
             self._errors = e.detail
 

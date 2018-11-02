@@ -5,6 +5,7 @@ Fields for serializers.
 import re
 import collections
 import datetime
+import json
 
 import six
 
@@ -973,3 +974,220 @@ class DateTimeField(Field):
             return value
 
         return value.strftime(output_format)
+
+
+class JsonField(Field):
+    """
+    Field for custom JSON data.
+
+    """
+    default_error_messages = {
+        'invalid': 'Value must be valid JSON.'
+    }
+
+    def to_internal_value(self, data):
+        """
+        Data transformation to python JSON object.
+
+        :param str data: Data for transformation.
+
+        :return: Transformed data.
+        :rtype: Union[dict, list]
+
+        :raise ValidationError: If not valid data.
+
+        """
+        if isinstance(data, (dict, list)):
+            return data
+
+        try:
+            return json.loads(data, encoding='utf8')
+        except (json.decoder.JSONDecodeError, TypeError, ValueError):
+            self.fail('invalid')
+
+    def to_representation(self, value):
+        """
+        Transformation an object to a valid JSON object.
+
+        :param Union[dict, list] value: The object to transformation.
+
+        :return: Transformed data.
+        :rtype: str
+
+        """
+        try:
+            return json.dumps(value)
+        except (TypeError, ValueError):
+            self.fail('invalid')
+
+
+class DictField(JsonField):
+    """
+    Field for custom DICT data.
+
+    """
+    child = _UnvalidatedField()
+    default_error_messages = {
+        'not_a_dict': 'Expected a dictionary of items but got type "{input_type}".'
+    }
+
+    def __init__(self, child=None, *args, **kwargs):
+        """
+        Field for custom DICT data.
+
+        :param rest_framework.serializers.Field child: Field describing the type of dict elements.
+
+        """
+        super().__init__(*args, **kwargs)
+
+        self.child = child or self.child
+
+        # Check field `child`.
+        if all((not isinstance(child, Field), not isinstance(self.child, Field))):
+            raise ValueError('`child=` or `self.child` must be Field.')
+
+        self.child.bind(field_name='', parent=self)  # Bind child field.
+
+    def to_internal_value(self, data):
+        """
+        Data transformation to python JSON object.
+
+        :param str data: Data for transformation.
+
+        :return: Transformed data.
+        :rtype: dict
+
+        :raise ValidationError: If not valid data.
+
+        """
+        if html.is_html_input(data):
+            data = html.parse_html_dict(data)
+
+        if not isinstance(data, dict):
+            self.fail('not_a_dict', input_type=type(data).__name__)
+
+        return {
+            six.text_type(key): self.child.run_validation(value)
+            for key, value in data.items()
+        }
+
+    def to_representation(self, value):
+        """
+        Transformation an object to a valid JSON object.
+
+        :param dict value: The object to transformation.
+
+        :return: Transformed data.
+        :rtype: str
+
+        """
+        return {
+            six.text_type(key): self.child.to_representation(val) if val is not None else None
+            for key, val in value.items()
+        }
+
+
+class SerializerMethodField(Field):
+    """
+    A field that get its representation from calling a method on the
+    parent serializer class. The method called will be of the form
+    "get_{field_name}" and "pop_{field_name}", and should take a single argument, which is the
+    object being serialized.
+
+    For example:
+
+    class ExampleSerializer(self):
+        extra_info = SerializerMethodField()
+
+        def get_extra_info(self, obj):
+            return ...  # Calculate some data to return.
+
+        def pop_extra_info(self, data):
+            return ...  # Serializing some data to return.
+
+    """
+    default_method_name_get_template = 'get_{field_name}'
+    default_method_name_pop_template = 'pop_{field_name}'
+
+    def __init__(self, method_name_get=None, method_name_pop=None,  *args, **kwargs):
+        """
+        A field that get its representation from calling a method on the
+        parent serializer class. The method called will be of the form
+        "get_{field_name}" and "pop_{field_name}", and should take a single argument, which is the
+        object being serialized.
+
+        :param str method_name_get: Method name for get data from python object.
+        :param str method_name_pop: Method name for get data from request body.
+
+        """
+        kwargs['required'] = False
+        super(SerializerMethodField, self).__init__(*args, **kwargs)
+
+        self.method_name_get = method_name_get
+        self.method_name_pop = method_name_pop
+
+    def bind(self, field_name, parent):
+        """
+        Initialization field name and parent instance .
+        Called when a field is added to an instance of the parent.
+
+        In order to enforce a consistent style, we error if a redundant
+        'method_name_[get, pop]' argument has been used. For example:
+        my_field = serializer.SerializerMethodField(method_name_get='get_my_field')
+
+        :param str field_name: Field name.
+        :param Serializer parent: Serializer class on which the field is located.
+
+        """
+        default_method_name_get = self.default_method_name_get_template.format(field_name=field_name)
+        default_method_name_pop = self.default_method_name_pop_template.format(field_name=field_name)
+
+        assert self.method_name_get != default_method_name_get, (
+            "It is redundant to specify `%s` on SerializerMethodField '%s' in "
+            "serializer '%s', because it is the same as the default method get name. "
+            "Remove the `method_name_get` argument." %
+            (self.method_name_get, field_name, parent.__class__.__name__)
+        )
+        assert self.method_name_pop != default_method_name_pop, (
+                "It is redundant to specify `%s` on SerializerMethodField '%s' in "
+                "serializer '%s', because it is the same as the default method pop name. "
+                "Remove the `method_name_pop` argument." %
+                (self.method_name_pop, field_name, parent.__class__.__name__)
+        )
+
+        # The method name should default to `get_{field_name}`.
+        if self.method_name_get is None:
+            self.method_name_get = default_method_name_get
+        # The method name should default to `pop_{field_name}`.
+        if self.method_name_pop is None:
+            self.method_name_pop = default_method_name_pop
+
+        super(SerializerMethodField, self).bind(field_name, parent)
+
+    def to_representation(self, value):
+        """
+        Transformation an object to a custom user object.
+
+        :param object value: The object to transformation.
+
+        :return: Transformed data.
+        :rtype: object
+
+        """
+        method = getattr(self.parent, self.method_name_get)
+        return method(value)
+
+    def to_internal_value(self, data):
+        """
+        Data transformation to python custom user object.
+
+        :param str data: Data for transformation.
+
+        :return: Transformed data.
+        :rtype: object
+
+        :raise ValidationError: If not valid data.
+
+        """
+        method = getattr(self.parent, self.method_name_pop)
+        return method(data)

@@ -92,32 +92,6 @@ A floating point representation.
 
 ---
 
-## - ListField
-
-A field class that validates a list of objects.
-
-**Signature**: `ListField(child=<A_FIELD_INSTANCE>, min_length=None, max_length=None, allow_empty=False)`
-
-- `child` - A field instance that should be used for validating the objects in the list. If this argument is not provided then objects in the list will not be validated.
-- `min_length` - Validates that the list contains no fewer than this number of elements.
-- `max_length` - Validates that the list contains no more than this number of elements.
-- `allow_blank` - If set to` True`, an empty array should be considered valid. If set to `False`, an empty array is considered invalid and causes a validation error. The default is `False`.
-
-For example, to validate a list of integers you might use something like the following:
-
-    scores = serializers.ListField(
-       child=serializers.IntegerField(min_value=0, max_value=100)
-    )
-
-The `ListField` class also supports a declarative style that allows you to write reusable list field classes.
-
-    class StringListField(serializers.ListField):
-        child = serializers.CharField()
-
-We can now reuse our custom `StringListField` class throughout our application, without having to provide a `child` argument to it.
-
----
-
 # Date and time fields
 
 ## - DateTimeField
@@ -161,13 +135,103 @@ A time representation.
 
 Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string `'iso-8601'`, which indicates that [ISO 8601][iso8601] style times should be used. (eg `'12:34:56'`)
 
-## Custom fields
+---
+
+# Composite fields
+
+## - ListField
+
+A field class that validates a list of objects.
+
+**Signature**: `ListField(child=<A_FIELD_INSTANCE>, min_length=None, max_length=None, allow_empty=False)`
+
+- `child` - A field instance that should be used for validating the objects in the list. If this argument is not provided then objects in the list will not be validated.
+- `min_length` - Validates that the list contains no fewer than this number of elements.
+- `max_length` - Validates that the list contains no more than this number of elements.
+- `allow_blank` - If set to` True`, an empty array should be considered valid. If set to `False`, an empty array is considered invalid and causes a validation error. The default is `False`.
+
+For example, to validate a list of integers you might use something like the following:
+
+    scores = serializers.ListField(
+       child=serializers.IntegerField(min_value=0, max_value=100)
+    )
+
+The `ListField` class also supports a declarative style that allows you to write reusable list field classes.
+
+    class StringListField(serializers.ListField):
+        child = serializers.CharField()
+
+We can now reuse our custom `StringListField` class throughout our application, without having to provide a `child` argument to it.
+
+## - JSONField
+
+A field class that validates that the incoming data structure consists of valid JSON primitives. In its alternate binary mode, it will represent and validate JSON-encoded binary strings.
+
+**Signature**: `JSONField()`
+
+## - DictField
+
+A field class that validates a dictionary of objects. The keys in `DictField` are always assumed to be string values.
+
+**Signature**: `DictField(child=<A_FIELD_INSTANCE>)`
+
+- `child` - A field instance that should be used for validating the values in the dictionary. If this argument is not provided then values in the mapping will not be validated.
+
+For example, to create a field that validates a mapping of strings to strings, you would write something like this:
+
+    document = DictField(child=CharField())
+
+You can also use the declarative style, as with `ListField`. For example:
+
+    class DocumentField(DictField):
+        child = CharField()
+
+---
+
+# Miscellaneous fields
+
+## - SerializerMethodField
+
+It gets its value by calling a method on the serializer class it is attached to. It can be used to add any sort of data to the serialized representation of your object.
+
+**Signature**: `SerializerMethodField(method_name_get=None, method_name_pop=None)`
+
+- `method_name_get` - The name of the method on the calling serializer during object scrapping. If not included this defaults to `get_<field_name>`.
+- `method_name_pop` - The name of the method on the calling serializer during validation data. If not included this defaults to `pop_<field_name>`.
+
+The serializer method referred to by the `method_name_get` argument should accept a single argument (in addition to `self`), which is the object being serialized. It should return whatever you want to be included in the serialized representation of the object. For example:
+
+    from datetime.datetime import now
+    from rest_framework import serializers
+
+    class UserSerializer(serializers.Serializer):
+        days_since_joined = serializers.SerializerMethodField()
+
+        def get_days_since_joined(self, obj):
+            return (now() - obj.date_joined).days
+
+The serializer method referenced by the `method_name_pop` argument must take one argument (in addition to` self`), which is the value to process and validate. It must return whatever you want to include in the validated view of the data. For example:
+
+    from datetime.datetime import now
+    from rest_framework import serializers
+
+    class UserSerializer(serializers.Serializer):
+        rgb = serializers.SerializerMethodField()
+
+        def pop_rgb(self, data):
+            return data.split(';')[1:3]
+
+---
+
+# Custom fields
 
 If you want to create a custom field, you'll need to subclass `Field` and then override either one or both of the `.to_representation()` and `.to_internal_value()` methods.  These two methods are used to convert between the initial datatype, and a primitive, serializable datatype. Primitive datatypes will typically be any of a number, string, boolean, `date`/`time`/`datetime` or `None`. They may also be any list or dictionary like object that only contains other primitive objects. Other types might be supported, depending on the renderer that you are using.
 
 The `.to_representation()` method is called to convert the initial datatype into a primitive, serializable datatype.
 
 The `to_internal_value()` method is called to restore a primitive datatype into its internal python representation. This method should raise a `serializers.ValidationError` if the data is invalid.
+
+---
 
 ## Examples
 

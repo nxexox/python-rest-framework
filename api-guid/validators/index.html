@@ -156,6 +156,8 @@
                 
             <li class="second-level"><a href="#maxvaluevalidator">MaxValueValidator</a></li>
                 
+            <li class="second-level"><a href="#regexvalidator">RegexValidator</a></li>
+                
         <li class="first-level "><a href="#writing-custom-validators">Writing custom validators</a></li>
             <li class="second-level"><a href="#function-based">Function based</a></li>
                 
@@ -187,6 +189,15 @@
 <ul>
 <li><code>message</code> The short message should fall out on validation error.</li>
 </ul>
+<p><strong>Example</strong>:</p>
+<pre><code>validator = RequiredValidator()
+validator('Not empty string')
+
+try:
+    validator(None)
+except ValidationError:
+    pass
+</code></pre>
 <h2 id="minlengthvalidator"><a class="toclink" href="#minlengthvalidator">MinLengthValidator</a></h2>
 <p>This validator checks for greater than or equal to the minimum length of the object being iterated.</p>
 <p><strong>Signature</strong>: <code>MinLengthValidator(min_length, message=None)</code></p>
@@ -194,6 +205,15 @@
 <li><code>min_length</code> Minimal length for value.</li>
 <li><code>message</code> The short message should fall out on validation error.</li>
 </ul>
+<p><strong>Example</strong>:</p>
+<pre><code>validator = MinLengthValidator(10)
+validator(list(range(15))
+
+try:
+    validator(list(range(9)))
+except ValidationError:
+    pass
+</code></pre>
 <h2 id="maxlengthvalidator"><a class="toclink" href="#maxlengthvalidator">MaxLengthValidator</a></h2>
 <p>This validator checks for less than or equal to the maximum length of the object to be iterated.</p>
 <p><strong>Signature</strong>: <code>MaxLengthValidator(max_length, message=None)</code></p>
@@ -201,6 +221,15 @@
 <li><code>max_length</code> Maximum length for value.</li>
 <li><code>message</code> The short message should fall out on validation error.</li>
 </ul>
+<p><strong>Example</strong>:</p>
+<pre><code>validator = MaxLengthValidator(10)
+validator(list(range(9))
+
+try:
+    validator(list(range(15)))
+except ValidationError:
+    pass
+</code></pre>
 <h2 id="minvaluevalidator"><a class="toclink" href="#minvaluevalidator">MinValueValidator</a></h2>
 <p>This validator checks for greater than or equal to the minimum value.</p>
 <p><strong>Signature</strong>: <code>MinValueValidator(min_value, message=None)</code></p>
@@ -208,6 +237,15 @@
 <li><code>min_value</code> Minimal valid value.</li>
 <li><code>message</code> The short message should fall out on validation error.</li>
 </ul>
+<p><strong>Example</strong>:</p>
+<pre><code>validator = MinValueValidator(10)
+validator(15)
+
+try:
+    validator(9)
+except ValidationError:
+    pass
+</code></pre>
 <h2 id="maxvaluevalidator"><a class="toclink" href="#maxvaluevalidator">MaxValueValidator</a></h2>
 <p>This validator checks for less than or equal to the maximum value.</p>
 <p><strong>Signature</strong>: <code>MaxValueValidator(max_value, message=None)</code></p>
@@ -215,6 +253,36 @@
 <li><code>max_value</code> Maximal valid value.</li>
 <li><code>message</code> The short message should fall out on validation error.</li>
 </ul>
+<p><strong>Example</strong>:</p>
+<pre><code>validator = MaxValueValidator(10)
+validator(9)
+
+try:
+    validator(15)
+except ValidationError:
+    pass
+</code></pre>
+<h2 id="regexvalidator"><a class="toclink" href="#regexvalidator">RegexValidator</a></h2>
+<p>This validator checks the string against a regular expression.</p>
+<p><strong>Signature</strong>: <code>RegexValidator(regex, inverse_match=None, flags=None, message=None)</code></p>
+<ul>
+<li><code>regex</code> Regex raw/</li>
+<li><code>inverse_match</code> - A flag indicating whether to invert the response? Default: <code>False</code>.</li>
+<li><code>flags</code> - Flags for compiling regular expression. Default <code>0</code>.</li>
+<li><code>message</code> The short message should fall out on validation error.</li>
+</ul>
+<p><strong>Example</strong>:</p>
+<pre><code>validator = RegexValidator(r'\d+')
+validator('123')
+
+try:
+    validator('example')
+except ValidationError:
+    pass
+
+validator = RegexValidator(r'\d+', True)
+validator('test')
+</code></pre>
 <hr />
 <h1 id="writing-custom-validators"><a class="toclink" href="#writing-custom-validators">Writing custom validators</a></h1>
 <p>You can write your own custom validators.</p>
@@ -226,7 +294,7 @@
 </code></pre>
 <h4 id="field-level-validation"><a class="toclink" href="#field-level-validation">Field-level validation</a></h4>
 <p>You can specify custom field-level validation by adding <code>.validate_&lt;field_name&gt;</code> methods
-to your <code>Serializer</code> subclass.</p>
+to your <code>Serializer</code> subclass. Read more <a href="../serializers/#field-level-validation"><code>Field Level Validation</code></a></p>
 <h2 id="class-based"><a class="toclink" href="#class-based">Class-based</a></h2>
 <p>To write a class-based validator, use the <code>__call__</code> method. Class-based validators are useful as they allow you to parameterize and reuse behavior.</p>
 <pre><code>class MultipleOf(object):

@@ -71,3 +71,27 @@ class SerializerMethodFieldSingle(Serializer):
 
     def test_test(self, obj):
         return obj
+
+
+class InheritSerRoot(Serializer):
+    """
+    Check inherit. Root serializer.
+
+    """
+    root = IntegerField(required=True)
+
+
+class InheritFirstLevelChild(InheritSerRoot):
+    """
+    Check inherit. First level inherit serializer.
+
+    """
+    first_level_child = IntegerField(required=True)
+
+
+class InheritSecondLevelChild(InheritFirstLevelChild):
+    """
+    Check inherit. Second level inherit serializer.
+
+    """
+    second_level_child = IntegerField(required=True)

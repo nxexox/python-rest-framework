@@ -21,6 +21,54 @@ LIST_SERIALIZER_KWARGS = (
 )  # The argument list for the ListSerializer to control the creation of many=True.
 
 
+class MroFieldsSearch(object):
+    """
+    Class for search MRO fields on serializer.
+
+    """
+    def __init__(self, cls):
+        self.cls = cls
+
+    def get_fields(self, cls=None):
+        """
+        Search and return fields on order MRO.
+
+        :param rest_framework.serializers.Serializer cls: Serializer class for search fields.
+
+        :return: Dict fields for class on order MRO.
+        :rtype: collections.OrderedDict
+
+        """
+        _declared_fields = OrderedDict()
+
+        for _cls in reversed((cls or self.cls).__mro__):
+            _current_fields = self.get_fields_from_cls(_cls)
+            # print(_cls, _current_fields)
+            _declared_fields.update(_current_fields)
+
+        return _declared_fields
+
+    def get_fields_from_cls(self, cls):
+        """
+        Search fields for one class.
+
+        :param rest_framework.serializers.Serializer cls: Class for search fields.
+
+        :return: Dict fields for class.
+        :rtype: collections.OrderedDict
+
+        """
+        _declared_fields = OrderedDict()
+
+        # Fill storage of fields.
+        for name, obj in six.iteritems(cls.__dict__):
+            if isinstance(obj, Field):
+                _declared_fields[name] = obj
+
+        # Forward storage of fields to the class itself.
+        return _declared_fields
+
+
 class BaseSerializerMeta(type):
     """
     Metaclass to create serializers.
@@ -35,19 +83,13 @@ class BaseSerializerMeta(type):
         :param dict attrs: Attribute dict.
 
         """
-        _declared_fields = OrderedDict()  # Make storage of fields.
+        _cls = super().__new__(cls, name, bases, attrs)  # Create serializer class.
 
-        # Fill storage of fields.
-        for attr_name, attr_obj in attrs.items():
-            # TODO: Add default attribute check.
-            # Fill storage.
-            if isinstance(attr_obj, Field):
-                _declared_fields[attr_name] = attr_obj
+        # Get serializer fields.
+        _declared_fields = MroFieldsSearch(_cls).get_fields()
+        setattr(_cls, '_declared_fields', _declared_fields)  # Ser fields information on serializer.
 
-        # Forward storage of fields to the class itself.
-        attrs.update(dict(_declared_fields=_declared_fields))
-
-        return super().__new__(cls, name, bases, attrs)
+        return _cls
 
 
 class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
@@ -92,7 +134,7 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
         # Passing arguments to the ListSerializer.
         list_kwargs = {'child': child_serializer}
         list_kwargs.update({
-            key: value for key, value in kwargs.items()
+            key: value for key, value in six.iteritems(kwargs)
             if key in LIST_SERIALIZER_KWARGS
         })
 
@@ -184,7 +226,7 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
             self._fields = BindingDict(self)
             # TODO: FIXME Architecture. many call bind methods. On create serializer object
             # Call bind method. In metaclass not access to create class.
-            for field_name, field_obj in self.get_fields().items():
+            for field_name, field_obj in six.iteritems(self.get_fields()):
                 self._fields[field_name] = field_obj
 
         return self._fields
@@ -263,7 +305,7 @@ class Serializer(BaseSerializer):
         """
         res = OrderedDict()  # Attributes storage.
 
-        for field_name, field_val in self.fields.items():
+        for field_name, field_val in six.iteritems(self.fields):
             # We try to get the attribute.
             try:
                 attribute = field_val.get_attribute(instance)
@@ -307,7 +349,7 @@ class Serializer(BaseSerializer):
         """
         validated_data, errors = OrderedDict(), OrderedDict()
         # Running through the fields.
-        for field_name, field_obj in fields_dict.items():
+        for field_name, field_obj in six.iteritems(fields_dict):
             try:
                 # Transform to python type and validate each field.
                 validated_val = field_obj.run_validation(data.get(field_name, None))

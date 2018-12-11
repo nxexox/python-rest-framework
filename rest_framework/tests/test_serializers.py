@@ -7,6 +7,7 @@ Testing serializers.
 import collections
 from unittest import TestCase
 
+import six
 
 from rest_framework.serializers.fields import (
     CharField, BooleanField, IntegerField, FloatField, ListField
@@ -16,7 +17,8 @@ from rest_framework.exceptions import SkipError
 from rest_framework.serializers.exceptions import ValidationError
 
 from rest_framework.tests.serializers_for_tests import (
-    SerializerPrimitiveField, SerializerMixinSingle, SerializerMixinMany, SerializerMixinRequired
+    SerializerPrimitiveField, SerializerMixinSingle, SerializerMixinMany, SerializerMixinRequired,
+    InheritSecondLevelChild
 )
 
 
@@ -179,7 +181,7 @@ class BaseSerializerTestClass(TestCase):
 
         """
         field = self.serializer_class(**self.create_params())
-        for method_name, method_params in self.abstract_methods.items():
+        for method_name, method_params in six.iteritems(self.abstract_methods):
             try:
                 # Works for both methods and abstract properties.
                 getattr(field, method_name, lambda: None)(**method_params)
@@ -310,7 +312,7 @@ class SerializerUserTestCase(TestCase):
         """
         return type('object', (object,), {
             key: self.__create_object(val) if isinstance(val, collections.Mapping) else val
-            for key, val in data.items()
+            for key, val in six.iteritems(data)
         })
 
     def __create_params(self, fullness=None):
@@ -393,7 +395,7 @@ class SerializerUserTestCase(TestCase):
             '`.validated_data` must be dict. Reality: {}.'.format(ser.validated_data)
         assert len(ser.validated_data) > 0, '`.validated_data` must contain data.'
         # We check that all data is returned correctly.
-        for k, v in ser.validated_data.items():
+        for k, v in six.iteritems(ser.validated_data):
             if k in data:
                 assert v == data[k]
                 del data[k]
@@ -413,7 +415,7 @@ class SerializerUserTestCase(TestCase):
         data = self.__create_params(fullness='middle')
         ser = self.serializer_class(instance=self.__create_object(data))
         assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
-        for k, v in ser.data.items():
+        for k, v in six.iteritems(ser.data):
             if k in data:
                 assert v == data[k], 'Object attribute `{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
                 del data[k]
@@ -423,7 +425,7 @@ class SerializerUserTestCase(TestCase):
         data = self.__create_params(fullness='full')
         ser = self.serializer_class(instance=self.__create_object(data))
         assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
-        for k, v in ser.data.items():
+        for k, v in six.iteritems(ser.data):
             if k in data:
                 assert v == data[k], 'Object attribute `{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
                 del data[k]
@@ -443,7 +445,7 @@ class SerializerUserTestCase(TestCase):
         data = self.__create_params(fullness='middle')
         ser = self.serializer_class(instance=data)
         assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
-        for k, v in ser.data.items():
+        for k, v in six.iteritems(ser.data):
             if k in data:
                 assert v == data[k], 'Object attribute`{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
                 del data[k]
@@ -453,7 +455,7 @@ class SerializerUserTestCase(TestCase):
         data = self.__create_params(fullness='full')
         ser = self.serializer_class(instance=data)
         assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
-        for k, v in ser.data.items():
+        for k, v in six.iteritems(ser.data):
             if k in data:
                 assert v == data[k], 'Object attribute `{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
                 del data[k]
@@ -471,7 +473,7 @@ class SerializerSingleMixinTestCase(SerializerUserTestCase):
         """
         Create data for serializer.
 
-        :param str fullness: Type of data creation: `empty`,` middle`, `full`,` validation_error`.
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`, `validation_error`.
 
         :return: Data dict.
         :rtype: dict
@@ -501,7 +503,7 @@ class SerializerManyMixinTestCase(SerializerUserTestCase):
         """
         Create data for serializer.
 
-        :param str fullness: Type of data creation: `empty`,` middle`, `full`,` validation_error`.
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`, `validation_error`.
 
         :return: Data dict.
         :rtype: dict
@@ -531,7 +533,7 @@ class SerializerRequiredMixinTestCase(SerializerUserTestCase):
         """
         Create data for serializer.
 
-        :param str fullness: Type of data creation: `empty`,` middle`, `full`,` validation_error`.
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`, `validation_error`.
 
         :return: Data dict.
         :rtype: dict
@@ -548,3 +550,30 @@ class SerializerRequiredMixinTestCase(SerializerUserTestCase):
                 'char_f': 'rty',
                 'ser_f': {'char_f': 'qwe', 'integer_f': 123, 'bool_f': True, 'float_f': 1.0, 'list_f': ['123', '123']}
             }
+
+
+class SerializerInheritTestCase(SerializerUserTestCase):
+    """
+    Testing the serializer with many levels inherit.
+
+    """
+    serializer_class = InheritSecondLevelChild
+
+    def create_params(self, fullness):
+        """
+        Create data for serializer.
+
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`, `validation_error`.
+
+        :return: Data dict.
+        :rtype: dict
+
+        """
+        if fullness == 'empty':
+            return {}
+        elif fullness == 'middle':
+            return {'root': 100, 'first_level_child': 50}
+        elif fullness == 'validation_error':
+            return {}
+        else:
+            return {'root': 100, 'first_level_child': 50, 'second_level_child': 100}

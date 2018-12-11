@@ -201,6 +201,29 @@ class Field(object):
             return self.default()
         return self.default
 
+    def _get_field_name(self):
+        """
+        Get field name for search attribute on object.
+
+        :return: Field name for search attribute.
+        :rtype: str
+
+        """
+        return self.field_name
+
+    def _get_attribute(self, instance):
+        """
+        Searches for and returns an attribute on an object..
+
+        :return: Object attribute value.
+        :rtype: object
+
+        :raise SkipError: If you could not find the field and the field is required.
+        :raise Exception: If an error occurred during the search.
+
+        """
+        return get_attribute(instance, self._get_field_name())
+
     def get_attribute(self, instance):
         """
         Searches for and returns an attribute on an object..
@@ -214,7 +237,7 @@ class Field(object):
         """
         try:
             # Trying to get an attribute.
-            return get_attribute(instance, self.field_name)
+            return self._get_attribute(instance)
         except (KeyError, AttributeError) as e:
             # If there is a default value, then it.
             if self.default is not None:
@@ -716,7 +739,7 @@ class ListField(Field):
         :rtype: list
 
         """
-        return [self.child.to_representation(item) if item is not None else None for item in value]
+        return [self.child.to_representation(item) if item is not None else None for item in (value or [])]
 
 
 class DateField(Field):
@@ -1073,7 +1096,7 @@ class DictField(JsonField):
 
         return {
             six.text_type(key): self.child.run_validation(value)
-            for key, value in data.items()
+            for key, value in six.iteritems(data)
         }
 
     def to_representation(self, value):
@@ -1088,7 +1111,7 @@ class DictField(JsonField):
         """
         return {
             six.text_type(key): self.child.to_representation(val) if val is not None else None
-            for key, val in value.items()
+            for key, val in six.iteritems(value)
         }
 
 
@@ -1168,6 +1191,19 @@ class SerializerMethodField(Field):
             self.method_name_pop = default_method_name_pop
 
         super(SerializerMethodField, self).bind(field_name, parent)
+
+    def _get_attribute(self, instance):
+        """
+        Searches for and returns an attribute on an object..
+
+        :return: Object attribute value.
+        :rtype: object
+
+        :raise SkipError: If you could not find the field and the field is required.
+        :raise Exception: If an error occurred during the search.
+
+        """
+        return self.to_internal_value(instance)
 
     def to_representation(self, value):
         """

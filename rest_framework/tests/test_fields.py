@@ -83,7 +83,7 @@ class BaseFieldTestCase(TestCase):
         copy_fields.update(additional_fields)
         msg = 'Invalid value in %s for field: {}. Expected: {}, Reality: {}.' % field.__class__.__name__
 
-        for key, val in copy_fields.items():
+        for key, val in six.iteritems(copy_fields):
             field_val = getattr(field, key, self.Empty())
             # We try to check in three ways, depending on the type.
             if isinstance(val, (bool, type(None))):  # First single types.
@@ -285,7 +285,7 @@ class BaseFieldTestCase(TestCase):
 
         """
         field = self.field_class(**self.create_params())
-        for method_name, method_params in self.abstract_methods.items():
+        for method_name, method_params in six.iteritems(self.abstract_methods):
             try:
                 getattr(field, method_name, lambda: None)(**method_params)
                 self.fail('Method `.{}` must throw as exception `NotImplementedError`.'.format(method_name))
@@ -683,7 +683,7 @@ class TestListField(BaseFieldTestCase):
         {'data': {'value': [123, 123, 123]}, 'return': ['123', '123', '123']},
         {'data': {'value': [True, True, True]}, 'return': ['True', 'True', 'True']},
         {'data': {'value': ['123', 123, True, None]}, 'return': ['123', '123', 'True', None]},
-        {'data': {'value': None}, 'exceptions': (TypeError,)},
+        {'data': {'value': None}, 'return': []},
     )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
         {'data': {'data': ''}, 'exceptions': (ValidationError,)},
@@ -980,7 +980,7 @@ class TestSerializerMethodField(TestCase):
         ser = SerializerMethodFieldDefault(instance=obj)
         assert isinstance(ser.data, dict), 'Expected type: `dict`. Reality: `{}`.'.format(type(ser.data))
         assert len(ser.data) == 1, 'Expected single value in data. Reality: `{}`.'.format(ser.data)
-        assert ser.data['test'] == 'test', 'Expected value `test`. Reality: `{}`.'.format(ser.data['test'])
+        assert ser.data['test'] == obj, 'Expected value `test`. Reality: `{}`.'.format(ser.data['test'])
 
         ser = SerializerMethodFieldDefault(instance=obj)
         setattr(ser, 'get_test', lambda *args: None)
@@ -1028,7 +1028,7 @@ class TestSerializerMethodField(TestCase):
         ser = SerializerMethodFieldSingle(instance=obj)
         assert isinstance(ser.data, dict), 'Expected type: `dict`. Reality: `{}`.'.format(type(ser.data))
         assert len(ser.data) == 1, 'Expected single value in data. Reality: `{}`.'.format(ser.data)
-        assert ser.data['test'] == 'test', 'Expected value `test`. Reality: `{}`.'.format(ser.data['test'])
+        assert ser.data['test'] == obj, 'Expected value `test`. Reality: `{}`.'.format(ser.data['test'])
 
         ser = SerializerMethodFieldSingle(instance=obj)
         setattr(ser, 'test_test', lambda *args: None)
@@ -1046,4 +1046,4 @@ class TestSerializerMethodField(TestCase):
         setattr(ser, 'get_test', lambda *args: 123)
         assert isinstance(ser.data, dict), 'Expected type: `dict`. Reality: `{}`.'.format(type(ser.data))
         assert len(ser.data) == 1, 'Expected single value in data. Reality: `{}`.'.format(ser.data)
-        assert ser.data['test'] == 'test', 'Expected value `test`. Reality: `{}`.'.format(ser.data['test'])
+        assert ser.data['test'] == obj, 'Expected value `test`. Reality: `{}`.'.format(ser.data['test'])

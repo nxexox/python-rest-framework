@@ -28,6 +28,16 @@ This is a validator to check for required fields. Checks value using None.
 
 - `message` The short message should fall out on validation error.
 
+**Example**:
+
+    validator = RequiredValidator()
+    validator('Not empty string')
+
+    try:
+        validator(None)
+    except ValidationError:
+        pass
+
 ## MinLengthValidator
 
 This validator checks for greater than or equal to the minimum length of the object being iterated.
@@ -36,6 +46,16 @@ This validator checks for greater than or equal to the minimum length of the obj
 
 - `min_length` Minimal length for value.
 - `message` The short message should fall out on validation error.
+
+**Example**:
+
+    validator = MinLengthValidator(10)
+    validator(list(range(15))
+
+    try:
+        validator(list(range(9)))
+    except ValidationError:
+        pass
 
 ## MaxLengthValidator
 
@@ -46,6 +66,16 @@ This validator checks for less than or equal to the maximum length of the object
 - `max_length` Maximum length for value.
 - `message` The short message should fall out on validation error.
 
+**Example**:
+
+    validator = MaxLengthValidator(10)
+    validator(list(range(9))
+
+    try:
+        validator(list(range(15)))
+    except ValidationError:
+        pass
+
 ## MinValueValidator
 
 This validator checks for greater than or equal to the minimum value.
@@ -55,6 +85,16 @@ This validator checks for greater than or equal to the minimum value.
 - `min_value` Minimal valid value.
 - `message` The short message should fall out on validation error.
 
+**Example**:
+
+    validator = MinValueValidator(10)
+    validator(15)
+
+    try:
+        validator(9)
+    except ValidationError:
+        pass
+
 ## MaxValueValidator
 
 This validator checks for less than or equal to the maximum value.
@@ -63,6 +103,40 @@ This validator checks for less than or equal to the maximum value.
 
 - `max_value` Maximal valid value.
 - `message` The short message should fall out on validation error.
+
+**Example**:
+
+    validator = MaxValueValidator(10)
+    validator(9)
+
+    try:
+        validator(15)
+    except ValidationError:
+        pass
+
+## RegexValidator
+
+This validator checks the string against a regular expression.
+
+**Signature**: `RegexValidator(regex, inverse_match=None, flags=None, message=None)`
+
+- `regex` Regex raw/
+- `inverse_match` - A flag indicating whether to invert the response? Default: `False`.
+- `flags` - Flags for compiling regular expression. Default `0`.
+- `message` The short message should fall out on validation error.
+
+**Example**:
+
+    validator = RegexValidator(r'\d+')
+    validator('123')
+
+    try:
+        validator('example')
+    except ValidationError:
+        pass
+
+    validator = RegexValidator(r'\d+', True)
+    validator('test')
 
 ---
 
@@ -81,7 +155,7 @@ A validator may be any callable that raises a `serializers.ValidationError` on f
 #### Field-level validation
 
 You can specify custom field-level validation by adding `.validate_<field_name>` methods
-to your `Serializer` subclass.
+to your `Serializer` subclass. Read more [`Field Level Validation`][FieldLevelValidation]
 
 ## Class-based
 
@@ -95,3 +169,5 @@ To write a class-based validator, use the `__call__` method. Class-based validat
             if value % self.base != 0:
                 message = 'This field must be a multiple of %d.' % self.base
                 raise serializers.ValidationError(message)
+
+[FieldLevelValidation]: serializers.md#field-level-validation

@@ -4,6 +4,8 @@ Utilities for working with raw html request body.
 """
 import re
 
+import six
+
 from rest_framework.utils.collections import MultiValueDict
 
 
@@ -54,7 +56,7 @@ def parse_html_list(dictionary, prefix=''):
     regex = re.compile(r'^%s\[([0-9]+)\](.*)$' % re.escape(prefix))
 
     # We run on the values.
-    for field, value in dictionary.items():
+    for field, value in six.iteritems(dictionary):
         # Parsing for the presence of keys with [].
         match = regex.match(field)
         if not match:

@@ -8,12 +8,21 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.1.5
+
+**Date**: [12th December 2018].
+
+* Add [`RegexValidator`][RegexValidator].
+* Add [`Inherit Serializers`][InheritSerializers].
+* Add `six.iteritems` in all code.
+* Fix mini bugs.
+
 ### 0.1.4
 
 **Date**: [25th October 2018].
 
-* Add [`JsonField`][JsonField], [`DictField`][DictField]
-* Add [`SerializerMethodField`][SerializerMethodField]
+* Add [`JsonField`][JsonField], [`DictField`][DictField].
+* Add [`SerializerMethodField`][SerializerMethodField].
 
 ### 0.1.3
 
@@ -38,3 +47,5 @@ Major version numbers (x.0.0) are reserved for substantial project milestones.
 [JsonField]: api-guid/fields.md#-jsonfield
 [DictField]: api-guid/fields.md#-dictfield
 [SerializerMethodField]: api-guid/fields.md#-serializermethodfield
+[InheritSerializers]: api-guid/serializers.md#serializer-inheritance
+[RegexValidator]: api-guid/validators.md#regexvalidator

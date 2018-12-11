@@ -135,7 +135,7 @@ class MultiValueDict(dict):
 
         """
         data = obj_dict.pop('_data', {})
-        for k, v in data.items():
+        for k, v in six.iteritems(data):
             self.setlist(k, v)
         self.__dict__.update(obj_dict)
 
@@ -307,7 +307,7 @@ class MultiValueDict(dict):
             else:
                 # If this is also a dict of arrays.
                 try:
-                    for key, value in other_dict.items():
+                    for key, value in six.iteritems(other_dict):
                         self.setlistdefault(key).append(value)
                 except TypeError:
                     raise ValueError("`MultiValueDict.update ()` accepts either `MultiValueDict` or` dict`")

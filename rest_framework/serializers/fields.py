@@ -3,7 +3,10 @@ Fields for serializers.
 
 """
 import re
-import typing
+try:
+    from typing import Mapping
+except ImportError:
+    from collections import Mapping
 import datetime
 import json
 
@@ -48,7 +51,7 @@ def get_attribute(obj, attr_name):
 
     """
     # Search attribute.
-    if isinstance(obj, typing.Mapping):
+    if isinstance(obj, Mapping):
         attr = obj[attr_name]
     else:
         attr = getattr(obj, attr_name)
@@ -725,7 +728,7 @@ class ListField(Field):
         if html.is_html_input(data):
             data = html.parse_html_list(data)
 
-        if any((isinstance(data, type('')), isinstance(data, typing.Mapping), not hasattr(data, '__iter__'))):
+        if any((isinstance(data, type('')), isinstance(data, Mapping), not hasattr(data, '__iter__'))):
             self.fail('not_a_list', input_type=type(data).__name__)
 
         if not self.allow_empty and len(data) == 0:

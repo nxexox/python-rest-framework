@@ -4,7 +4,11 @@ Serializers.
 """
 import copy
 import inspect
-from typing import Mapping
+try:
+    from typing import Mapping
+except ImportError:
+    from collections import Mapping
+
 from collections import OrderedDict
 
 import six

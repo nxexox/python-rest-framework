@@ -4,6 +4,7 @@ Serializers.
 """
 import copy
 import inspect
+from typing import Mapping
 from collections import OrderedDict
 
 import six
@@ -107,7 +108,7 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
         """
         super().__init__(*args, **kwargs)
         self.instance = instance
-        if isinstance(data, dict):
+        if isinstance(data, Mapping):
             self.initial_data = data
 
     def __new__(cls, *args, **kwargs):

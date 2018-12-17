@@ -20,7 +20,7 @@ from rest_framework.serializers.validators import (
     RequiredValidator, MaxValueValidator, MinValueValidator, MinLengthValidator, MaxLengthValidator
 )
 
-from .serializers_for_tests import SerializerMethodFieldDefault, SerializerMethodFieldSingle
+from rest_framework.tests.serializers_for_tests import SerializerMethodFieldDefault, SerializerMethodFieldSingle
 
 
 class BaseFieldTestCase(TestCase):
@@ -481,7 +481,7 @@ class CharFieldTest(BaseFieldTestCase):
         {'data': {'data': 123}, 'return': '123'},
         {'data': {'data': 'qwe'}, 'return': 'qwe'},
         {'data': {'data': None}, 'exceptions': (ValidationError,)},
-        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'required': False}, 'return': None},
         {'data': {'data': ''}, 'params': {'allow_blank': False}, 'exceptions': (ValidationError,)},
         {'data': {'data': ''}, 'params': {'allow_blank': True}, 'return': ''},
         {'data': {'data': '   '}, 'params': {'allow_blank': True, 'trim_whitespace': True}, 'return': ''},
@@ -758,7 +758,7 @@ class TestTimeField(BaseFieldTestCase):
         {'data': {'data': datetime.time()}, 'return': datetime.time()},
         {'data': {'data': datetime.time(10, 10)}, 'return': datetime.time(10, 10)},
         {'data': {'data': None}, 'exceptions': (ValidationError,)},
-        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'required': False}, 'return': None},
         {'data': {'data': None}, 'params': {'default': datetime.time()}, 'return': datetime.time()},
     )  # Cases, to test the performance of `.run_validation()`.
 
@@ -801,7 +801,7 @@ class TestDateField(BaseFieldTestCase):
         {'data': {'data': datetime.datetime.now()}, 'exceptions': (ValidationError,)},
         {'data': {'data': '2018-10'}, 'params': {'input_format': '%Y-%m'}, 'return': datetime.date(2018, 10, 1)},
         {'data': {'data': None}, 'exceptions': (ValidationError,)},
-        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'required': False}, 'return': None},
         {'data': {'data': None}, 'params': {'default': datetime.date(2018, 1, 1)}, 'return': datetime.date(2018, 1, 1)},
     )  # Cases, to test the performance of `.run_validation()`.
 
@@ -847,7 +847,7 @@ class TestDateTimeField(BaseFieldTestCase):
         {'data': {'data': __now_for_test.strftime(DateTimeField.input_format)}, 'return': __now_for_test},
         {'data': {'data': '2018-10'}, 'params': {'input_format': '%Y-%m'}, 'return': datetime.datetime(2018, 10, 1)},
         {'data': {'data': None}, 'exceptions': (ValidationError,)},
-        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'required': False}, 'return': None},
         {'data': {'data': None}, 'params': {'default': datetime.datetime(2018, 1, 1)}, 'return': datetime.datetime(2018, 1, 1)},
     )  # Cases, to test the performance of `.run_validation()`.
 
@@ -897,7 +897,7 @@ class TestJsonField(BaseFieldTestCase):
         {'data': {'data': 'asd'}, 'exceptions': (ValidationError,)},
         {'data': {'data': 123}, 'exceptions': (ValidationError,)},
         {'data': {'data': None}, 'exceptions': (ValidationError,)},
-        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},  # TODO: FIXME
+        {'data': {'data': None}, 'params': {'required': False}, 'return': None},  # TODO: FIXME
     )  # Cases, to test the performance of `.run_validation()`.
 
 
@@ -941,7 +941,7 @@ class TestDictField(BaseFieldTestCase):
         {'data': {'data': 'asd'}, 'exceptions': (ValidationError,)},
         {'data': {'data': 123}, 'exceptions': (ValidationError,)},
         {'data': {'data': None}, 'exceptions': (ValidationError,)},
-        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},  # TODO: FIXME
+        {'data': {'data': None}, 'params': {'required': False}, 'return': None},  # TODO: FIXME
         {'data': {'data': {123: [123]}}, 'params': {'child': IntegerField()}, 'exceptions': (ValidationError,)}
     )  # Cases, to test the performance of `.run_validation()`.
 

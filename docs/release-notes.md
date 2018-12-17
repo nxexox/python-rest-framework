@@ -8,6 +8,13 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.1.6
+
+**Date**: [18th December 2018].
+
+* Fix internal logic on validation field binding.
+* Fix settings internal validators on fields.
+
 ### 0.1.5
 
 **Date**: [12th December 2018].

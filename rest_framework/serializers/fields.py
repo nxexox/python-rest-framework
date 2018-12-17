@@ -3,7 +3,7 @@ Fields for serializers.
 
 """
 import re
-import collections
+import typing
 import datetime
 import json
 
@@ -48,7 +48,7 @@ def get_attribute(obj, attr_name):
 
     """
     # Search attribute.
-    if isinstance(obj, collections.Mapping):
+    if isinstance(obj, typing.Mapping):
         attr = obj[attr_name]
     else:
         attr = getattr(obj, attr_name)
@@ -305,6 +305,10 @@ class Field(object):
         # First, we validate to be bound.
         is_empty, data = self.validate_empty_values(data)
 
+        # If empty data and field not required.
+        if is_empty and not self.required:
+            return data
+
         # Process raw data.
         value = self.to_internal_value(data)
         # Run validators.
@@ -358,16 +362,16 @@ class CharField(Field):
 
         """
         super().__init__(*args, **kwargs)
-        self.max_length = max_length
-        self.min_length = min_length
+        self.max_length = max_length if max_length is None else int(max_length)
+        self.min_length = min_length if min_length is None else int(min_length)
         self.trim_whitespace = trim_whitespace
         self.allow_blank = allow_blank
 
         # Added validators.
-        if self.max_length:
+        if self.max_length is not None:
             message = self.error_messages['max_length'].format(max_length=self.max_length)
             self.validators.append(MaxLengthValidator(max_length, message=message))
-        if self.min_length:
+        if self.min_length is not None:
             message = self.error_messages['min_length'].format(min_length=self.min_length)
             self.validators.append(MinLengthValidator(self.min_length, message=message))
 
@@ -444,10 +448,10 @@ class IntegerField(Field):
         self.max_value = max_value if max_value is None else int(max_value)
 
         # Added validators.
-        if self.min_value:
+        if self.min_value is not None:
             message = self.error_messages['min_value'].format(min_value=self.min_value)
             self.validators.append(MinValueValidator(self.min_value, message=message))
-        if self.max_value:
+        if self.max_value is not None:
             message = self.error_messages['max_value'].format(max_value=self.max_value)
             self.validators.append(MaxValueValidator(self.max_value, message=message))
 
@@ -508,14 +512,14 @@ class FloatField(Field):
 
         """
         super().__init__(*args, **kwargs)
-        self.min_value = min_value if min_value is None else int(min_value)
-        self.max_value = max_value if max_value is None else int(max_value)
+        self.min_value = min_value if min_value is None else float(min_value)
+        self.max_value = max_value if max_value is None else float(max_value)
 
         # Added validators.
-        if self.min_value:
+        if self.min_value is not None:
             message = self.error_messages['min_value'].format(min_value=self.min_value)
             self.validators.append(MinValueValidator(self.min_value, message=message))
-        if self.max_value:
+        if self.max_value is not None:
             message = self.error_messages['max_value'].format(max_value=self.max_value)
             self.validators.append(MaxValueValidator(self.max_value, message=message))
 
@@ -688,8 +692,8 @@ class ListField(Field):
         """
         super().__init__(*args, **kwargs)
         self.child = child or self.child
-        self.min_length = min_length
-        self.max_length = max_length
+        self.min_length = min_length if min_length is None else int(min_length)
+        self.max_length = max_length if max_length is None else int(max_length)
         self.allow_empty = bool(allow_empty)
 
         # Check field `child`.
@@ -699,10 +703,10 @@ class ListField(Field):
         self.child.bind(field_name='', parent=self)  # Bind child field.
 
         # Added validators.
-        if self.max_length:
+        if self.max_length is not None:
             message = self.error_messages['max_length'].format(max_length=self.max_length)
             self.validators.append(MaxLengthValidator(max_length, message=message))
-        if self.min_length:
+        if self.min_length is not None:
             message = self.error_messages['min_length'].format(min_length=self.min_length)
             self.validators.append(MinLengthValidator(self.min_length, message=message))
 
@@ -721,7 +725,7 @@ class ListField(Field):
         if html.is_html_input(data):
             data = html.parse_html_list(data)
 
-        if any((isinstance(data, type('')), isinstance(data, collections.Mapping), not hasattr(data, '__iter__'))):
+        if any((isinstance(data, type('')), isinstance(data, typing.Mapping), not hasattr(data, '__iter__'))):
             self.fail('not_a_list', input_type=type(data).__name__)
 
         if not self.allow_empty and len(data) == 0:

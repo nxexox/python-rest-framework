@@ -4,7 +4,8 @@ Testing serializers.
 2. We test the external interface as they should work.
 
 """
-import collections
+# import collections
+import typing
 from unittest import TestCase
 
 import six
@@ -311,7 +312,7 @@ class SerializerUserTestCase(TestCase):
 
         """
         return type('object', (object,), {
-            key: self.__create_object(val) if isinstance(val, collections.Mapping) else val
+            key: self.__create_object(val) if isinstance(val, typing.Mapping) else val
             for key, val in six.iteritems(data)
         })
 
@@ -358,10 +359,10 @@ class SerializerUserTestCase(TestCase):
         # First we feed him empty data.
         ser = self.serializer_class(data=self.__create_params(fullness='empty'))
         assert ser.is_valid() is False, '`.is_valid()` must return False.'
-        assert isinstance(ser.errors, collections.Mapping), \
+        assert isinstance(ser.errors, typing.Mapping), \
             '`.errors` must be dict. Reality: {}.'.format(type(ser.errors))
         assert len(ser.errors) > 0, '`.errors` must contain errors.'
-        assert isinstance(ser.validated_data, collections.Mapping), \
+        assert isinstance(ser.validated_data, typing.Mapping), \
             '`.validated_data` must be dict. Reality: {}.'.format(type(ser.validated_data))
         assert len(ser.validated_data) == 0, '`.validated_data` must be empty. Reality: {},'.format(ser.validated_data)
 
@@ -376,10 +377,10 @@ class SerializerUserTestCase(TestCase):
         # Now we feed the data partially.
         ser = self.serializer_class(data=self.__create_params(fullness='middle'))
         assert ser.is_valid() is False, '`.is_valid()` must return False.'
-        assert isinstance(ser.errors, collections.Mapping), \
+        assert isinstance(ser.errors, typing.Mapping), \
             '`.errors` must be dict. Reality: {}.'.format(type(ser.errors))
         assert len(ser.errors) > 0, '`.errors` must contain errors.'
-        assert isinstance(ser.validated_data, collections.Mapping), \
+        assert isinstance(ser.validated_data, typing.Mapping), \
             '`.validated_data` must be dict. Reality: {}.'.format(type(ser.validated_data))
         assert len(ser.validated_data) == 0, '`.validated_data` must be empty. Reality: {}.'.format(ser.validated_data)
 
@@ -388,10 +389,10 @@ class SerializerUserTestCase(TestCase):
         ser = self.serializer_class(data=data)
         # Check logic.
         assert ser.is_valid() is True, '`.is_valid()` must return True.'
-        assert isinstance(ser.errors, collections.Mapping), \
+        assert isinstance(ser.errors, typing.Mapping), \
             '`.errors` must be dict. Reality: {}.'.format(type(ser.errors))
         assert len(ser.errors) == 0, '`.errors` must be empty. Reality: {}.'.format(ser.errors)
-        assert isinstance(ser.validated_data, collections.Mapping), \
+        assert isinstance(ser.validated_data, typing.Mapping), \
             '`.validated_data` must be dict. Reality: {}.'.format(ser.validated_data)
         assert len(ser.validated_data) > 0, '`.validated_data` must contain data.'
         # We check that all data is returned correctly.
@@ -409,12 +410,12 @@ class SerializerUserTestCase(TestCase):
         """
         # First we feed him an empty object.
         ser = self.serializer_class(instance=self.__create_object(self.__create_params(fullness='empty')))
-        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}'.format(type(ser.data))
+        assert isinstance(ser.data, typing.Mapping), '`.data` must be dict. Reality: {}'.format(type(ser.data))
 
         # Now we feed the data partially.
         data = self.__create_params(fullness='middle')
         ser = self.serializer_class(instance=self.__create_object(data))
-        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
+        assert isinstance(ser.data, typing.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
         for k, v in six.iteritems(ser.data):
             if k in data:
                 assert v == data[k], 'Object attribute `{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
@@ -424,7 +425,7 @@ class SerializerUserTestCase(TestCase):
         # Now we feed the data completely.
         data = self.__create_params(fullness='full')
         ser = self.serializer_class(instance=self.__create_object(data))
-        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
+        assert isinstance(ser.data, typing.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
         for k, v in six.iteritems(ser.data):
             if k in data:
                 assert v == data[k], 'Object attribute `{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
@@ -439,12 +440,12 @@ class SerializerUserTestCase(TestCase):
         """
         # First we feed him an empty object..
         ser = self.serializer_class(instance=self.__create_params(fullness='empty'))
-        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
+        assert isinstance(ser.data, typing.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
 
         # Now we feed the data partially.
         data = self.__create_params(fullness='middle')
         ser = self.serializer_class(instance=data)
-        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
+        assert isinstance(ser.data, typing.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
         for k, v in six.iteritems(ser.data):
             if k in data:
                 assert v == data[k], 'Object attribute`{}` must be `{}`, reality `{}`.'.format(k, v, data[k])
@@ -454,7 +455,7 @@ class SerializerUserTestCase(TestCase):
         # Now we feed the data completely.
         data = self.__create_params(fullness='full')
         ser = self.serializer_class(instance=data)
-        assert isinstance(ser.data, collections.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
+        assert isinstance(ser.data, typing.Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
         for k, v in six.iteritems(ser.data):
             if k in data:
                 assert v == data[k], 'Object attribute `{}` must be `{}`, reality `{}`.'.format(k, v, data[k])

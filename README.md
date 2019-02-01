@@ -18,12 +18,15 @@ Full documentation for the project is available at [https://nxexox.github.io/pyt
 
 Install using `pip`, including any optional packages you want...
 
-    pip install python-rest-framework
+```bash
+pip install python-rest-framework
+```
 
 ...or clone the project from github.
 
-    git clone git@github.com:nxexox/python-rest-framework.git
-
+```bash
+git clone git@github.com:nxexox/python-rest-framework.git
+```
 
 ## Example
 
@@ -31,31 +34,35 @@ For example, we will serialize the data from the request object.
 
 First we write the serializer
 
-    from rest_framework.serializers import (
-        Serializer, CharField, IntegerField, ListField, FloatField
-    )
+```python
+from rest_framework.serializers import (
+    Serializer, CharField, IntegerField, ListField, FloatField
+)
 
-    # Example serializer for parsing body data from web request.
-    class ExampleSerializer(Serializer):
-        char_field = CharField(label='This char field', required=True)
-        int_field = IntegerField(label='This int field', required=True)
-        list_float_field = ListField(child=FloatField(), required=True, min_length=2)
+# Example serializer for parsing body data from web request.
+class ExampleSerializer(Serializer):
+    char_field = CharField(label='This char field', required=True)
+    int_field = IntegerField(label='This int field', required=True)
+    list_float_field = ListField(child=FloatField(), required=True, min_length=2)
+```
 
 ---
 
 Now we process the request body with a serializer
 
-    # web request data
-    data = {
-        'char_field': 'example', 'int_field': 1,
-        'list_float_field': [1.0, 1.1, 1.2]
-    }
+```python
+# web request data
+data = {
+    'char_field': 'example', 'int_field': 1,
+    'list_float_field': [1.0, 1.1, 1.2]
+}
 
-    ser = ExampleSerializer(data=data)
-    if ser.is_valid():
-        print(ser.validated_data)
-    else:
-        print(ser.errors)
+ser = ExampleSerializer(data=data)
+if ser.is_valid():
+    print(ser.validated_data)
+else:
+    print(ser.errors)
+```
 
 [docs]: https://nxexox.github.io/python-rest-framework/
 [pypi-version]: https://img.shields.io/pypi/v/python-rest-framework.svg

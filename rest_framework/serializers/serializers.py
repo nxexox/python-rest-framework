@@ -125,6 +125,9 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
             return cls.many_init(*args, **kwargs)
         return super(BaseSerializer, cls).__new__(cls)
 
+    def __deepcopy__(self, memo={}):
+        return self.__class__(instance=self.instance, data=self.data)
+
     @classmethod
     def many_init(cls, *args, **kwargs):
         """
@@ -500,6 +503,12 @@ class ListSerializer(Serializer):
         super(ListSerializer, self).__init__(*args, **kwargs)
         # Bind child serializer.
         self.child.bind(field_name='', parent=self)
+
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            instance=self.instance, data=self.data,
+            child=self.child, allow_empty=self.allow_empty
+        )
 
     def to_internal_value(self, data):
         """

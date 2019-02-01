@@ -86,14 +86,22 @@ class Field(object):
         self.default = default
         self.required = bool(required) if self.default is None else False
         # Added validator for check on required field.
+        self._src_validators = validators
         self._validators = ([RequiredValidator()] if self.required else []) + (validators or [])[:]
 
         # Make errors dict.
         messages = {}
+        self._src_messages = messages
         for cls in reversed(self.__class__.__mro__):
             messages.update(getattr(cls, 'default_error_messages', {}))
         messages.update(error_messages or {})
         self.error_messages = messages
+
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            required=self.required, default=self.default, label=self.label,
+            validators=self._src_validators, error_messages=self._src_messages
+        )
 
     def bind(self, field_name, parent):
         """
@@ -378,6 +386,14 @@ class CharField(Field):
             message = self.error_messages['min_length'].format(min_length=self.min_length)
             self.validators.append(MinLengthValidator(self.min_length, message=message))
 
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            required=self.required, default=self.default, label=self.label,
+            validators=self._src_validators, error_messages=self._src_messages,
+            min_length=self.min_length, max_length=self.max_length,
+            trim_whitespace=self.trim_whitespace, allow_blank=self.allow_blank
+        )
+
     def run_validation(self, data=None):
         """
         We check for an empty string here, so that it does not fall into subclasses in `.to_internal_value ()`.
@@ -458,6 +474,13 @@ class IntegerField(Field):
             message = self.error_messages['max_value'].format(max_value=self.max_value)
             self.validators.append(MaxValueValidator(self.max_value, message=message))
 
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            required=self.required, default=self.default, label=self.label,
+            validators=self._src_validators, error_messages=self._src_messages,
+            min_value=self.min_value, max_value=self.max_value
+        )
+
     def to_internal_value(self, data):
         """
         Data transformation to python object.
@@ -525,6 +548,13 @@ class FloatField(Field):
         if self.max_value is not None:
             message = self.error_messages['max_value'].format(max_value=self.max_value)
             self.validators.append(MaxValueValidator(self.max_value, message=message))
+
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            required=self.required, default=self.default, label=self.label,
+            validators=self._src_validators, error_messages=self._src_messages,
+            min_value=self.min_value, max_value=self.max_value
+        )
 
     def to_internal_value(self, data):
         """
@@ -713,6 +743,14 @@ class ListField(Field):
             message = self.error_messages['min_length'].format(min_length=self.min_length)
             self.validators.append(MinLengthValidator(self.min_length, message=message))
 
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            required=self.required, default=self.default, label=self.label,
+            validators=self._src_validators, error_messages=self._src_messages,
+            child=self.child, min_length=self.min_length, max_length=self.max_length,
+            allow_empty=self.allow_empty
+        )
+
     def to_internal_value(self, data):
         """
         Data transformation to python list object.
@@ -775,6 +813,13 @@ class DateField(Field):
         if input_format is not None:
             self.input_format = input_format
         super().__init__(*args, **kwargs)
+
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            required=self.required, default=self.default, label=self.label,
+            validators=self._src_validators, error_messages=self._src_messages,
+            format=getattr(self, 'format'), input_format=getattr(self, 'input_format')
+        )
 
     def to_internal_value(self, data):
         """
@@ -868,6 +913,13 @@ class TimeField(Field):
             self.input_format = input_format
         super().__init__(*args, **kwargs)
 
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            required=self.required, default=self.default, label=self.label,
+            validators=self._src_validators, error_messages=self._src_messages,
+            format=getattr(self, 'format', None), input_format=getattr(self, 'input_format')
+        )
+
     def to_internal_value(self, data):
         """
         Data transformation to python datetime object.
@@ -957,6 +1009,13 @@ class DateTimeField(Field):
             self.input_format = input_format
 
         super(DateTimeField, self).__init__(*args, **kwargs)
+
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            required=self.required, default=self.default, label=self.label,
+            validators=self._src_validators, error_messages=self._src_messages,
+            format=getattr(self, 'format'), input_format=getattr(self, 'input_format')
+        )
 
     def to_internal_value(self, data):
         """
@@ -1083,6 +1142,13 @@ class DictField(JsonField):
 
         self.child.bind(field_name='', parent=self)  # Bind child field.
 
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            required=self.required, default=self.default, label=self.label,
+            validators=self._src_validators, error_messages=self._src_messages,
+            child=self.child
+        )
+
     def to_internal_value(self, data):
         """
         Data transformation to python JSON object.
@@ -1160,6 +1226,13 @@ class SerializerMethodField(Field):
 
         self.method_name_get = method_name_get
         self.method_name_pop = method_name_pop
+
+    def __deepcopy__(self, memo={}):
+        return self.__class__(
+            required=self.required, default=self.default, label=self.label,
+            validators=self._src_validators, error_messages=self._src_messages,
+            method_name_get=self.method_name_get, method_name_pop=self.method_name_pop
+        )
 
     def bind(self, field_name, parent):
         """

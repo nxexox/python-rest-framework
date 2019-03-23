@@ -8,6 +8,12 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.1.8
+
+**Date:** [23th March 2019]
+
+* Mini fix [`SerializerMethodField`][SerializerMethodField] run `to_representation` method.
+
 ### 0.1.7
 
 **Date:** [1st of January 2019]

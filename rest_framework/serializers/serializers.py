@@ -13,7 +13,7 @@ from collections import OrderedDict
 
 import six
 
-from rest_framework.serializers.fields import Field
+from rest_framework.serializers.fields import Field, SerializerMethodField
 from rest_framework.serializers.helpers import BindingDict
 from rest_framework.exceptions import SkipError
 from rest_framework.serializers.exceptions import ValidationError
@@ -314,12 +314,16 @@ class Serializer(BaseSerializer):
         res = OrderedDict()  # Attributes storage.
 
         for field_name, field_val in six.iteritems(self.fields):
-            # We try to get the attribute.
-            try:
-                attribute = field_val.get_attribute(instance)
-            except SkipError:
-                # TODO: That thing, throw an error, if the attribute of the object is not found, or skip?
-                continue
+            # TODO: mini hack
+            if not isinstance(field_val, SerializerMethodField):
+                # We try to get the attribute.
+                try:
+                    attribute = field_val.get_attribute(instance)
+                except SkipError:
+                    # TODO: That thing, throw an error, if the attribute of the object is not found, or skip?
+                    continue
+            else:
+                attribute = instance
 
             # We try to turn it into a JSON valid format.
             res[field_name] = field_val.to_representation(attribute)

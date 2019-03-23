@@ -8,7 +8,7 @@ r"""
          __/ |
         |___/
 """
-VERSION = (0, 1, 8)
+VERSION = (0, 1, 9)
 
 __title__ = 'Python-Rest-Framework'
 __author__ = 'Deys Timofey'

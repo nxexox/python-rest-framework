@@ -154,6 +154,8 @@
         <li class="first-level "><a href="#fields_1">Fields</a></li>
             <li class="second-level"><a href="#-booleanfield">- BooleanField</a></li>
                 
+            <li class="second-level"><a href="#-booleannullfield">- BooleanNullField</a></li>
+                
             <li class="second-level"><a href="#-charfield">- CharField</a></li>
                 
             <li class="second-level"><a href="#-integerfield">- IntegerField</a></li>
@@ -215,9 +217,13 @@ Set to false if this field is not required to be present during deserialization.
 <hr />
 <h1 id="fields_1"><a class="toclink" href="#fields_1">Fields</a></h1>
 <h2 id="-booleanfield"><a class="toclink" href="#-booleanfield">- BooleanField</a></h2>
-<p>A boolean representation that also accepts <code>None</code> as a valid value.</p>
 <p>When using HTML encoded form input be aware that omitting a value will always be treated as setting a field to <code>False</code>, even if it has a <code>default=True</code> option specified. This is because HTML checkbox inputs represent the unchecked state by omitting the value, so REST framework treats omission as if it is an empty checkbox input.</p>
 <p><strong>Signature:</strong> <code>BooleanField()</code></p>
+<hr />
+<h2 id="-booleannullfield"><a class="toclink" href="#-booleannullfield">- BooleanNullField</a></h2>
+<p>A boolean representation that also accepts <code>None</code> as a valid value.</p>
+<p>When using HTML encoded form input be aware that omitting a value will always be treated as setting a field to <code>False</code>, even if it has a <code>default=True</code> option specified. This is because HTML checkbox inputs represent the unchecked state by omitting the value, so REST framework treats omission as if it is an empty checkbox input.</p>
+<p><strong>Signature:</strong> <code>BooleanNullField()</code></p>
 <hr />
 <h2 id="-charfield"><a class="toclink" href="#-charfield">- CharField</a></h2>
 <p>A text representation. Optionally validates the text to be shorter than <code>max_length</code> and longer than <code>min_length</code>.</p>

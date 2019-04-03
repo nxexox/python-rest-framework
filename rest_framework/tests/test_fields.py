@@ -10,7 +10,7 @@ import six
 from rest_framework.exceptions import SkipError
 from rest_framework.serializers.exceptions import ValidationError
 from rest_framework.serializers.fields import (
-    Field, CharField, IntegerField, FloatField, BooleanField, ListField,
+    Field, CharField, IntegerField, FloatField, BooleanField, BooleanNullField, ListField,
     TimeField, DateField, DateTimeField,
     JsonField, DictField,
     SerializerMethodField,
@@ -616,6 +616,52 @@ class TestBooleanField(BaseFieldTestCase):
 
     """
     field_class = BooleanField
+    abstract_methods = {}  # Custom abstract methods.
+    field_error_messages = {'invalid': None}
+    to_representation_cases = (
+        {'data': {'value': True}, 'return': True},
+        {'data': {'value': False}, 'return': False},
+        {'data': {'value': None}, 'return': False},
+        {'data': {'value': 'Yes'}, 'return': True},
+        {'data': {'value': 1}, 'return': True},
+        {'data': {'value': 'No'}, 'return': False},
+        {'data': {'value': 0}, 'return': False},
+        {'data': {'value': 'null'}, 'return': True},
+        {'data': {'value': ''}, 'return': False},
+        {'data': {'value': '100'}, 'return': True}
+    )  # Cases, to test the performance of `.to_representation()`.
+    to_internal_value_cases = (
+        {'data': {'data': True}, 'return': True},
+        {'data': {'data': False}, 'return': False},
+        {'data': {'data': None}, 'exceptions': (ValidationError,)},
+        {'data': {'data': 'Yes'}, 'return': True},
+        {'data': {'data': 1}, 'return': True},
+        {'data': {'data': 'No'}, 'return': False},
+        {'data': {'data': 0}, 'return': False},
+        {'data': {'data': 'null'}, 'exceptions': (ValidationError,)},
+        {'data': {'data': ''}, 'exceptions': (ValidationError,)},
+        {'data': {'data': '100'}, 'exceptions': (ValidationError,)},
+    )  # Cases, to test the performance of `.to_internal_value()`.
+    run_validation_cases = (
+        {'data': {'data': True}, 'return': True},
+        {'data': {'data': False}, 'return': False},
+        {'data': {'data': None}, 'params': {'required': False}, 'return': None},
+        {'data': {'data': 'Yes'}, 'return': True},
+        {'data': {'data': 1}, 'return': True},
+        {'data': {'data': 'No'}, 'return': False},
+        {'data': {'data': 0}, 'return': False},
+        {'data': {'data': 'null'}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': ''}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': '100'}, 'exceptions': (ValidationError,)},
+    )  # Cases, to test the performance of `.run_validation()`.
+
+
+class TestBooleanNullField(BaseFieldTestCase):
+    """
+    Testing BooleanNullField.
+
+    """
+    field_class = BooleanNullField
     abstract_methods = {}  # Custom abstract methods.
     field_error_messages = {'invalid': None}
     to_representation_cases = (

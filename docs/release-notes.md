@@ -8,6 +8,14 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.2.0
+
+**Date:** [3th April 2019]
+
+* Mini fix [`Serializers`][Serializers] `_field_validation` method.
+* Add [`BooleanNullField`][BooleanNullField].
+* Remove Null values from [`BooleanField`][BooleanField].
+
 ### 0.1.9
 
 **Date:** [23th March 2019]
@@ -66,6 +74,8 @@ Major version numbers (x.0.0) are reserved for substantial project milestones.
 
 
 [DateField]: api-guid/fields.md#-datefield
+[BooleanNullField]: api-guid/fields.md#-booleannullfield
+[BooleanField]: api-guid/fields.md#-booleanfield
 [TimeField]: api-guid/fields.md#-timefield
 [DateTimeField]: api-guid/fields.md#-datetimefield
 [ListField]: api-guid/fields.md#-listfield
@@ -74,3 +84,4 @@ Major version numbers (x.0.0) are reserved for substantial project milestones.
 [SerializerMethodField]: api-guid/fields.md#-serializermethodfield
 [InheritSerializers]: api-guid/serializers.md#serializer-inheritance
 [RegexValidator]: api-guid/validators.md#regexvalidator
+[Serializers]: api-guid/serializers.md

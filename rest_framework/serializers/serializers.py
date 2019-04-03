@@ -370,8 +370,10 @@ class Serializer(BaseSerializer):
                 validated_val = self._manual_validate_method(field_name, validated_val)
 
                 # And if there was a field in the incoming data, then we save it in the converted form.
-                if field_name in data or field_obj.default:
-                    validated_data[field_name] = validated_val or field_obj.default
+                if field_name in data:
+                    validated_data[field_name] = validated_val
+                elif field_obj.default:
+                    validated_data[field_name] = field_obj.default
 
             except ValidationError as e:
                 # If not passed validation, save the error.

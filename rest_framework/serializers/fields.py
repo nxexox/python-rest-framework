@@ -425,7 +425,13 @@ class CharField(Field):
         # We skip numbers as strings, but bool as strings seems to be a developer error.
         if isinstance(data, bool) or not isinstance(data, six.string_types + six.integer_types + (float,)):
             self.fail('invalid')
-        return six.text_type(data)
+
+        val = six.text_type(data)
+
+        if self.trim_whitespace:
+            val = val.strip()
+
+        return val
 
     def to_representation(self, value):
         """
@@ -591,6 +597,71 @@ class FloatField(Field):
 
 
 class BooleanField(Field):
+    """
+    Field for boolean type.
+
+    """
+    default_error_messages = {
+        'invalid': '"{input}" must be a valid boolean type.'
+    }
+    TRUE_VALUES = {
+        't', 'T',
+        'y', 'Y', 'yes', 'YES', 'Yes',
+        'true', 'True', 'TRUE',
+        'on', 'On', 'ON',
+        '1', 1,
+        True
+    }  # Dict with True options.
+    FALSE_VALUES = {
+        'f', 'F', 'n',
+        'N', 'no', 'NO', 'No',
+        'false', 'False', 'FALSE',
+        'off', 'Off', 'OFF',
+        '0', 0, 0.0,
+        False
+    }  # Dictionary with False options.
+
+    def to_internal_value(self, data):
+        """
+        Data transformation to python object.
+
+        :param Union[str, int, float, bool] data: Data for transformation.
+
+        :return: Transformed data.
+        :rtype: bool
+
+        :raise ValidationError: If not valid data.
+
+        """
+        try:
+            if data in self.TRUE_VALUES:
+                return True
+            elif data in self.FALSE_VALUES:
+                return False
+        except TypeError:  # If the non-hash type came.
+            pass
+        self.fail('invalid', input=data)
+
+    def to_representation(self, value):
+        """
+        Transformation an object to a valid JSON object.
+
+        :param Union[str, int, float, bool] value: The object to transformation.
+
+        :return: Transformed data.
+        :rtype: bool
+
+        """
+        # First we look for in the match table.
+        if value in self.TRUE_VALUES:
+            return True
+        elif value in self.FALSE_VALUES:
+            return False
+        # If not found, try to transform.
+        return bool(value)
+
+
+class BooleanNullField(Field):
     """
     Field for boolean type.
 

@@ -16,6 +16,12 @@ Major version numbers (x.0.0) are reserved for substantial project milestones.
 * Add [`BooleanNullField`][BooleanNullField].
 * Remove Null values from [`BooleanField`][BooleanField].
 
+### 0.1.9
+
+**Date:** [23th March 2019]
+
+* Fix incorrect 0.1.8 VERSION
+
 ### 0.1.8
 
 **Date:** [23th March 2019]

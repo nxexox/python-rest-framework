@@ -2,7 +2,7 @@
     <a href="https://pypi.org/project/Python-Rest-Framework/">
         <img src="https://img.shields.io/pypi/v/python-rest-framework.svg" class="status-badge">
     </a>
-    <a href="https://travis-ci.org/encode/python-rest-framework?branch=master">
+    <a href="https://travis-ci.org/nxexox/python-rest-framework?branch=master">
         <img src="https://travis-ci.org/nxexox/python-rest-framework.svg?branch=master" class="status-badge">
     </a>
     <a href="https://codecov.io/gh/nxexox/python-rest-framework">

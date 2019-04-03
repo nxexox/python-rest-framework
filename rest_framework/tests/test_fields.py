@@ -645,7 +645,7 @@ class TestBooleanField(BaseFieldTestCase):
     run_validation_cases = (
         {'data': {'data': True}, 'return': True},
         {'data': {'data': False}, 'return': False},
-        {'data': {'data': None}, 'params': {'required': False}, 'exceptions': (ValidationError,)},
+        {'data': {'data': None}, 'params': {'required': False}, 'return': None},
         {'data': {'data': 'Yes'}, 'return': True},
         {'data': {'data': 1}, 'return': True},
         {'data': {'data': 'No'}, 'return': False},

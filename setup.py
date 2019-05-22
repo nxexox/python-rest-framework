@@ -16,6 +16,7 @@ setup(
     license='Apache 2.0',  # Put the license.
     description='Python Rest Framework. Box utils for easy makes rest api on python',
     long_description=README,
+    long_description_content_type='text/markdown',
     url=rest_framework.__url__,
     author=rest_framework.__author__,
     author_email=rest_framework.__email__,

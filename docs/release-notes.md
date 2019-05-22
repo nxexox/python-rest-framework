@@ -8,6 +8,12 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.2.1
+
+**Date:** [22th May 2019]
+
+* Mini fix processing data in [`Serializers`][Serializers] `_field_validation` method.
+
 ### 0.2.0
 
 **Date:** [3th April 2019]

@@ -378,6 +378,9 @@ class Serializer(BaseSerializer):
             except ValidationError as e:
                 # If not passed validation, save the error.
                 errors[field_name] = e.detail
+            except (AttributeError, TypeError, ValueError):
+                # If data not valid format.
+                errors[field_name] = 'Could not parse data for field `{}`.'.format(field_name)
 
         if any(errors):
             raise ValidationError(errors)

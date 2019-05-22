@@ -173,7 +173,7 @@ class Field(object):
 
         # Format the message and throw an error.
         message_string = msg.format(**kwargs)
-        raise ValidationError(message_string, code=key)
+        raise ValidationError(detail=message_string, status=key)
 
     def to_internal_value(self, data):
         """
@@ -296,7 +296,7 @@ class Field(object):
 
         # If empty and not necessary, then there is nothing to validate and transformed.
         if is_empty:
-            raise ValidationError(self.error_messages['required'])
+            raise ValidationError(detail=self.error_messages['required'])
 
         # Return.
         return is_empty, data
@@ -347,7 +347,7 @@ class Field(object):
 
         # Check on errors.
         if errors:
-            raise ValidationError(errors)
+            raise ValidationError(detail=errors)
 
 
 class CharField(Field):

@@ -158,6 +158,8 @@
                 
             <li class="second-level"><a href="#regexvalidator">RegexValidator</a></li>
                 
+            <li class="second-level"><a href="#choicevalidator">ChoiceValidator</a></li>
+                
         <li class="first-level "><a href="#writing-custom-validators">Writing custom validators</a></li>
             <li class="second-level"><a href="#function-based">Function based</a></li>
                 
@@ -282,6 +284,22 @@ except ValidationError:
 
 validator = RegexValidator(r'\d+', True)
 validator('test')
+</code></pre>
+<h2 id="choicevalidator"><a class="toclink" href="#choicevalidator">ChoiceValidator</a></h2>
+<p>This validator checks a value for an entry in a predefined list of values.</p>
+<p><strong>Signature</strong>: <code>ChoiceValidator(choices, message=None)</code></p>
+<ul>
+<li><code>choices</code> Valid values. Iter object. If <code>list</code>, <code>tuple</code>, <code>set</code> check into iter object. If <code>dict</code>, check key.</li>
+<li><code>message</code> The short message should fall out on validation error.</li>
+</ul>
+<p><strong>Example</strong>:</p>
+<pre><code>validator = ChoiceValidator([1, 2, 3])
+validator(2)
+
+try:
+    validator(15)
+except ValidationError:
+    pass
 </code></pre>
 <hr />
 <h1 id="writing-custom-validators"><a class="toclink" href="#writing-custom-validators">Writing custom validators</a></h1>

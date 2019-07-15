@@ -138,6 +138,25 @@ This validator checks the string against a regular expression.
     validator = RegexValidator(r'\d+', True)
     validator('test')
 
+## ChoiceValidator
+
+This validator checks a value for an entry in a predefined list of values.
+
+**Signature**: `ChoiceValidator(choices, message=None)`
+
+- `choices` Valid values. Iter object. If `list`, `tuple`, `set` check into iter object. If `dict`, check key.
+- `message` The short message should fall out on validation error.
+
+**Example**:
+
+    validator = ChoiceValidator([1, 2, 3])
+    validator(2)
+
+    try:
+        validator(15)
+    except ValidationError:
+        pass
+
 ---
 
 # Writing custom validators

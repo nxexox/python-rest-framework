@@ -8,7 +8,7 @@ import six
 
 from rest_framework.serializers.validators import (
     RegexValidator, BaseValidator, RequiredValidator, MinLengthValidator, MaxLengthValidator,
-    MinValueValidator, MaxValueValidator
+    MinValueValidator, MaxValueValidator, ChoiceValidator
 )
 from rest_framework.serializers.exceptions import ValidationError
 
@@ -171,4 +171,18 @@ class RegexValidatorTestCase(ValidatorTestCases):
         {'init': {'regex': r'\d+'}, 'data': 'asdasd', 'message': 'Enter a valid value.'},
         {'init': {'regex': r'\d+', 'message': 'test'}, 'data': 'test', 'message': 'test'},
         {'init': {'regex': r'\d+', 'inverse_match': True}, 'data': 'test'}
+    )
+
+
+class ChoiceValidatorTestCase(ValidatorTestCases):
+    """
+    Testing ChoiceValidator.
+
+    """
+    validator_class = ChoiceValidator
+    cases = (
+        {'init': {'choices': [1, 2, 3]}, 'data': 3},
+        {'init': {'choices': {1: 1, 2: 2, 3: 3}}, 'data': 2},
+        {'init': {'choices': [1, 2, 3]}, 'data': 'asdasd', 'message': 'Value must be one of `[1, 2, 3]`.'},
+        {'init': {'choices': [1, 2, 3], 'message': 'test'}, 'data': 'test', 'message': 'test'},
     )

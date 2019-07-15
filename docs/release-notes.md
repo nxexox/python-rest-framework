@@ -8,6 +8,12 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.2.2
+
+**Date:** [15th Jule 2019]
+
+* Added [`ChoiceValidator`][ChoiceValidator] in [`serializers.validators`][Validators].
+
 ### 0.2.1
 
 **Date:** [22th May 2019]
@@ -90,4 +96,6 @@ Major version numbers (x.0.0) are reserved for substantial project milestones.
 [SerializerMethodField]: api-guid/fields.md#-serializermethodfield
 [InheritSerializers]: api-guid/serializers.md#serializer-inheritance
 [RegexValidator]: api-guid/validators.md#regexvalidator
+[ChoiceValidator]: api-guid/validators.md#choicevalidator
 [Serializers]: api-guid/serializers.md
+[Validators]: api-guid/validators.md

@@ -222,3 +222,35 @@ class RegexValidator(BaseValidator):
         """
         if not (self.inverse_match is not bool(self.regex.search(value))):
             self.fail(detail=self.message)
+
+
+class ChoiceValidator(BaseValidator):
+    """
+    Validator for validation choice field.
+
+    """
+    message = 'Value must be one of `{allowed_values}`.'
+
+    def __init__(self, choices, *args, **kwargs):
+        """
+        Validator for validation choice field.
+
+        :param Union[iter, dict] choices: Valid choices values.
+
+        """
+        try:
+            iter(choices)
+        except TypeError:
+            raise ValueError('`choices=` must be iter or dict. Reality: `{}`.'.format(type(choices)))
+        super().__init__(*args, **kwargs)
+        self.choices = choices
+
+    def __call__(self, value: object):
+        """
+        Validation.
+
+        :param object value: Object for validation.
+
+        """
+        if value not in self.choices:
+            raise ValidationError(self.message.format(**dict(allowed_values=self.choices)))

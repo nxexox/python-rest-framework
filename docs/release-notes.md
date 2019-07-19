@@ -8,6 +8,19 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.3.0
+
+**Date:** [19th Jule 2019]
+
+* Added base views
+* Added base views mixins
+* Added views pagination
+* Added ApiException
+* Added views for AioHttp
+* Added views for Flask
+* Added utils.decorators for class check attributes and signature
+* Fix not actual docs
+
 ### 0.2.2
 
 **Date:** [15th Jule 2019]

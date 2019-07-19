@@ -253,4 +253,4 @@ class ChoiceValidator(BaseValidator):
 
         """
         if value not in self.choices:
-            raise ValidationError(self.message.format(**dict(allowed_values=self.choices)))
+            raise ValidationError(detail=self.message.format(**dict(allowed_values=self.choices)))

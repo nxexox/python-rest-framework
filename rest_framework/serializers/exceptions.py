@@ -19,4 +19,5 @@ class ValidationError(ApiException):
         :param str code: Code, for check error type and get current error message.
 
         """
+        super().__init__(*args, **kwargs)
         self.code = code

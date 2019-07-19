@@ -20,7 +20,7 @@ from rest_framework.serializers.serializers import BaseSerializer, Serializer, L
 from rest_framework.exceptions import SkipError
 from rest_framework.serializers.exceptions import ValidationError
 
-from rest_framework.tests.serializers_for_tests import (
+from tests.serializers_for_tests import (
     SerializerPrimitiveField, SerializerMixinSingle, SerializerMixinMany, SerializerMixinRequired,
     InheritSecondLevelChild
 )

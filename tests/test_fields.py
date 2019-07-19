@@ -20,7 +20,7 @@ from rest_framework.serializers.validators import (
     RequiredValidator, MaxValueValidator, MinValueValidator, MinLengthValidator, MaxLengthValidator
 )
 
-from rest_framework.tests.serializers_for_tests import SerializerMethodFieldDefault, SerializerMethodFieldSingle
+from tests.serializers_for_tests import SerializerMethodFieldDefault, SerializerMethodFieldSingle
 
 
 class BaseFieldTestCase(TestCase):

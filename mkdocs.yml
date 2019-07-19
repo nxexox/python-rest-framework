@@ -3,7 +3,7 @@ site_description: Python Rest Framework - Web APIs for Python
 site_author: Deys Timofey
 site_name: Python Rest Framework
 
-copyright: 'Copyright (c) 2018, Deys Timofey All rights reserved.'
+copyright: 'Copyright (c) 2019, Deys Timofey All rights reserved.'
 
 repo_name: GitHub
 repo_url: https://github.com/nxexox/python-rest-framework
@@ -12,9 +12,15 @@ edit_uri: /blob/master/docs/
 nav:
   - Home: 'index.md'
   - API:
-    - Serializer fields: 'api-guid/fields.md'
     - Serializers: 'api-guid/serializers.md'
-    - Validation: 'api-guid/validators.md'
+    - Serializers Fields: 'api-guid/fields.md'
+    - Serializers Validation: 'api-guid/validators.md'
+    - BaseViews: 'api-guid/views/views.md'
+    - ViewsMixins: 'api-guid/views/mixins.md'
+    - PaginationViews: 'api-guid/views/paginations.md'
+    - FlaskViews: 'api-guid/views/flask.md'
+    - AioHTTPViews: 'api-guid/views/aiohttp.md'
+    - SanicViews: 'api-guid/views/sanic.md'
   - Release Notes: 'release-notes.md'
 
 theme:

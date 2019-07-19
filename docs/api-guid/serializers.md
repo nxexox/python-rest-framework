@@ -5,76 +5,71 @@ Serializers allow complex data such as querysets and model instances to be conve
 ## Declaring Serializers
 
 Let's start by creating a simple object we can use for example:
+```python
+from datetime import datetime
 
-    from datetime import datetime
+class Comment(object):
+    def __init__(self, author_name, content, created=False):
+        self.author_name = author_name
+        self.content = content
+        self.created = bool(created)
 
-    class Comment(object):
-        def __init__(self, author_name, content, created=False):
-            self.author_name = author_name
-            self.content = content
-            self.created = bool(created)
-
-    comment = Comment(author_name='example_name', content='foo bar')
-
+comment = Comment(author_name='example_name', content='foo bar')
+```
 We'll declare a serializer that we can use to serialize and deserialize data that corresponds to `Comment` objects.
+```python
+from rest_framework import serializers
 
-    from rest_framework import serializers
-
-    class CommentSerializer(serializers.Serializer):
-        author_name = serializers.CharField(required=True)
-        content = serializers.CharField(max_length=200)
-        created = serializers.BooleanField(required=True)
-
+class CommentSerializer(serializers.Serializer):
+    author_name = serializers.CharField(required=True)
+    content = serializers.CharField(max_length=200)
+    created = serializers.BooleanField(required=True)
+```
 ---
 
 ## Serializing objects
 
 We can now use `CommentSerializer` to serialize a comment, or list of comments.
-
-    serializer = CommentSerializer(comment)
-    serializer.data
-    # {'author_name': 'example_name', 'content': 'foo bar', 'created': False}
-
-At this point we've translated the model instance into Python native datatypes.  To finalise the serialization process we render the data into `json`.
-
-    from rest_framework.renderers import JSONRenderer
-
-    json = JSONRenderer().render(serializer.data)
-    json
-    # b'{"author_name":"example","content":"foo bar","created":false}'
-
+```python
+serializer = CommentSerializer(comment)
+serializer.data
+# {'author_name': 'example_name', 'content': 'foo bar', 'created': False}
+```
 ---
 
 ## Deserializing objects
 
-Deserialization is similar. First we parse a stream into Python native datatypes...
-
-    import io
-    from rest_framework.parsers import JSONParser
-
-    stream = io.BytesIO(json)
-    data = JSONParser().parse(stream)
-
-...then we restore those native datatypes into a dictionary of validated data.
-
-    serializer = CommentSerializer(data=data)
-    serializer.is_valid()
-    # True
-    serializer.validated_data
-    # {'content': 'foo bar', 'author_name': 'example', 'created': False)}
-
+We restore those native datatypes into a dictionary of validated data.
+```python
+serializer = CommentSerializer(data=data)
+serializer.is_valid()
+# True
+serializer.validated_data
+# {'content': 'foo bar', 'author_name': 'example', 'created': False)}
+```
+With the same ease, you can deserialize several objects. You just need to add the `many=True` flag to the serializer constructor.
+```python
+serializer = CommentSerializer(data=[data, data], many=True)
+serializer.is_valid()
+# True
+serializer.validated_data
+# [
+#   {'content': 'foo bar', 'author_name': 'example', 'created': False)}, 
+#   {'content': 'foo bar', 'author_name': 'example', 'created': False)}
+# ]
+```
 ---
 
 ## Validation
 
 When deserializing data, you always need to call `is_valid()` before attempting to access the validated data. If any validation errors occur, the `.errors` property will contain a dictionary representing the resulting error messages.  For example:
-
-    serializer = CommentSerializer(data={'author_name': 'foobar', 'content': 'baz'})
-    serializer.is_valid()
-    # False
-    serializer.errors
-    # {'author_name': [u'This field is required.'], 'created': [u'This field is required.']}
-
+```python
+serializer = CommentSerializer(data={'author_name': 'foobar', 'content': 'baz'})
+serializer.is_valid()
+# False
+serializer.errors
+# {'created': ['This field is required.']}
+```
 Each key in the dictionary will be the field name, and the values will be lists of strings of any error messages corresponding to that field.  The `non_field_errors` key may also be present, and will list any general validation errors.
 
 When deserializing a list of items, errors will be returned as a list of dictionaries representing each of the deserialized items.
@@ -82,12 +77,14 @@ When deserializing a list of items, errors will be returned as a list of diction
 ### Raising an exception on invalid data
 
 The `.is_valid()` method takes an optional `raise_exception` flag that will cause it to raise a `serializers.ValidationError` exception if there are validation errors.
-
-    try:
-        serializer.is_valid(raise_exception=True)
-    except ValidationError:
-        print(serializer.errors)
-
+```python
+serializer = CommentSerializer(data={'author_name': 'foobar', 'content': 'baz'})
+try:
+    serializer.is_valid(raise_exception=True)
+except ValidationError:
+    print(serializer.errors)
+# {'created': ['This field is required.']}
+```
 ---
 
 ### Field-level validation
@@ -97,58 +94,58 @@ You can specify custom field-level validation by adding `.validate_<field_name>`
 These methods take a single argument, which is the field value that requires validation.
 
 Your `validate_<field_name>` methods should return the validated value or raise a `serializers.ValidationError`.  For example:
+```python
+from rest_framework import serializers
 
-    from rest_framework import serializers
+class BlogPostSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=100)
+    content = serializers.CharField()
 
-    class BlogPostSerializer(serializers.Serializer):
-        title = serializers.CharField(max_length=100)
-        content = serializers.CharField()
+    def validate_title(self, value):
+        """
+        Check that the blog post is about Django.
 
-        def validate_title(self, value):
-            """
-            Check that the blog post is about Django.
-
-            """
-            if 'rest' not in value.lower():
-                raise serializers.ValidationError("Blog post is not about Rest")
-            return value
-
+        """
+        if 'rest' not in value.lower():
+            raise serializers.ValidationError("Blog post is not about Rest")
+        return value
+```
 ---
 
 ### Object-level validation
 
 To do any other validation that requires access to multiple fields, add a method called `.validate()` to your `Serializer` subclass.  This method takes a single argument, which is a dictionary of field values.  It should raise a `serializers.ValidationError` if necessary, or just return the validated values.  For example:
+```python
+from rest_framework import serializers
 
-    from rest_framework import serializers
+class EventSerializer(serializers.Serializer):
+    description = serializers.CharField(max_length=100)
+    start = serializers.IntegerField()
+    finish = serializers.IntegerField()
 
-    class EventSerializer(serializers.Serializer):
-        description = serializers.CharField(max_length=100)
-        start = serializers.IntegerField()
-        finish = serializers.IntegerField()
+    def validate(self, data):
+        """
+        Check that the start is before the stop.
 
-        def validate(self, data):
-            """
-            Check that the start is before the stop.
-
-            """
-            if data['start'] > data['finish']:
-                raise serializers.ValidationError("finish must occur after start")
-            return data
-
+        """
+        if data['start'] > data['finish']:
+            raise serializers.ValidationError("finish must occur after start")
+        return data
+```
 ---
 
 ### Validators
 
 Individual fields on a serializer can include validators, by declaring them on the field instance, for example:
+```python
+def multiple_of_ten(value):
+    if value % 10 != 0:
+        raise serializers.ValidationError('Not a multiple of ten')
 
-    def multiple_of_ten(value):
-        if value % 10 != 0:
-            raise serializers.ValidationError('Not a multiple of ten')
-
-    class GameRecord(serializers.Serializer):
-        score = IntegerField(validators=[multiple_of_ten])
-        ...
-
+class GameRecord(serializers.Serializer):
+    score = IntegerField(validators=[multiple_of_ten])
+    # ...
+```
 For more information see the [validators documentation](validators.md).
 
 ---
@@ -166,40 +163,40 @@ When passing data to a serializer instance, the unmodified data will be made ava
 The previous examples are fine for dealing with objects that only have simple datatypes, but sometimes we also need to be able to represent more complex objects, where some of the attributes of an object might not be simple datatypes such as strings, dates or integers.
 
 The `Serializer` class is itself a type of `Field`, and can be used to represent relationships where one object type is nested inside another.
+```python
+class UserSerializer(serializers.Serializer):
+    email = serializers.CharField(required=True)
+    username = serializers.CharField(max_length=100)
 
-    class UserSerializer(serializers.Serializer):
-        email = serializers.CharField(required=True)
-        username = serializers.CharField(max_length=100)
-
-    class CommentSerializer(serializers.Serializer):
-        user = UserSerializer()
-        content = serializers.CharField(max_length=200)
-
+class CommentSerializer(serializers.Serializer):
+    user = UserSerializer()
+    content = serializers.CharField(max_length=200)
+```
 If a nested representation may optionally accept the `None` value you should pass the `required=False` flag to the nested serializer.
-
-    class CommentSerializer(serializers.Serializer):
-        user = UserSerializer(required=False)  # May be an anonymous user.
-        content = serializers.CharField(max_length=200)
-
+```python
+class CommentSerializer(serializers.Serializer):
+    user = UserSerializer(required=False)  # May be an anonymous user.
+    content = serializers.CharField(max_length=200)
+```
 Similarly if a nested representation should be a list of items, you should pass the `many=True` flag to the nested serialized.
-
-    class CommentSerializer(serializers.Serializer):
-        user = UserSerializer(required=False)
-        edits = UserSerializer(many=True)  # A nested list of 'user' items.
-        content = serializers.CharField(max_length=200)
-
+```python
+class CommentSerializer(serializers.Serializer):
+    user = UserSerializer(required=False)
+    edits = UserSerializer(many=True)  # A nested list of 'user' items.
+    content = serializers.CharField(max_length=200)
+```
 ---
 
 ## Writable nested representations
 
 When dealing with nested representations that support deserializing the data, any errors with nested objects will be nested under the field name of the nested object.
-
-    serializer = CommentSerializer(data={'user': {'username': 'doe'}, 'content': 'baz'})
-    serializer.is_valid()
-    # False
-    serializer.errors
-    # {'user': {'email': [u'Enter a valid e-mail address.']}}
-
+```python
+serializer = CommentSerializer(data={'user': {'username': 'doe'}, 'content': 'baz'})
+serializer.is_valid()
+# False
+serializer.errors
+# {'user': {'email': [u'Enter a valid e-mail address.']}}
+```
 Similarly, the `.validated_data` property will include nested data structures.
 
 ---
@@ -241,21 +238,21 @@ The signatures for these methods are as follows:
 ---
 
 
-### - `.to_representation(self, instance)`
+### `.to_representation(self, instance)`
 
 Takes the object instance that requires serialization, and should return a primitive representation. Typically this means returning a structure of built-in Python datatypes. The exact types that can be handled will depend on the render classes you have configured for your API.
 
 May be overridden in order modify the representation style. For example:
-
-    def to_representation(self, instance):
-        """Convert `username` to lowercase."""
-        ret = super().to_representation(instance)
-        ret['username'] = ret['username'].lower()
-        return ret
-
+```python
+def to_representation(self, instance):
+    """Convert `username` to lowercase."""
+    ret = super().to_representation(instance)
+    ret['username'] = ret['username'].lower()
+    return ret
+```
 ---
 
-### - ``.to_internal_value(self, data)``
+### `.to_internal_value(self, data)`
 
 Takes the unvalidated incoming data as input and should return the validated data that will be made available as `serializer.validated_data`.
 
@@ -268,24 +265,24 @@ The `data` argument passed to this method will normally be the value of `request
 ## Serializer Inheritance
 
 You can extend and reuse serializers through inheritance. This allows you to declare a common set of fields or methods on a parent class that can then be used in a number of serializers. For example,
+```python
+class MyBaseSerializer(Serializer):
+    my_field = serializers.CharField()
 
-    class MyBaseSerializer(Serializer):
-        my_field = serializers.CharField()
-
-        def validate_my_field(self, value):
-            ...
-
-    class MySerializer(MyBaseSerializer):
+    def validate_my_field(self, value):
         ...
 
+class MySerializer(MyBaseSerializer):
+    ...
+```
 It’s possible to declaratively remove a `Field` inherited from a parent class by setting the name to be `None` on the subclass.
+```python
+class MyBaseSerializer(ModelSerializer):
+    my_field = serializers.CharField()
 
-    class MyBaseSerializer(ModelSerializer):
-        my_field = serializers.CharField()
-
-    class MySerializer(MyBaseSerializer):
-        my_field = None
-
+class MySerializer(MyBaseSerializer):
+    my_field = None
+```
 ## Dynamically modifying fields
 
 Once a serializer has been initialized, the dictionary of fields that are set on the serializer may be accessed using the `.fields` attribute.  Accessing and modifying this attribute allows you to dynamically modify the serializer.

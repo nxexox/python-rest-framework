@@ -41,7 +41,7 @@ class ValidatorTestCases(unittest.TestCase):
         :param dict case: Current case.
 
         """
-        if issubclass(self.validator_class, MinLengthValidator):
+        if issubclass(self.validator_class, ChoiceValidator):
             print()
 
         validator = self.validator_class(**case.get('init', {}))

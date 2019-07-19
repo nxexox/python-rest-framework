@@ -2,16 +2,22 @@
 Errors for serializers.
 
 """
+from rest_framework.exceptions import ApiException
 
 
-class ValidationError(Exception):
+class ValidationError(ApiException):
     """
     Validation error.
 
     """
-    # TODO: This error will then be inherited from an APIException and will be able to handle the error response handler.
     default_detail = 'Invalid input.'
 
-    def __init__(self, detail=None, code=None):
-        self.detail = detail
+    def __init__(self, code=None, *args, **kwargs):
+        """
+        Validation error.
+
+        :param str code: Code, for check error type and get current error message.
+
+        """
+        super().__init__(*args, **kwargs)
         self.code = code

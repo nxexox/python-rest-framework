@@ -25,6 +25,9 @@ class BaseValidator(object):
         """
         self.message = message or self.message
 
+    def fail(self, detail=None, code=None):
+        raise ValidationError(detail=detail, code=code)
+
     def __call__(self, value):
         """
         Validation.
@@ -52,7 +55,7 @@ class RequiredValidator(BaseValidator):
 
         """
         if value is None:
-            raise ValidationError(self.message)
+            self.fail(detail=self.message)
 
 
 class MinLengthValidator(BaseValidator):
@@ -82,7 +85,7 @@ class MinLengthValidator(BaseValidator):
 
         """
         if len(value) < self.min_length:
-            raise ValidationError(self.message.format(min_length=self.min_length))
+            self.fail(detail=self.message.format(min_length=self.min_length))
 
 
 class MaxLengthValidator(BaseValidator):
@@ -112,7 +115,7 @@ class MaxLengthValidator(BaseValidator):
 
         """
         if len(value) > self.max_length:
-            raise ValidationError(self.message.format(max_length=self.max_length))
+            self.fail(detail=self.message.format(max_length=self.max_length))
 
 
 class MinValueValidator(BaseValidator):
@@ -142,7 +145,7 @@ class MinValueValidator(BaseValidator):
 
         """
         if value < self.min_value:
-            raise ValidationError(self.message.format(min_value=self.min_value))
+            self.fail(detail=self.message.format(min_value=self.min_value))
 
 
 class MaxValueValidator(BaseValidator):
@@ -172,7 +175,7 @@ class MaxValueValidator(BaseValidator):
 
         """
         if value > self.max_value:
-            raise ValidationError(self.message.format(max_value=self.max_value))
+            self.fail(detail=self.message.format(max_value=self.max_value))
 
 
 class RegexValidator(BaseValidator):
@@ -218,7 +221,7 @@ class RegexValidator(BaseValidator):
 
         """
         if not (self.inverse_match is not bool(self.regex.search(value))):
-            raise ValidationError(self.message)
+            self.fail(detail=self.message)
 
 
 class ChoiceValidator(BaseValidator):
@@ -250,4 +253,4 @@ class ChoiceValidator(BaseValidator):
 
         """
         if value not in self.choices:
-            raise ValidationError(self.message.format(**dict(allowed_values=self.choices)))
+            raise ValidationError(detail=self.message.format(**dict(allowed_values=self.choices)))

@@ -383,7 +383,7 @@ class Serializer(BaseSerializer):
                 errors[field_name] = 'Could not parse data for field `{}`.'.format(field_name)
 
         if any(errors):
-            raise ValidationError(errors)
+            raise ValidationError(detail=errors)
 
         return validated_data
 
@@ -421,7 +421,7 @@ class Serializer(BaseSerializer):
         # If you need to throw an error, we throw.
         if self._errors and raise_exception:
             self._validated_data = OrderedDict()
-            raise ValidationError(self._errors)
+            raise ValidationError(detail=self._errors)
 
         # Return validation result.
         return not bool(self._errors)
@@ -540,12 +540,12 @@ class ListSerializer(Serializer):
             message = self.error_messages['not_a_list'].format(
                 input_type=type(data).__name__
             )
-            raise ValidationError({'non_field_errors': [message]}, code='not_a_list')
+            raise ValidationError(detail={'non_field_errors': [message]}, code='not_a_list')
 
         # Validation that this is not an empty value and whether it is empty.
         if not self.allow_empty and len(data) == 0:
             message = self.error_messages['empty']
-            raise ValidationError({'non_field_errors': [message]}, code='empty')
+            raise ValidationError(detail={'non_field_errors': [message]}, code='empty')
 
         res, errors = [], []  # Make storage for results.
 
@@ -562,7 +562,7 @@ class ListSerializer(Serializer):
 
         # If the conversion and validation failed.
         if any(errors):
-            raise ValidationError(errors)
+            raise ValidationError(detail=errors)
 
         # We return the transformed and validated data.
         return res
@@ -607,7 +607,7 @@ class ListSerializer(Serializer):
         # If you need to throw an error, we throw.
         if self._errors and raise_exception:
             self._validated_data = []
-            raise ValidationError(self._errors)
+            raise ValidationError(detail=self._errors)
 
         # Return validation result.
         return not bool(self._errors)

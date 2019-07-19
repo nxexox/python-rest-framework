@@ -8,6 +8,20 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.3.0
+
+**Date:** [19th Jule 2019]
+
+* Added [`base views`][BaseViews]
+* Added [`base views mixins`][ViewsMixins]
+* Added [`views pagination`][ViewsPaginations]
+* Added ApiException
+* Added [`views for Flask`][FlaskViews]
+* Added [`views for AioHttp`][AioHttpViews]
+* Added [`views for Sanic`][SanicViews]
+* Added utils.decorators for class check attributes and signature
+* Fix not actual docs
+
 ### 0.2.2
 
 **Date:** [15th Jule 2019]
@@ -85,6 +99,12 @@ Major version numbers (x.0.0) are reserved for substantial project milestones.
 * Push to Open Source community.
 
 
+[BaseViews]: api-guid/views/views
+[ViewsMixins]: api-guid/views/mixins
+[ViewsPaginations]: api-guid/views/paginations
+[FlaskViews]: api-guid/views/flask
+[AioHttpViews]: api-guid/views/aiohttp
+[SanicViews]: api-guid/views/sanic
 [DateField]: api-guid/fields.md#-datefield
 [BooleanNullField]: api-guid/fields.md#-booleannullfield
 [BooleanField]: api-guid/fields.md#-booleanfield

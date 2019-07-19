@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+        <meta name="description" content="Python Rest Framework - Web APIs for Python">
+    
+    
+        <meta name="author" content="Deys Timofey">
+    
+    
+        <link rel="canonical" href="https://nxexox.github.io/python-rest-framework/api-guid/views/flask/">
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+
+    <title>FlaskViews - Python Rest Framework</title>
+
+    <link href="../../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/font-hack/2.018/css/hack.min.css">
+    <link href='//fonts.googleapis.com/css?family=PT+Sans:400,400italic,700,700italic&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link href="../../../css/cinder.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js"></script>
+    <script>
+    WebFont.load({
+        google: {
+            families: ['Open Sans', 'PT Sans']
+        }
+    });
+    </script>
+
+    
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+
+            <a class="navbar-brand" href="../../..">Python Rest Framework</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="../../..">Home</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../../serializers/">Serializers</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../fields/">Serializers Fields</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../validators/">Serializers Validation</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../views/">BaseViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../mixins/">ViewsMixins</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../paginations/">PaginationViews</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">FlaskViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../aiohttp/">AioHTTPViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../sanic/">SanicViews</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../../../release-notes/">Release Notes</a>
+                    </li>
+                
+                
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                            <i class="fa fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="next" href="../paginations/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../aiohttp/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/blob/master/docs/api-guid/views/flask.md"><i class="fa fa-github"></i> Edit on GitHub</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/nxexox/python-rest-framework/"><i class="fa fa-github"></i> GitHub</a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    <div class="container">
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#flask-views">Flask Views</a></li>
+        <li class="first-level "><a href="#flaskbaseviews">FlaskBaseViews</a></li>
+            <li class="second-level"><a href="#flaskbaseapiview">FlaskBaseApiView</a></li>
+                
+            <li class="second-level"><a href="#flaskbasemethodview">FlaskBaseMethodView</a></li>
+                
+        <li class="first-level "><a href="#flask-mixins">Flask Mixins</a></li>
+            <li class="second-level"><a href="#getvalidjsonmixin">GetValidJsonMixin</a></li>
+                
+                <li class="third-level"><a href="#get_valid_json">.get_valid_json()</a></li>
+        <li class="first-level "><a href="#flaskgenericviews">FlaskGenericViews</a></li>
+            <li class="second-level"><a href="#getserializerapigenericview">GetSerializerApiGenericView</a></li>
+                
+            <li class="second-level"><a href="#getresponseapigenericview">GetResponseApiGenericView</a></li>
+                
+            <li class="second-level"><a href="#getvalidjsonapigenericview">GetValidJsonApiGenericView</a></li>
+                
+            <li class="second-level"><a href="#apigenericview">ApiGenericView</a></li>
+                
+            <li class="second-level"><a href="#getserializerapigenericmethodview">GetSerializerApiGenericMethodView</a></li>
+                
+            <li class="second-level"><a href="#getresponseapigenericmethodview">GetResponseApiGenericMethodView</a></li>
+                
+            <li class="second-level"><a href="#getvalidjsonapigenericmethodview">GetValidJsonApiGenericMethodView</a></li>
+                
+            <li class="second-level"><a href="#apigenericmethodview">ApiGenericMethodView</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="flask-views"><a class="toclink" href="#flask-views">Flask Views</a></h1>
+<p><code>Flask</code> has two <code>BaseClassViews</code>: <code>View</code>, <code>MethodView</code>. <code>Python-Rest-Framework</code> is connected to both.</p>
+<p><strong>Note:</strong> To use <code>FlaskViews</code> you need to install <code>Flask</code>.</p>
+<p><strong>All Classes can be found here:</strong></p>
+<pre><code class="python">from rest_framework.views.flask import *
+</code></pre>
+
+<hr />
+<h1 id="flaskbaseviews"><a class="toclink" href="#flaskbaseviews">FlaskBaseViews</a></h1>
+<hr />
+<h2 id="flaskbaseapiview"><a class="toclink" href="#flaskbaseapiview">FlaskBaseApiView</a></h2>
+<p>This class is a successor: <code>flask.views.View</code>,<code>rest_framework.views.BaseApiView</code>.</p>
+<p>What the class consists of:</p>
+<ul>
+<li>The class is completely safe. The class does not completely change the source code of Flask, and does not restrict from the source functions of the framework.</li>
+<li>Class implemented properties: <code>request_object</code>,<code>current_request_method</code>.</li>
+<li>Using the <code>rest_framework.views.BaseApiView._dispatch</code> method is configured and can be adjusted by setting the <code>use_dispatch</code>. By default <code>use_dispatch</code> set in <code>True</code>.</li>
+<li>The class itself uses <code>response_class=json_response</code>:</li>
+</ul>
+<pre><code class="python">from flask import jsonify, make_response
+
+def json_response(data, status=200, content_type='application/json'):
+    return make_response(jsonify(data), status, content_type=content_type)
+</code></pre>
+
+<p><strong>Example:</strong></p>
+<pre><code class="python">from rest_framework.views.flask import FlaskBaseApiView
+
+
+class MyView(FlaskBaseApiView):
+    def dispatch_request(self, *args, **kwargs):
+        # your view code
+</code></pre>
+
+<hr />
+<h2 id="flaskbasemethodview"><a class="toclink" href="#flaskbasemethodview">FlaskBaseMethodView</a></h2>
+<p>This class is a successor: <code>flask.views.MethodView</code>,<code>rest_framework.views.BaseApiView</code>.</p>
+<p>What the class consists of:</p>
+<ul>
+<li>The class is completely safe. The class does not completely change the source code of Flask, and does not restrict from the source functions of the framework.</li>
+<li>Class implemented properties: <code>request_object</code>,<code>current_request_method</code>.</li>
+<li>Using the <code>rest_framework.views.BaseApiView._dispatch</code> method is configured and can be adjusted by setting the <code>use_dispatch</code>. By default <code>use_dispatch</code> set in <code>True</code>.</li>
+<li>The class itself uses <code>response_class=json_response</code>:</li>
+</ul>
+<pre><code class="python">from flask import jsonify, make_response
+
+def json_response(data, status=200, content_type='application/json'):
+    return make_response(jsonify(data), status, content_type=content_type)
+</code></pre>
+
+<p><strong>Example:</strong></p>
+<pre><code class="python">from rest_framework.views.flask import FlaskBaseMethodView
+
+
+class MyView(FlaskBaseMethodView):
+    def get(self):
+        # your view code
+</code></pre>
+
+<hr />
+<h1 id="flask-mixins"><a class="toclink" href="#flask-mixins">Flask Mixins</a></h1>
+<p>Mixins for <code>Flask</code> ​​are the same useful mixins as <code>rest_framework.views.mixins</code>, but they can only be used in <code>Flask</code>.</p>
+<hr />
+<h2 id="getvalidjsonmixin"><a class="toclink" href="#getvalidjsonmixin">GetValidJsonMixin</a></h2>
+<p>The class is successor: <code>rest_framework.views.GetSerializerMixin</code></p>
+<p>Mixin adds the <code>.get_valid_json()</code> method, which parses the query and body of the query, merges them, and automatically serializes it and validates it with <code>rest_framework.serializers.Serializer</code>.
+You can describe the serializers themselves in the <a href="/api-guid/views/mixins#getserializermixin"><code>serializers_classes</code></a> class attribute.</p>
+<h3 id="get_valid_json"><a class="toclink" href="#get_valid_json"><code>.get_valid_json()</code></a></h3>
+<p>This method retrieves from the request all the data that the user sent. Serializes and validates them and returns as a dictionary.</p>
+<p><strong>Signature:</strong> <code>.get_valid_json(parse_query=False, raise_exception=True) -&gt; dict</code></p>
+<ul>
+<li><code>parse_query(bool)</code> - Parse query params?</li>
+<li><code>raise_exception(bool)</code> - Raise exception <code>ValidationError</code>, if validation error.</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code class="python">from rest_framework.views.flask import FlaskBaseMethodView, GetValidJsonMixin
+
+class MyView(FlaskBaseMethodView, GetValidJsonMixin):
+    serializer_classes = {
+        'get': MySerializer()
+    }
+    def get(self):
+        request_data = self.get_valid_json()
+
+#############
+### Equivalent to
+#############
+
+from rest_framework.views.flask import FlaskBaseMethodView
+from rest_framework.views.mixins import GetSerializerMixin
+
+class MyView(FlaskBaseMethodView, GetSerializerMixin):
+    def get(self):
+        serializer_class = self.get_request_serializer()
+        try:
+            data = self.request_object.get_json()
+        except Exception:
+            data = {}
+        ser = serializer_class(data=data)
+        ser.is_valid(raise_exception=True)
+        request_data = ser.validated_data
+
+</code></pre>
+
+<hr />
+<h1 id="flaskgenericviews"><a class="toclink" href="#flaskgenericviews">FlaskGenericViews</a></h1>
+<p><code>GenericViews</code> are ready-to-use classes, compiled from base classes and mixins for various needs.</p>
+<hr />
+<h2 id="getserializerapigenericview"><a class="toclink" href="#getserializerapigenericview">GetSerializerApiGenericView</a></h2>
+<p>Generic Api view for <code>GetSerializer</code> methods.</p>
+<p><strong>Parents:</strong> </p>
+<ul>
+<li><code>rest_framework.views.flask.FlaskBaseApiView</code></li>
+<li><code>rest_framework.views.mixins.GetSerializer</code></li>
+</ul>
+<hr />
+<h2 id="getresponseapigenericview"><a class="toclink" href="#getresponseapigenericview">GetResponseApiGenericView</a></h2>
+<p>Generic Api view for <code>GetResponse</code> methods.</p>
+<p><strong>Parents:</strong> </p>
+<ul>
+<li><code>rest_framework.views.flask.FlaskBaseApiView</code></li>
+<li><code>rest_framework.views.mixins.GetResponse</code></li>
+</ul>
+<hr />
+<h2 id="getvalidjsonapigenericview"><a class="toclink" href="#getvalidjsonapigenericview">GetValidJsonApiGenericView</a></h2>
+<p>Generic Api view for <code>GetValidJson</code> methods.</p>
+<p><strong>Parents:</strong> </p>
+<ul>
+<li><code>rest_framework.views.flask.FlaskBaseApiView</code></li>
+<li><code>rest_framework.views.flask.mixins.GetValidJson</code></li>
+</ul>
+<hr />
+<h2 id="apigenericview"><a class="toclink" href="#apigenericview">ApiGenericView</a></h2>
+<p>Generic Api view for all mixins methods.</p>
+<p><strong>Parents:</strong> </p>
+<ul>
+<li><code>rest_framework.views.flask.FlaskBaseApiView</code></li>
+<li><code>rest_framework.views.flask.mixins.GetValidJson</code></li>
+<li><code>rest_framework.views.mixins.GetSerializer</code></li>
+<li><code>rest_framework.views.mixins.GetResponse</code></li>
+</ul>
+<hr />
+<h2 id="getserializerapigenericmethodview"><a class="toclink" href="#getserializerapigenericmethodview">GetSerializerApiGenericMethodView</a></h2>
+<p>Generic Api method view for <code>GetSerializer</code> methods.</p>
+<p><strong>Parents:</strong> </p>
+<ul>
+<li><code>rest_framework.views.flask.FlaskBaseMethodView</code></li>
+<li><code>rest_framework.views.mixins.GetSerializer</code></li>
+</ul>
+<hr />
+<h2 id="getresponseapigenericmethodview"><a class="toclink" href="#getresponseapigenericmethodview">GetResponseApiGenericMethodView</a></h2>
+<p>Generic Api method view for <code>GetResponse</code> methods.</p>
+<p><strong>Parents:</strong> </p>
+<ul>
+<li><code>rest_framework.views.flask.FlaskBaseMethodView</code></li>
+<li><code>rest_framework.views.mixins.GetResponse</code></li>
+</ul>
+<hr />
+<h2 id="getvalidjsonapigenericmethodview"><a class="toclink" href="#getvalidjsonapigenericmethodview">GetValidJsonApiGenericMethodView</a></h2>
+<p>Generic Api method view for <code>GetValidJson</code> methods.</p>
+<p><strong>Parents:</strong> </p>
+<ul>
+<li><code>rest_framework.views.flask.FlaskBaseMethodView</code></li>
+<li><code>rest_framework.views.flask.mixins.GetValidJson</code></li>
+</ul>
+<hr />
+<h2 id="apigenericmethodview"><a class="toclink" href="#apigenericmethodview">ApiGenericMethodView</a></h2>
+<p>Generic Api method view for all mixins methods.</p>
+<p><strong>Parents:</strong> </p>
+<ul>
+<li><code>rest_framework.views.flask.FlaskBaseMethodView</code></li>
+<li><code>rest_framework.views.flask.mixins.GetValidJson</code></li>
+<li><code>rest_framework.views.mixins.GetSerializer</code></li>
+<li><code>rest_framework.views.mixins.GetResponse</code></li>
+</ul>
+<hr /></div>
+        
+    </div>
+
+    <footer class="col-md-12 text-center">
+        <hr>
+        <p>
+        <small>Copyright (c) 2019, Deys Timofey All rights reserved.<br></small>
+        
+        <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p></small>
+    </footer>
+
+    <script src="../../../js/jquery-1.10.2.min.js"></script>
+    <script src="../../../js/bootstrap-3.0.3.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script>
+    var base_url = '../../..';
+    </script>
+    <script data-main="../../../mkdocs/js/search.js" src="../../../mkdocs/js/require.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script src="../../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        From here you can search these documents. Enter your search terms below.
+                    </p>
+                    <form role="form">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                        </div>
+                    </form>
+                    <div id="mkdocs-search-results"></div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </body>
+
+</html>

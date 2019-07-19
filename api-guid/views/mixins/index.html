@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+        <meta name="description" content="Python Rest Framework - Web APIs for Python">
+    
+    
+        <meta name="author" content="Deys Timofey">
+    
+    
+        <link rel="canonical" href="https://nxexox.github.io/python-rest-framework/api-guid/views/mixins/">
+    
+    <link rel="shortcut icon" href="../../../img/favicon.ico">
+
+    <title>ViewsMixins - Python Rest Framework</title>
+
+    <link href="../../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/font-hack/2.018/css/hack.min.css">
+    <link href='//fonts.googleapis.com/css?family=PT+Sans:400,400italic,700,700italic&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../../css/base.css" rel="stylesheet">
+    <link href="../../../css/cinder.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../css/highlight.css">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js"></script>
+    <script>
+    WebFont.load({
+        google: {
+            families: ['Open Sans', 'PT Sans']
+        }
+    });
+    </script>
+
+    
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+
+            <a class="navbar-brand" href="../../..">Python Rest Framework</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="../../..">Home</a>
+                    </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">API <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../../serializers/">Serializers</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../fields/">Serializers Fields</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../validators/">Serializers Validation</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../views/">BaseViews</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">ViewsMixins</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../paginations/">PaginationViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../flask/">FlaskViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../aiohttp/">AioHTTPViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../sanic/">SanicViews</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../../../release-notes/">Release Notes</a>
+                    </li>
+                
+                
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                            <i class="fa fa-search"></i> Search
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="next" href="../views/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../paginations/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/blob/master/docs/api-guid/views/mixins.md"><i class="fa fa-github"></i> Edit on GitHub</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/nxexox/python-rest-framework/"><i class="fa fa-github"></i> GitHub</a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    <div class="container">
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#views-mixins">Views Mixins</a></li>
+            <li class="second-level"><a href="#mixins">Mixins</a></li>
+                
+            <li class="second-level"><a href="#getrequestabstractmixin">GetRequestAbstractMixin</a></li>
+                
+            <li class="second-level"><a href="#getserializermixin">GetSerializerMixin</a></li>
+                
+                <li class="third-level"><a href="#get_request_serializer">.get_request_serializer()</a></li>
+                <li class="third-level"><a href="#get_response_serializer">.get_response_serializer()</a></li>
+                <li class="third-level"><a href="#get_serializer">.get_serializer()</a></li>
+            <li class="second-level"><a href="#getresponsemixin">GetResponseMixin</a></li>
+                
+                <li class="third-level"><a href="#get_response">.get_response()</a></li>
+                <li class="third-level"><a href="#get_list_response">.get_list_response()</a></li>
+        <li class="first-level "><a href="#writing-custom-frameworkbaseview">Writing custom FrameworkBaseView</a></li>
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="views-mixins"><a class="toclink" href="#views-mixins">Views Mixins</a></h1>
+<p><code>Pytthon-Rest-Framework</code> provides views mixins, for easy customization of your <code>API</code>.</p>
+<p><code>View Mixins</code> is a powerful <code>Python-Rest-Framework</code> tool, with which you can very flexibly configure only the functionality that you need.</p>
+<p>Each mixin provides its own functionality and asks for its settings. <code>Views Mixins</code> do not overlap in functionality, so you can use any combination of them.</p>
+<p><code>Views Mixins</code> is not only common for all types of frameworks, but also specific for each framework.</p>
+<p><strong>All Mixins can be found here:</strong></p>
+<pre><code class="python">from rest_framework.views.mixins import *
+</code></pre>
+
+<hr />
+<h2 id="mixins"><a class="toclink" href="#mixins">Mixins</a></h2>
+<hr />
+<h2 id="getrequestabstractmixin"><a class="toclink" href="#getrequestabstractmixin">GetRequestAbstractMixin</a></h2>
+<p>Basic mixin, which is an asbestos class and requires the implementation of:</p>
+<ul>
+<li><code>request_object</code> - The class property that the query object returns. This property is used by all inherited mixins.
+The property requires implementation. In the base classes for frameworks, this property is already implemented and you do not need to worry.</li>
+</ul>
+<p><strong>Example(Flask):</strong></p>
+<pre><code class="python">from flask import request, jsonify, make_response
+from flask.views import View
+from rest_framework.views.mixins import GetRequestAbstractMixin
+
+
+class MyView(View, GetRequestAbstractMixin):
+
+    @property
+    def request_object(self):
+        return request
+</code></pre>
+
+<ul>
+<li><code>current_request_method</code> - A class property that returns the name of the current HTTP request method. <code>GET</code>,<code>POST</code> and <code>etc</code> &hellip;
+The property requires implementation. In the base class for frameworks, this property is already implemented and you do not need to worry.</li>
+</ul>
+<p><strong>Example(Flask):</strong></p>
+<pre><code class="python">from flask import request, jsonify, make_response
+from flask.views import View
+from rest_framework.views.mixins import GetRequestAbstractMixin
+
+
+class MyView(View, GetRequestAbstractMixin):
+
+    @property
+    def current_request_method(self):
+        return request.method
+</code></pre>
+
+<hr />
+<h2 id="getserializermixin"><a class="toclink" href="#getserializermixin">GetSerializerMixin</a></h2>
+<p>Mixin, which allows you to conveniently work with serializers.</p>
+<p>Provides methods: <code>get_serializer</code>,<code>get_request_serializer</code>, <code>get_response_serializer</code>.
+All these methods look for serializers in the class attribute <code>serializer_classes (Dict)</code> according to certain rules:</p>
+<ul>
+<li>At the first level of the dictionary, the name of the request method is <code>GET</code>,<code>POST</code> and etc:</li>
+</ul>
+<pre><code class="python">from rest_framework.views import GetSerializerMixin
+
+class ExampleView(GetSerializerMixin):
+    serializer_classes = {
+        'get': None,
+        'post': None
+    }
+</code></pre>
+
+<hr />
+<p><strong>Note:</strong> You must add the methods you want to use in your view.</p>
+<hr />
+<ul>
+<li>At the second level, there must be either a <code>Serializer</code> or another dictionary. The dictionary must consist of either one or two keys: <code>in</code>,<code>out</code>.</li>
+</ul>
+<pre><code class="python">from rest_framework.views import GetSerializerMixin
+
+class ExampleView(GetSerializerMixin):
+    serializer_classes = {
+        'get': GetSerializer,
+        'post': {
+            'in': PostRequestSerializer
+        },
+        'put': {
+            'in': PutRequestSerializer,
+            'out': PutResponseSerializer
+        }
+    }
+</code></pre>
+
+<h3 id="get_request_serializer"><a class="toclink" href="#get_request_serializer"><code>.get_request_serializer()</code></a></h3>
+<p>A method that returns a <code>Serializer</code> to process data from a client.</p>
+<pre><code class="python">from rest_framework.views import GetSerializerMixin
+
+class ExampleView(GetSerializerMixin):
+    serializer_classes = {
+        'get': GetSerializer,
+        'post': {
+            'in': PostRequestSerializer
+        },
+        'put': {
+            'in': PutRequestSerializer,
+            'out': PutResponseSerializer
+        },
+        'patch': {}
+    }
+
+    def get(self):
+        ser = self.get_request_serializer()
+        # ser - GetSerializer
+
+    def post(self):
+        ser = self.get_request_serializer()
+        # ser - PostRequestSerializer
+
+    def put(self):
+        ser = self.get_request_serializer()
+        # ser - PutRequestSerializer
+
+    def patch(self):
+        ser = self.get_request_serializer()
+        # ser - None
+
+    def delete(self):
+        ser = self.get_request_serializer()
+        # ser - None
+</code></pre>
+
+<h3 id="get_response_serializer"><a class="toclink" href="#get_response_serializer"><code>.get_response_serializer()</code></a></h3>
+<p>A method that returns a <code>Serializer</code> to serialize data to return to a user. For <code>Response</code>.</p>
+<pre><code class="python">from rest_framework.views import GetSerializerMixin
+
+class ExampleView(GetSerializerMixin):
+    serializer_classes = {
+        'get': GetSerializer,
+        'post': {
+            'in': PostRequestSerializer
+        },
+        'put': {
+            'in': PutRequestSerializer,
+            'out': PutResponseSerializer
+        },
+        'patch': {}
+    }
+
+    def get(self):
+        ser = self.get_response_serializer()
+        # ser - GetSerializer
+
+    def post(self):
+        ser = self.get_response_serializer()
+        # ser - None
+
+    def put(self):
+        ser = self.get_response_serializer()
+        # ser - PutResponseSerializer
+
+    def patch(self):
+        ser = self.get_response_serializer()
+        # ser - None
+
+    def delete(self):
+        ser = self.get_response_serializer()
+        # ser - None
+</code></pre>
+
+<h3 id="get_serializer"><a class="toclink" href="#get_serializer"><code>.get_serializer()</code></a></h3>
+<p>Method for search <code>Serializer</code>.</p>
+<p><strong>Signature:</strong> <code>get_serializer(key: str)</code></p>
+<ul>
+<li><code>key(str)</code> - Key for search. <code>in</code> or <code>out</code>.</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code class="python">from rest_framework.views import GetSerializerMixin
+
+class ExampleView(GetSerializerMixin):
+    serializer_classes = {
+        'get': GetSerializer,
+        'post': {
+            'in': PostRequestSerializer
+        },
+        'put': {
+            'in': PutRequestSerializer,
+            'out': PutResponseSerializer
+        },
+        'patch': {}
+    }
+
+    def get(self):
+        ser = self.get_serializer('in')
+        # ser - GetSerializer
+        ser = self.get_serializer('out')
+        # ser - GetSerializer
+
+    def post(self):
+        ser = self.get_serializer('in')
+        # ser - PostRequestSerializer
+        ser = self.get_serializer('out')
+        # ser - None
+
+    def put(self):
+        ser = self.get_serializer('in')
+        # ser - PutRequestSerializer
+        ser = self.get_serializer('out')
+        # ser - PutResponseSerializer
+
+    def patch(self):
+        ser = self.get_serializer('in')
+        # ser - None
+        ser = self.get_serializer('out')
+        # ser - None
+
+    def delete(self):
+        ser = self.get_serializer('in')
+        # ser - None
+        ser = self.get_serializer('out')
+        # ser - None
+</code></pre>
+
+<hr />
+<h2 id="getresponsemixin"><a class="toclink" href="#getresponsemixin">GetResponseMixin</a></h2>
+<p>Mixin for easy response to the client. </p>
+<p><strong>Attributes:</strong></p>
+<ul>
+<li><code>response_class</code> - Response class, for create Response. Interface: data: Any(For JSON), status: int = response status, content_type: str = <code>application/json</code></li>
+<li><code>pagination_class</code> - Paginator class for get pagination json. Default: <a href="/api-guid/views/paginations#limitoffsetobjectspaginator"><code>LimitOffsetObjectsPaginator</code></a>. Read more in the section on <a href="/api-giud/views/paginations"><code>pagination</code></a>.</li>
+<li><code>response_content_type</code> - Response Content Type, default: <code>application/json</code></li>
+</ul>
+<h3 id="get_response"><a class="toclink" href="#get_response"><code>.get_response()</code></a></h3>
+<p>Formation and preparation of response <code>Response object</code> for the client.</p>
+<p><strong>Signature:</strong> <code>.get_response(obj=None, is_serialized=True, status_code=200)</code></p>
+<ul>
+<li><code>obj(Any)</code> - Object for response body.</li>
+<li><code>is_serialized(bool)</code> - Is data serialization required? Use <code>get_response_serializer()</code> for serilization result object? Default: <code>True</code>.</li>
+<li><code>status_code(int)</code> - Code server response. Default: <code>200</code>.</li>
+</ul>
+<p><strong>Example(AioHTTP):</strong></p>
+<pre><code class="python">from aiohttp.web import View, json_response
+from rest_framework.views import GetResponseMixin
+
+class ExampleView(View, GetResponseMixin):
+    response_class = json_response
+    serializer_classes = {
+        'get': MyGetSerializer
+    }
+
+    async def get(self):
+        # Your code
+        data = MyModel()
+        return self.get_response(data, is_serialized=True, status_code=200)
+</code></pre>
+
+<h3 id="get_list_response"><a class="toclink" href="#get_list_response"><code>.get_list_response()</code></a></h3>
+<p>Formation and preparation of response <code>Many Response objects</code> for the client.</p>
+<p><strong>Signature:</strong> <code>get_list_response(obj=None, is_serialized=True, status_code=200, *args, **kwargs)</code></p>
+<ul>
+<li><code>objs(List[Any])</code> - List Objects for response body.</li>
+<li><code>is_serialized(bool)</code> - Is data serialization required? Use <code>get_response_serializer()</code> for serilization result object? Default: <code>True</code>.</li>
+<li><code>status_code(int)</code> - Code server response. Default: <code>200</code>.</li>
+<li><code>args, kwargs</code> - Arguments for pagination class. Read more in the section on <a href="/api-giud/views/paginations"><code>pagination</code></a>.</li>
+</ul>
+<p><strong>Example(AioHTTP):</strong></p>
+<pre><code class="python">from aiohttp.web import View, json_response
+from rest_framework.views import GetResponseMixin
+
+class ExampleView(View, GetResponseMixin):
+    response_class = json_response
+    serializer_classes = {
+        'get': MyGetSerializer
+    }
+
+    async def get(self):
+        # Your code
+        data = [MyModel(), MyModel(), MyModel()]
+        return self.get_list_response(data, is_serialized=True, status_code=200)
+</code></pre>
+
+<hr />
+<h1 id="writing-custom-frameworkbaseview"><a class="toclink" href="#writing-custom-frameworkbaseview">Writing custom FrameworkBaseView</a></h1>
+<p>To write your Mixin, you can inherit from <code>GetRequestAbstractMixin</code> if you need the properties<code>request_object</code>, <code>request_object_method</code>.
+From any other <code>Mixin</code>, if you need its methods or attributes.
+And from <code>object</code>, if your Mixin does not depend on the existing ones.</p>
+<p><strong>Example:</strong></p>
+<pre><code class="python">class CustomHeadersMixin(object):
+    def update_headers(self, headers):
+        headers.update({'Custom-Auth-Header': 'HashCode'})
+        return headers
+
+</code></pre></div>
+        
+    </div>
+
+    <footer class="col-md-12 text-center">
+        <hr>
+        <p>
+        <small>Copyright (c) 2019, Deys Timofey All rights reserved.<br></small>
+        
+        <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p></small>
+    </footer>
+
+    <script src="../../../js/jquery-1.10.2.min.js"></script>
+    <script src="../../../js/bootstrap-3.0.3.min.js"></script>
+    <script src="../../../js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script>
+    var base_url = '../../..';
+    </script>
+    <script data-main="../../../mkdocs/js/search.js" src="../../../mkdocs/js/require.js"></script>
+    <script src="../../../js/base.js"></script>
+    <script src="../../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        From here you can search these documents. Enter your search terms below.
+                    </p>
+                    <form role="form">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                        </div>
+                    </form>
+                    <div id="mkdocs-search-results"></div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </body>
+
+</html>

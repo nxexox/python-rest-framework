@@ -83,12 +83,6 @@
                         <ul class="dropdown-menu">
                         
                             
-<li >
-    <a href="../fields/">Serializer fields</a>
-</li>
-
-                        
-                            
 <li class="active">
     <a href="./">Serializers</a>
 </li>
@@ -96,7 +90,49 @@
                         
                             
 <li >
-    <a href="../validators/">Validation</a>
+    <a href="../fields/">Serializers Fields</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../validators/">Serializers Validation</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../views/views/">BaseViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../views/mixins/">ViewsMixins</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../views/paginations/">PaginationViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../views/flask/">FlaskViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../views/aiohttp/">AioHTTPViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../views/sanic/">SanicViews</a>
 </li>
 
                         
@@ -119,12 +155,12 @@
                         </a>
                     </li>
                     <li >
-                        <a rel="next" href="../fields/">
+                        <a rel="next" href="../..">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="../validators/">
+                        <a rel="prev" href="../fields/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -166,8 +202,8 @@
         <li class="first-level "><a href="#advanced-serializer-usage">Advanced serializer usage</a></li>
             <li class="second-level"><a href="#overriding-serialization-and-deserialization-behavior">Overriding serialization and deserialization behavior</a></li>
                 
-                <li class="third-level"><a href="#-to_representationself-instance">- .to_representation(self, instance)</a></li>
-                <li class="third-level"><a href="#-to_internal_valueself-data">- .to_internal_value(self, data)</a></li>
+                <li class="third-level"><a href="#to_representationself-instance">.to_representation(self, instance)</a></li>
+                <li class="third-level"><a href="#to_internal_valueself-data">.to_internal_value(self, data)</a></li>
             <li class="second-level"><a href="#serializer-inheritance">Serializer Inheritance</a></li>
                 
             <li class="second-level"><a href="#dynamically-modifying-fields">Dynamically modifying fields</a></li>
@@ -180,7 +216,7 @@
 <p>Serializers allow complex data such as querysets and model instances to be converted to native Python datatypes that can then be easily rendered into <code>JSON</code>, <code>XML</code> or other content types.  Serializers also provide deserialization, allowing parsed data to be converted back into complex types, after first validating the incoming data.</p>
 <h2 id="declaring-serializers"><a class="toclink" href="#declaring-serializers">Declaring Serializers</a></h2>
 <p>Let&rsquo;s start by creating a simple object we can use for example:</p>
-<pre><code>from datetime import datetime
+<pre><code class="python">from datetime import datetime
 
 class Comment(object):
     def __init__(self, author_name, content, created=False):
@@ -190,86 +226,92 @@ class Comment(object):
 
 comment = Comment(author_name='example_name', content='foo bar')
 </code></pre>
+
 <p>We&rsquo;ll declare a serializer that we can use to serialize and deserialize data that corresponds to <code>Comment</code> objects.</p>
-<pre><code>from rest_framework import serializers
+<pre><code class="python">from rest_framework import serializers
 
 class CommentSerializer(serializers.Serializer):
     author_name = serializers.CharField(required=True)
     content = serializers.CharField(max_length=200)
     created = serializers.BooleanField(required=True)
 </code></pre>
+
 <hr />
 <h2 id="serializing-objects"><a class="toclink" href="#serializing-objects">Serializing objects</a></h2>
 <p>We can now use <code>CommentSerializer</code> to serialize a comment, or list of comments.</p>
-<pre><code>serializer = CommentSerializer(comment)
+<pre><code class="python">serializer = CommentSerializer(comment)
 serializer.data
 # {'author_name': 'example_name', 'content': 'foo bar', 'created': False}
 </code></pre>
-<p>At this point we&rsquo;ve translated the model instance into Python native datatypes.  To finalise the serialization process we render the data into <code>json</code>.</p>
-<pre><code>from rest_framework.renderers import JSONRenderer
 
-json = JSONRenderer().render(serializer.data)
-json
-# b'{"author_name":"example","content":"foo bar","created":false}'
-</code></pre>
 <hr />
 <h2 id="deserializing-objects"><a class="toclink" href="#deserializing-objects">Deserializing objects</a></h2>
-<p>Deserialization is similar. First we parse a stream into Python native datatypes&hellip;</p>
-<pre><code>import io
-from rest_framework.parsers import JSONParser
-
-stream = io.BytesIO(json)
-data = JSONParser().parse(stream)
-</code></pre>
-<p>&hellip;then we restore those native datatypes into a dictionary of validated data.</p>
-<pre><code>serializer = CommentSerializer(data=data)
+<p>We restore those native datatypes into a dictionary of validated data.</p>
+<pre><code class="python">serializer = CommentSerializer(data=data)
 serializer.is_valid()
 # True
 serializer.validated_data
 # {'content': 'foo bar', 'author_name': 'example', 'created': False)}
 </code></pre>
+
+<p>With the same ease, you can deserialize several objects. You just need to add the <code>many=True</code> flag to the serializer constructor.</p>
+<pre><code class="python">serializer = CommentSerializer(data=[data, data], many=True)
+serializer.is_valid()
+# True
+serializer.validated_data
+# [
+#   {'content': 'foo bar', 'author_name': 'example', 'created': False)}, 
+#   {'content': 'foo bar', 'author_name': 'example', 'created': False)}
+# ]
+</code></pre>
+
 <hr />
 <h2 id="validation"><a class="toclink" href="#validation">Validation</a></h2>
 <p>When deserializing data, you always need to call <code>is_valid()</code> before attempting to access the validated data. If any validation errors occur, the <code>.errors</code> property will contain a dictionary representing the resulting error messages.  For example:</p>
-<pre><code>serializer = CommentSerializer(data={'author_name': 'foobar', 'content': 'baz'})
+<pre><code class="python">serializer = CommentSerializer(data={'author_name': 'foobar', 'content': 'baz'})
 serializer.is_valid()
 # False
 serializer.errors
-# {'author_name': [u'This field is required.'], 'created': [u'This field is required.']}
+# {'created': ['This field is required.']}
 </code></pre>
+
 <p>Each key in the dictionary will be the field name, and the values will be lists of strings of any error messages corresponding to that field.  The <code>non_field_errors</code> key may also be present, and will list any general validation errors.</p>
 <p>When deserializing a list of items, errors will be returned as a list of dictionaries representing each of the deserialized items.</p>
 <h3 id="raising-an-exception-on-invalid-data"><a class="toclink" href="#raising-an-exception-on-invalid-data">Raising an exception on invalid data</a></h3>
 <p>The <code>.is_valid()</code> method takes an optional <code>raise_exception</code> flag that will cause it to raise a <code>serializers.ValidationError</code> exception if there are validation errors.</p>
-<pre><code>try:
+<pre><code class="python">serializer = CommentSerializer(data={'author_name': 'foobar', 'content': 'baz'})
+try:
     serializer.is_valid(raise_exception=True)
 except ValidationError:
     print(serializer.errors)
+# {'created': ['This field is required.']}
 </code></pre>
+
 <hr />
 <h3 id="field-level-validation"><a class="toclink" href="#field-level-validation">Field-level validation</a></h3>
 <p>You can specify custom field-level validation by adding <code>.validate_&lt;field_name&gt;</code> methods to your <code>Serializer</code> subclass.</p>
 <p>These methods take a single argument, which is the field value that requires validation.</p>
 <p>Your <code>validate_&lt;field_name&gt;</code> methods should return the validated value or raise a <code>serializers.ValidationError</code>.  For example:</p>
-<pre><code>from rest_framework import serializers
+<pre><code class="python">from rest_framework import serializers
 
 class BlogPostSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=100)
     content = serializers.CharField()
 
     def validate_title(self, value):
-        """
+        &quot;&quot;&quot;
         Check that the blog post is about Django.
 
-        """
+        &quot;&quot;&quot;
         if 'rest' not in value.lower():
-            raise serializers.ValidationError("Blog post is not about Rest")
+            raise serializers.ValidationError(&quot;Blog post is not about Rest&quot;)
         return value
 </code></pre>
+
 <hr />
 <h3 id="object-level-validation"><a class="toclink" href="#object-level-validation">Object-level validation</a></h3>
 <p>To do any other validation that requires access to multiple fields, add a method called <code>.validate()</code> to your <code>Serializer</code> subclass.  This method takes a single argument, which is a dictionary of field values.  It should raise a <code>serializers.ValidationError</code> if necessary, or just return the validated values.  For example:</p>
-<pre><code>from rest_framework import serializers
+<pre><code class="python">from rest_framework import serializers
 
 class EventSerializer(serializers.Serializer):
     description = serializers.CharField(max_length=100)
@@ -277,25 +319,27 @@ class EventSerializer(serializers.Serializer):
     finish = serializers.IntegerField()
 
     def validate(self, data):
-        """
+        &quot;&quot;&quot;
         Check that the start is before the stop.
 
-        """
+        &quot;&quot;&quot;
         if data['start'] &gt; data['finish']:
-            raise serializers.ValidationError("finish must occur after start")
+            raise serializers.ValidationError(&quot;finish must occur after start&quot;)
         return data
 </code></pre>
+
 <hr />
 <h3 id="validators"><a class="toclink" href="#validators">Validators</a></h3>
 <p>Individual fields on a serializer can include validators, by declaring them on the field instance, for example:</p>
-<pre><code>def multiple_of_ten(value):
+<pre><code class="python">def multiple_of_ten(value):
     if value % 10 != 0:
         raise serializers.ValidationError('Not a multiple of ten')
 
 class GameRecord(serializers.Serializer):
     score = IntegerField(validators=[multiple_of_ten])
-    ...
+    # ...
 </code></pre>
+
 <p>For more information see the <a href="../validators/">validators documentation</a>.</p>
 <hr />
 <h2 id="accessing-the-initial-data-and-instance"><a class="toclink" href="#accessing-the-initial-data-and-instance">Accessing the initial data and instance</a></h2>
@@ -305,7 +349,7 @@ class GameRecord(serializers.Serializer):
 <h2 id="dealing-with-nested-objects"><a class="toclink" href="#dealing-with-nested-objects">Dealing with nested objects</a></h2>
 <p>The previous examples are fine for dealing with objects that only have simple datatypes, but sometimes we also need to be able to represent more complex objects, where some of the attributes of an object might not be simple datatypes such as strings, dates or integers.</p>
 <p>The <code>Serializer</code> class is itself a type of <code>Field</code>, and can be used to represent relationships where one object type is nested inside another.</p>
-<pre><code>class UserSerializer(serializers.Serializer):
+<pre><code class="python">class UserSerializer(serializers.Serializer):
     email = serializers.CharField(required=True)
     username = serializers.CharField(max_length=100)
 
@@ -313,26 +357,30 @@ class CommentSerializer(serializers.Serializer):
     user = UserSerializer()
     content = serializers.CharField(max_length=200)
 </code></pre>
+
 <p>If a nested representation may optionally accept the <code>None</code> value you should pass the <code>required=False</code> flag to the nested serializer.</p>
-<pre><code>class CommentSerializer(serializers.Serializer):
+<pre><code class="python">class CommentSerializer(serializers.Serializer):
     user = UserSerializer(required=False)  # May be an anonymous user.
     content = serializers.CharField(max_length=200)
 </code></pre>
+
 <p>Similarly if a nested representation should be a list of items, you should pass the <code>many=True</code> flag to the nested serialized.</p>
-<pre><code>class CommentSerializer(serializers.Serializer):
+<pre><code class="python">class CommentSerializer(serializers.Serializer):
     user = UserSerializer(required=False)
     edits = UserSerializer(many=True)  # A nested list of 'user' items.
     content = serializers.CharField(max_length=200)
 </code></pre>
+
 <hr />
 <h2 id="writable-nested-representations"><a class="toclink" href="#writable-nested-representations">Writable nested representations</a></h2>
 <p>When dealing with nested representations that support deserializing the data, any errors with nested objects will be nested under the field name of the nested object.</p>
-<pre><code>serializer = CommentSerializer(data={'user': {'username': 'doe'}, 'content': 'baz'})
+<pre><code class="python">serializer = CommentSerializer(data={'user': {'username': 'doe'}, 'content': 'baz'})
 serializer.is_valid()
 # False
 serializer.errors
 # {'user': {'email': [u'Enter a valid e-mail address.']}}
 </code></pre>
+
 <p>Similarly, the <code>.validated_data</code> property will include nested data structures.</p>
 <hr />
 <h1 id="baseserializer"><a class="toclink" href="#baseserializer">BaseSerializer</a></h1>
@@ -362,24 +410,25 @@ serializer.errors
 </ul>
 <p>The signatures for these methods are as follows:</p>
 <hr />
-<h3 id="-to_representationself-instance"><a class="toclink" href="#-to_representationself-instance">- <code>.to_representation(self, instance)</code></a></h3>
+<h3 id="to_representationself-instance"><a class="toclink" href="#to_representationself-instance"><code>.to_representation(self, instance)</code></a></h3>
 <p>Takes the object instance that requires serialization, and should return a primitive representation. Typically this means returning a structure of built-in Python datatypes. The exact types that can be handled will depend on the render classes you have configured for your API.</p>
 <p>May be overridden in order modify the representation style. For example:</p>
-<pre><code>def to_representation(self, instance):
-    """Convert `username` to lowercase."""
+<pre><code class="python">def to_representation(self, instance):
+    &quot;&quot;&quot;Convert `username` to lowercase.&quot;&quot;&quot;
     ret = super().to_representation(instance)
     ret['username'] = ret['username'].lower()
     return ret
 </code></pre>
+
 <hr />
-<h3 id="-to_internal_valueself-data"><a class="toclink" href="#-to_internal_valueself-data">- <code>.to_internal_value(self, data)</code></a></h3>
+<h3 id="to_internal_valueself-data"><a class="toclink" href="#to_internal_valueself-data"><code>.to_internal_value(self, data)</code></a></h3>
 <p>Takes the unvalidated incoming data as input and should return the validated data that will be made available as <code>serializer.validated_data</code>.</p>
 <p>If any of the validation fails, then the method should raise a <code>serializers.ValidationError(errors)</code>. The <code>errors</code> argument should be a dictionary mapping field names (or <code>non_field_errors</code>) to a list of error messages. If you don&rsquo;t need to alter deserialization behavior and instead want to provide object-level validation, it&rsquo;s recommended that you instead override the <a href="#object-level-validation"><code>.validate()</code></a> method.</p>
 <p>The <code>data</code> argument passed to this method will normally be the value of <code>request.data</code>, so the datatype it provides will depend on the parser classes you have configured for your API.</p>
 <hr />
 <h2 id="serializer-inheritance"><a class="toclink" href="#serializer-inheritance">Serializer Inheritance</a></h2>
 <p>You can extend and reuse serializers through inheritance. This allows you to declare a common set of fields or methods on a parent class that can then be used in a number of serializers. For example,</p>
-<pre><code>class MyBaseSerializer(Serializer):
+<pre><code class="python">class MyBaseSerializer(Serializer):
     my_field = serializers.CharField()
 
     def validate_my_field(self, value):
@@ -388,13 +437,15 @@ serializer.errors
 class MySerializer(MyBaseSerializer):
     ...
 </code></pre>
+
 <p>It’s possible to declaratively remove a <code>Field</code> inherited from a parent class by setting the name to be <code>None</code> on the subclass.</p>
-<pre><code>class MyBaseSerializer(ModelSerializer):
+<pre><code class="python">class MyBaseSerializer(ModelSerializer):
     my_field = serializers.CharField()
 
 class MySerializer(MyBaseSerializer):
     my_field = None
 </code></pre>
+
 <h2 id="dynamically-modifying-fields"><a class="toclink" href="#dynamically-modifying-fields">Dynamically modifying fields</a></h2>
 <p>Once a serializer has been initialized, the dictionary of fields that are set on the serializer may be accessed using the <code>.fields</code> attribute.  Accessing and modifying this attribute allows you to dynamically modify the serializer.</p>
 <p>Modifying the <code>fields</code> argument directly allows you to do interesting things such as changing the arguments on serializer fields at runtime, rather than at the point of declaring the serializer.</p>
@@ -405,7 +456,7 @@ class MySerializer(MyBaseSerializer):
     <footer class="col-md-12 text-center">
         <hr>
         <p>
-        <small>Copyright (c) 2018, Deys Timofey All rights reserved.<br></small>
+        <small>Copyright (c) 2019, Deys Timofey All rights reserved.<br></small>
         
         <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p></small>
     </footer>

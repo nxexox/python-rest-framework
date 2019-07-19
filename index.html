@@ -84,19 +84,55 @@
                         
                             
 <li >
-    <a href="api-guid/fields/">Serializer fields</a>
-</li>
-
-                        
-                            
-<li >
     <a href="api-guid/serializers/">Serializers</a>
 </li>
 
                         
                             
 <li >
-    <a href="api-guid/validators/">Validation</a>
+    <a href="api-guid/fields/">Serializers Fields</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="api-guid/validators/">Serializers Validation</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="api-guid/views/views/">BaseViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="api-guid/views/mixins/">ViewsMixins</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="api-guid/views/paginations/">PaginationViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="api-guid/views/flask/">FlaskViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="api-guid/views/aiohttp/">AioHTTPViews</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="api-guid/views/sanic/">SanicViews</a>
 </li>
 
                         
@@ -124,7 +160,7 @@
                         </a>
                     </li>
                     <li >
-                        <a rel="prev" href="api-guid/fields/">
+                        <a rel="prev" href="api-guid/serializers/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -147,6 +183,8 @@
             <li class="second-level"><a href="#requirements">Requirements</a></li>
                 
             <li class="second-level"><a href="#installation">Installation</a></li>
+                
+            <li class="second-level"><a href="#versions-for-python-web-frameworks">Versions for Python Web Frameworks</a></li>
                 
             <li class="second-level"><a href="#example">Example</a></li>
                 
@@ -178,15 +216,23 @@ You can concentrate all your strength on business logic, take care of the rest o
 </ul>
 <h2 id="installation"><a class="toclink" href="#installation">Installation</a></h2>
 <p>Install using <code>pip</code>, including any optional packages you want&hellip;</p>
-<pre><code>pip install python-rest-framework
+<pre><code class="bash">pip install python-rest-framework
 </code></pre>
+
 <p>&hellip;or clone the project from github.</p>
-<pre><code>git clone git@github.com:nxexox/python-rest-framework.git
+<pre><code class="bash">git clone git@github.com:nxexox/python-rest-framework.git
 </code></pre>
+
+<h2 id="versions-for-python-web-frameworks"><a class="toclink" href="#versions-for-python-web-frameworks">Versions for Python Web Frameworks</a></h2>
+<pre><code class="bash">pip install python-rest-framework[flask]  # For Flask framework
+pip install python-rest-framework[aiohttp]  # For AioHttp framework
+pip install python-rest-framework[sanic]  # For Sanic framework
+</code></pre>
+
 <h2 id="example"><a class="toclink" href="#example">Example</a></h2>
 <p>For example, we will serialize the data from the request object.</p>
 <p>First we write the serializer</p>
-<pre><code>from rest_framework.serializers import (
+<pre><code class="python">from rest_framework.serializers import (
     Serializer, CharField, IntegerField, ListField, FloatField
 )
 
@@ -196,9 +242,10 @@ class ExampleSerializer(Serializer):
     int_field = IntegerField(label='This int field', required=True)
     list_float_field = ListField(child=FloatField(), required=True, min_length=2)
 </code></pre>
+
 <hr />
 <p>Now we process the request body with a serializer</p>
-<pre><code># web request data
+<pre><code class="python"># web request data
 data = {
     'char_field': 'example', 'int_field': 1,
     'list_float_field': [1.0, 1.1, 1.2]
@@ -216,7 +263,7 @@ else:
     <footer class="col-md-12 text-center">
         <hr>
         <p>
-        <small>Copyright (c) 2018, Deys Timofey All rights reserved.<br></small>
+        <small>Copyright (c) 2019, Deys Timofey All rights reserved.<br></small>
         
         <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p></small>
     </footer>

@@ -5,13 +5,14 @@ python:
   - 3.4
   - 3.5
   - 3.6
+  - 3.7
 
 install:
   pip install -r requirements/requirements-app.txt -r requirements/requirements-tests.txt
 
 script:
-  - python -m unittest rest_framework/tests/__init__.py  # run tests
-  - coverage run -m unittest rest_framework/tests/__init__.py  # run coverage tests
+  - python -m unittest tests/__init__.py  # run tests
+  - coverage run -m unittest tests/__init__.py  # run coverage tests
 
 after_success:
   - codecov  # report to coverage.

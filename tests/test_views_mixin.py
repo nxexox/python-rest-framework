@@ -13,7 +13,7 @@ from rest_framework.views.paginations import LimitOffsetObjectsPaginator
 from tests.serializers_for_tests import SerializerPrimitiveField
 
 
-Response = namedtuple('Response', ('data', 'status'))
+Response = namedtuple('Response', ('data', 'status', 'content_type'))
 
 
 class ForTests(object):

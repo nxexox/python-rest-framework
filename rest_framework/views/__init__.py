@@ -1,3 +1,4 @@
+from .base import BaseApiView
 from .mixins import (
     GetSerializerMixin, GetResponseMixin
 )
@@ -6,6 +7,7 @@ from .paginations import (
 )
 
 __all__ = [
+    BaseApiView,
     GetSerializerMixin, GetResponseMixin,
     BasePaginatorAbstract, LimitOffsetResultPaginator, LimitOffsetObjectsPaginator, LimitOffsetItemsPaginator
 ]

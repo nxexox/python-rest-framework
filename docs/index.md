@@ -27,44 +27,54 @@ Full documentation for the project is available at [https://nxexox.github.io/pyt
 ## Installation
 
 Install using `pip`, including any optional packages you want...
-
-    pip install python-rest-framework
-
+```bash
+pip install python-rest-framework
+```
 ...or clone the project from github.
+```bash
+git clone git@github.com:nxexox/python-rest-framework.git
+```
 
-    git clone git@github.com:nxexox/python-rest-framework.git
+## Versions for Python Web Frameworks
 
+```bash
+pip install python-rest-framework[flask]  # For Flask framework
+pip install python-rest-framework[aiohttp]  # For AioHttp framework
+pip install python-rest-framework[sanic]  # For Sanic framework
+```
 
 ## Example
 
 For example, we will serialize the data from the request object.
 
 First we write the serializer
+```python
+from rest_framework.serializers import (
+    Serializer, CharField, IntegerField, ListField, FloatField
+)
 
-    from rest_framework.serializers import (
-        Serializer, CharField, IntegerField, ListField, FloatField
-    )
-
-    # Example serializer for parsing body data from web request.
-    class ExampleSerializer(Serializer):
-        char_field = CharField(label='This char field', required=True)
-        int_field = IntegerField(label='This int field', required=True)
-        list_float_field = ListField(child=FloatField(), required=True, min_length=2)
+# Example serializer for parsing body data from web request.
+class ExampleSerializer(Serializer):
+    char_field = CharField(label='This char field', required=True)
+    int_field = IntegerField(label='This int field', required=True)
+    list_float_field = ListField(child=FloatField(), required=True, min_length=2)
+```
 
 ---
 
 Now we process the request body with a serializer
+```python
+# web request data
+data = {
+    'char_field': 'example', 'int_field': 1,
+    'list_float_field': [1.0, 1.1, 1.2]
+}
 
-    # web request data
-    data = {
-        'char_field': 'example', 'int_field': 1,
-        'list_float_field': [1.0, 1.1, 1.2]
-    }
-
-    ser = ExampleSerializer(data=data)
-    if ser.is_valid():
-        print(ser.validated_data)
-    else:
-        print(ser.errors)
+ser = ExampleSerializer(data=data)
+if ser.is_valid():
+    print(ser.validated_data)
+else:
+    print(ser.errors)
+```
 
 [repo]: https://github.com/nxexox/python-rest-framework/

@@ -12,7 +12,7 @@ Serializer fields handle converting between primitive values and internal dataty
 
 Each serializer field class constructor takes at least these arguments.  Some Field classes take additional, field-specific arguments, but the following should always be accepted:
 
-### - `required`
+###`required`
 
 Normally an error will be raised if a field is not supplied during deserialization.
 Set to false if this field is not required to be present during deserialization.
@@ -21,7 +21,7 @@ Setting this to `False` also allows the object attribute or dictionary key to be
 
 Defaults to `True`.
 
-### - `default`
+###`default`
 
 If set, this gives the default value that will be used for the field if no input value is supplied. If not set the default behaviour is to not populate the attribute at all.
 
@@ -31,15 +31,15 @@ When serializing the instance, default will be used if the the object attribute 
 
 Note that setting a `default` value implies that the field is not required. Enabling the arguments of the `default` keyword will set the` required` to `False`.
 
-### - `label`
+###`label`
 
 A short text string that may be used as the name of the field in HTML form fields or other descriptive elements.
 
-### - `validators`
+###`validators`
 
 A list of validator functions which should be applied to the incoming field input, and which either raise a validation error or simply return. Validator functions should raise `serializers.ValidationError`.
 
-### - `error_messages`
+###`error_messages`
 
 A dictionary of error codes to error messages.
 
@@ -47,7 +47,7 @@ A dictionary of error codes to error messages.
 
 # Fields
 
-## - BooleanField
+## BooleanField
 
 When using HTML encoded form input be aware that omitting a value will always be treated as setting a field to `False`, even if it has a `default=True` option specified. This is because HTML checkbox inputs represent the unchecked state by omitting the value, so REST framework treats omission as if it is an empty checkbox input.
 
@@ -55,7 +55,7 @@ When using HTML encoded form input be aware that omitting a value will always be
 
 ---
 
-## - BooleanNullField
+## BooleanNullField
 
 A boolean representation that also accepts `None` as a valid value.
 
@@ -65,7 +65,7 @@ When using HTML encoded form input be aware that omitting a value will always be
 
 ---
 
-## - CharField
+## CharField
 
 A text representation. Optionally validates the text to be shorter than `max_length` and longer than `min_length`.
 
@@ -78,7 +78,7 @@ A text representation. Optionally validates the text to be shorter than `max_len
 
 ---
 
-## - IntegerField
+## IntegerField
 
 An integer representation.
 
@@ -89,7 +89,7 @@ An integer representation.
 
 ---
 
-## - FloatField
+## FloatField
 
 A floating point representation.
 
@@ -102,7 +102,7 @@ A floating point representation.
 
 # Date and time fields
 
-## - DateTimeField
+## DateTimeField
 
 A date and time representation.
 
@@ -117,7 +117,7 @@ Format strings may either be [Python strftime formats][strftime] which explicitl
 
 When a value of `None` is used for the format `datetime` objects will be returned by `to_representation` and the final output representation will determined by the renderer class.
 
-## - DateField
+## DateField
 
 A date representation.
 
@@ -130,7 +130,7 @@ A date representation.
 
 Format strings may either be [Python strftime formats][strftime] which explicitly specify the format, or the special string `'iso-8601'`, which indicates that [ISO 8601][iso8601] style dates should be used. (eg `'2013-01-29'`)
 
-## - TimeField
+## TimeField
 
 A time representation.
 
@@ -147,7 +147,7 @@ Format strings may either be [Python strftime formats][strftime] which explicitl
 
 # Composite fields
 
-## - ListField
+## ListField
 
 A field class that validates a list of objects.
 
@@ -159,25 +159,25 @@ A field class that validates a list of objects.
 - `allow_blank` - If set to` True`, an empty array should be considered valid. If set to `False`, an empty array is considered invalid and causes a validation error. The default is `False`.
 
 For example, to validate a list of integers you might use something like the following:
-
-    scores = serializers.ListField(
-       child=serializers.IntegerField(min_value=0, max_value=100)
-    )
-
+```python
+scores = serializers.ListField(
+   child=serializers.IntegerField(min_value=0, max_value=100)
+)
+```
 The `ListField` class also supports a declarative style that allows you to write reusable list field classes.
-
-    class StringListField(serializers.ListField):
-        child = serializers.CharField()
-
+```python
+class StringListField(serializers.ListField):
+    child = serializers.CharField()
+```
 We can now reuse our custom `StringListField` class throughout our application, without having to provide a `child` argument to it.
 
-## - JSONField
+## JSONField
 
 A field class that validates that the incoming data structure consists of valid JSON primitives. In its alternate binary mode, it will represent and validate JSON-encoded binary strings.
 
 **Signature**: `JSONField()`
 
-## - DictField
+## DictField
 
 A field class that validates a dictionary of objects. The keys in `DictField` are always assumed to be string values.
 
@@ -186,19 +186,19 @@ A field class that validates a dictionary of objects. The keys in `DictField` ar
 - `child` - A field instance that should be used for validating the values in the dictionary. If this argument is not provided then values in the mapping will not be validated.
 
 For example, to create a field that validates a mapping of strings to strings, you would write something like this:
-
-    document = DictField(child=CharField())
-
+```python
+document = DictField(child=CharField())
+```
 You can also use the declarative style, as with `ListField`. For example:
-
-    class DocumentField(DictField):
-        child = CharField()
-
+```python
+class DocumentField(DictField):
+    child = CharField()
+```
 ---
 
 # Miscellaneous fields
 
-## - SerializerMethodField
+## SerializerMethodField
 
 It gets its value by calling a method on the serializer class it is attached to. It can be used to add any sort of data to the serialized representation of your object.
 
@@ -208,27 +208,27 @@ It gets its value by calling a method on the serializer class it is attached to.
 - `method_name_pop` - The name of the method on the calling serializer during validation data. If not included this defaults to `pop_<field_name>`.
 
 The serializer method referred to by the `method_name_get` argument should accept a single argument (in addition to `self`), which is the object being serialized. It should return whatever you want to be included in the serialized representation of the object. For example:
+```python
+from datetime.datetime import now
+from rest_framework import serializers
 
-    from datetime.datetime import now
-    from rest_framework import serializers
+class UserSerializer(serializers.Serializer):
+    days_since_joined = serializers.SerializerMethodField()
 
-    class UserSerializer(serializers.Serializer):
-        days_since_joined = serializers.SerializerMethodField()
-
-        def get_days_since_joined(self, obj):
-            return (now() - obj.date_joined).days
-
+    def get_days_since_joined(self, obj):
+        return (now() - obj.date_joined).days
+```
 The serializer method referenced by the `method_name_pop` argument must take one argument (in addition to` self`), which is the value to process and validate. It must return whatever you want to include in the validated view of the data. For example:
+```python
+from datetime.datetime import now
+from rest_framework import serializers
 
-    from datetime.datetime import now
-    from rest_framework import serializers
+class UserSerializer(serializers.Serializer):
+    rgb = serializers.SerializerMethodField()
 
-    class UserSerializer(serializers.Serializer):
-        rgb = serializers.SerializerMethodField()
-
-        def pop_rgb(self, data):
-            return data.split(';')[1:3]
-
+    def pop_rgb(self, data):
+        return data.split(';')[1:3]
+```
 ---
 
 # Custom fields
@@ -246,91 +246,91 @@ The `to_internal_value()` method is called to restore a primitive datatype into 
 ### A Basic Custom Field
 
 Let's look at an example of serializing a class that represents an RGB color value:
+```python
+class Color(object):
+    """
+    A color represented in the RGB colorspace.
 
-    class Color(object):
-        """
-        A color represented in the RGB colorspace.
+    """
+    def __init__(self, red, green, blue):
+        assert(red >= 0 and green >= 0 and blue >= 0)
+        assert(red < 256 and green < 256 and blue < 256)
+        self.red, self.green, self.blue = red, green, blue
 
-        """
-        def __init__(self, red, green, blue):
-            assert(red >= 0 and green >= 0 and blue >= 0)
-            assert(red < 256 and green < 256 and blue < 256)
-            self.red, self.green, self.blue = red, green, blue
+class ColorField(serializers.Field):
+    """
+    Color objects are serialized into 'rgb(#, #, #)' notation.
 
-    class ColorField(serializers.Field):
-        """
-        Color objects are serialized into 'rgb(#, #, #)' notation.
+    """
+    def to_representation(self, value):
+        return "rgb(%d, %d, %d)" % (value.red, value.green, value.blue)
 
-        """
-        def to_representation(self, value):
-            return "rgb(%d, %d, %d)" % (value.red, value.green, value.blue)
-
-        def to_internal_value(self, data):
-            data = data.strip('rgb(').rstrip(')')
-            red, green, blue = [int(col) for col in data.split(',')]
-            return Color(red, green, blue)
-
+    def to_internal_value(self, data):
+        data = data.strip('rgb(').rstrip(')')
+        red, green, blue = [int(col) for col in data.split(',')]
+        return Color(red, green, blue)
+```
 By default field values are treated as mapping to an attribute on the object or key Mapping collection.  If you need to customize how the field value is accessed and set you need to override `.get_attribute()`.
 
 As an example, let's create a field that can be used to represent the class name of the object being serialized:
+```python
+class ClassNameField(serializers.Field):
+    def get_attribute(self, instance):
+        # We pass the object instance onto `to_representation`,
+        # not just the field attribute.
+        return instance
 
-    class ClassNameField(serializers.Field):
-        def get_attribute(self, instance):
-            # We pass the object instance onto `to_representation`,
-            # not just the field attribute.
-            return instance
+    def to_representation(self, value):
+        """
+        Serialize the value's class name.
 
-        def to_representation(self, value):
-            """
-            Serialize the value's class name.
-
-            """
-            return value.__class__.__name__
-
+        """
+        return value.__class__.__name__
+```
 ### Raising validation errors
 
 Our `ColorField` class above currently does not perform any data validation.
 To indicate invalid data, we should raise a `serializers.ValidationError`, like so:
+```python
+def to_internal_value(self, data):
+    if not isinstance(data, six.text_type):
+        msg = 'Incorrect type. Expected a string, but got %s'
+        raise ValidationError(msg % type(data).__name__)
 
-    def to_internal_value(self, data):
-        if not isinstance(data, six.text_type):
-            msg = 'Incorrect type. Expected a string, but got %s'
-            raise ValidationError(msg % type(data).__name__)
+    if not re.match(r'^rgb\([0-9]+,[0-9]+,[0-9]+\)$', data):
+        raise ValidationError('Incorrect format. Expected `rgb(#,#,#)`.')
 
-        if not re.match(r'^rgb\([0-9]+,[0-9]+,[0-9]+\)$', data):
-            raise ValidationError('Incorrect format. Expected `rgb(#,#,#)`.')
+    data = data.strip('rgb(').rstrip(')')
+    red, green, blue = [int(col) for col in data.split(',')]
 
-        data = data.strip('rgb(').rstrip(')')
-        red, green, blue = [int(col) for col in data.split(',')]
+    if any([col > 255 or col < 0 for col in (red, green, blue)]):
+        raise ValidationError('Value out of range. Must be between 0 and 255.')
 
-        if any([col > 255 or col < 0 for col in (red, green, blue)]):
-            raise ValidationError('Value out of range. Must be between 0 and 255.')
-
-        return Color(red, green, blue)
-
+    return Color(red, green, blue)
+```
 The `.fail()` method is a shortcut for raising `ValidationError` that takes a message string from the `error_messages` dictionary. For example:
+```python
+default_error_messages = {
+    'incorrect_type': 'Incorrect type. Expected a string, but got {input_type}',
+    'incorrect_format': 'Incorrect format. Expected `rgb(#,#,#)`.',
+    'out_of_range': 'Value out of range. Must be between 0 and 255.'
+}
 
-    default_error_messages = {
-        'incorrect_type': 'Incorrect type. Expected a string, but got {input_type}',
-        'incorrect_format': 'Incorrect format. Expected `rgb(#,#,#)`.',
-        'out_of_range': 'Value out of range. Must be between 0 and 255.'
-    }
+def to_internal_value(self, data):
+    if not isinstance(data, six.text_type):
+        self.fail('incorrect_type', input_type=type(data).__name__)
 
-    def to_internal_value(self, data):
-        if not isinstance(data, six.text_type):
-            self.fail('incorrect_type', input_type=type(data).__name__)
+    if not re.match(r'^rgb\([0-9]+,[0-9]+,[0-9]+\)$', data):
+        self.fail('incorrect_format')
 
-        if not re.match(r'^rgb\([0-9]+,[0-9]+,[0-9]+\)$', data):
-            self.fail('incorrect_format')
+    data = data.strip('rgb(').rstrip(')')
+    red, green, blue = [int(col) for col in data.split(',')]
 
-        data = data.strip('rgb(').rstrip(')')
-        red, green, blue = [int(col) for col in data.split(',')]
+    if any([col > 255 or col < 0 for col in (red, green, blue)]):
+        self.fail('out_of_range')
 
-        if any([col > 255 or col < 0 for col in (red, green, blue)]):
-            self.fail('out_of_range')
-
-        return Color(red, green, blue)
-
+    return Color(red, green, blue)
+```
 This style keeps your error messages cleaner and more separated from your code, and should be preferred.
 
 [iso8601]: https://www.w3.org/TR/NOTE-datetime

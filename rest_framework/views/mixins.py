@@ -95,11 +95,14 @@ class GetResponseMixin(GetSerializerMixin):
 
     """
     # Response class, for create Response.
-    # Interface: data: Any(For JSON), status: int = response status.
+    # Interface: data: Any(For JSON), status: int = response status, content_type: str = application/json
     response_class = None
 
     # Paginator class for get pagination json
     pagination_class = LimitOffsetObjectsPaginator
+
+    # Response Content Type, default: application/json
+    response_content_type = 'application/json'
 
     def __new__(cls, *args, **kwargs):
         res = super().__new__(cls, *args, **kwargs)
@@ -137,7 +140,7 @@ class GetResponseMixin(GetSerializerMixin):
         """
         Create and return response object.
 
-        :param object obj: Object for response body .
+        :param object obj: Object for response body.
         :param bool is_serialized: Is data serialization required?
         :param int status_code: Code server response.
 
@@ -149,4 +152,7 @@ class GetResponseMixin(GetSerializerMixin):
         if is_serialized and obj is not None:
             data = self.get_response_serializer()(obj).data
 
-        return self.response_class(data, status=status_code)
+        return self.response_class(
+            data, status=status_code,
+            content_type=self.response_content_type
+        )

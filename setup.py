@@ -16,11 +16,14 @@ with open(os.path.join(os.path.dirname(__file__), 'requirements', 'requirements-
 with open(os.path.join(os.path.dirname(__file__), 'requirements', 'requirements-tests.txt')) as f:
     requirements_test = f.read()
 
+with open(os.path.join(os.path.dirname(__file__), 'requirements', 'requirements-flask.txt')) as f:
+    requirements_flask = f.read()
+
 with open(os.path.join(os.path.dirname(__file__), 'requirements', 'requirements-aiohttp.txt')) as f:
     requirements_aiohttp = f.read()
 
-with open(os.path.join(os.path.dirname(__file__), 'requirements', 'requirements-flask.txt')) as f:
-    requirements_flask = f.read()
+with open(os.path.join(os.path.dirname(__file__), 'requirements', 'requirements-sanic.txt')) as f:
+    requirements_sanic = f.read()
 
 
 setup(
@@ -38,6 +41,7 @@ setup(
     extras_require={
         'aiohttp': requirements_aiohttp,
         'flask': requirements_flask,
+        'sanic': requirements_sanic
     },
     setup_requires=requirements_setup,
     url=rest_framework.__url__,
@@ -52,10 +56,10 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],

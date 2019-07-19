@@ -28,6 +28,14 @@ pip install python-rest-framework
 git clone git@github.com:nxexox/python-rest-framework.git
 ```
 
+## Versions for Python Web Frameworks
+
+```bash
+pip install python-rest-framework[flask]  # For Flask framework
+pip install python-rest-framework[aiohttp]  # For AioHttp framework
+pip install python-rest-framework[sanic]  # For Sanic framework
+```
+
 ## Example
 
 For example, we will serialize the data from the request object.

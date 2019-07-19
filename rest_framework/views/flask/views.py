@@ -6,21 +6,21 @@ from flask import request, jsonify, make_response
 from flask.views import View as _FlaskClassBaseView, MethodView as _FlaskClassBaseMethodView
 
 from rest_framework.views.base import BaseApiView
-from rest_framework.exceptions import ApiException
 
 
-def json_response(data, status=200):
+def json_response(data, status=200, content_type='application/json'):
     """
     Json response for Flask.
 
     :param dict data: Data for response
     :param int status: Response status code.
+    :param str content_type: Response Content-Type.
 
     :return: Response object.
     :rtype:
 
     """
-    return make_response(jsonify(data), status)
+    return make_response(jsonify(data), status, content_type=content_type)
 
 
 class _BaseFlaskView(object):
@@ -52,19 +52,6 @@ class _BaseFlaskView(object):
         """
         return request.method
 
-    def dispatch(self, method, *args, **kwargs):
-        """
-        Code after, before call request handler.
-
-        :param Callable method: Method handler for call.
-
-        """
-        try:
-            return method(*args, **kwargs)
-        except ApiException as e:
-            # TODO: Not security. e.detail maybe anything
-            return self.response_class({'errors': e.detail}, status=e.status or 400)
-
 
 class FlaskBaseApiView(_FlaskClassBaseView, _BaseFlaskView, BaseApiView):
     """
@@ -85,7 +72,9 @@ class FlaskBaseApiView(_FlaskClassBaseView, _BaseFlaskView, BaseApiView):
         """
         def view(*args, **kwargs):
             self = view.view_class(*class_args, **class_kwargs)
-            return self.dispatch(self.dispatch_request, *args, **kwargs)
+            if self.use_dispatch:
+                return self._dispatch(self.dispatch_request, *args, **kwargs)
+            return self.dispatch_request(*args, **kwargs)
 
         if cls.decorators:
             view.__name__ = name
@@ -113,13 +102,14 @@ class FlaskBaseMethodView(_FlaskClassBaseMethodView, _BaseFlaskView, BaseApiView
 
     """
     def dispatch_request(self, *args, **kwargs):
-        meth = getattr(self, request.method.lower(), None)
+        meth = getattr(self, self.current_request_method.lower(), None)
 
         # If the request method is HEAD and we don't have a handler for it
         # retry with GET.
-        if meth is None and request.method == 'HEAD':
+        if meth is None and self.current_request_method == 'HEAD':
             meth = getattr(self, 'get', None)
 
-        assert meth is not None, 'Unimplemented method %r' % request.method
-        return self.dispatch(meth, *args, **kwargs)
-
+        assert meth is not None, 'Unimplemented method %r' % self.current_request_method
+        if self.use_dispatch:
+            return self._dispatch(meth, *args, **kwargs)
+        return meth(*args, **kwargs)

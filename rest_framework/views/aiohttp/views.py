@@ -57,12 +57,15 @@ class AioHTTPApiView(AioHttpClassBaseView, BaseApiView):
         if method is None:
             self._raise_allowed_methods()
 
-        response = yield from self.dispatch(method)
+        if self.use_dispatch:
+            response = yield from self._dispatch(method)
+        else:
+            response = yield from method()
 
         return response
 
     @asyncio.coroutine
-    def dispatch(self, method):
+    def _dispatch(self, method, *args, **kwargs):
         """
         Code after, before call request handler.
 

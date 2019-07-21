@@ -71,7 +71,8 @@ class Field(object):
     }
     default_validators = []  # Default validators for field.
 
-    def __init__(self, required=True, default=None, label=None, validators=None, error_messages=None):
+    def __init__(self, required=True, default=None, label=None, validators=None,
+                 error_messages=None, source=None):
         """
         Base field.
 
@@ -80,10 +81,12 @@ class Field(object):
         :param str label: Field name.
         :param list validators: Validators for field.
         :param dict error_messages: Dictionary with custom error description.
+        :param str source: Source field_name, if field_name object other in serializer.
 
         """
         self.label = label
         self.default = default
+        self.source = source
         self.required = bool(required) if self.default is None else False
         # Added validator for check on required field.
         self._src_validators = validators
@@ -220,7 +223,7 @@ class Field(object):
         :rtype: str
 
         """
-        return self.field_name
+        return self.source or self.field_name
 
     def _get_attribute(self, instance):
         """

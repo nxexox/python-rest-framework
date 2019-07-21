@@ -43,6 +43,29 @@ A list of validator functions which should be applied to the incoming field inpu
 
 A dictionary of error codes to error messages.
 
+###`source`
+
+The name of the field object with which the serializer field is associated. By default, the field name of the serializer = the name of the field of the object being serialized. This field changes this behavior.
+
+**Example:**
+```python
+from rest_framework import serializers
+
+class Model(object):
+    field = 10
+
+class StandardSerializer(serializers.Serializer):
+    field = serializers.IntegerField()
+
+class SourceFieldSerializer(serializers.Serializer):
+    new_field = serializers.IntegerField(source='field')
+
+print(StandardSerializer(instance=Model()).data)
+# {'field': 10}
+print(SourceFieldSerializer(instance=Model()).data)
+# {'new_field': 10}
+```
+
 ---
 
 # Fields

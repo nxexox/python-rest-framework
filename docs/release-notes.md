@@ -8,12 +8,17 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.3.4
+
+**Date:** [22th Jule 2019]
+
+* Added [`source`][SourceFieldAttribute] attribute for base fields class.
+
 ### 0.3.3
 
 **Date:** [22th Jule 2019]
 
 * Finish fix setup.py config. Change travis config, codecov config.
-
 
 ### 0.3.2
 
@@ -118,6 +123,7 @@ Major version numbers (x.0.0) are reserved for substantial project milestones.
 * Push to Open Source community.
 
 
+[SourceFieldAttribute]: api-guid/fields#source
 [BaseViews]: api-guid/views/views
 [ViewsMixins]: api-guid/views/mixins
 [ViewsPaginations]: api-guid/views/paginations

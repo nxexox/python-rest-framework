@@ -187,6 +187,7 @@
                 <li class="third-level"><a href="#label">label</a></li>
                 <li class="third-level"><a href="#validators">validators</a></li>
                 <li class="third-level"><a href="#error_messages">error_messages</a></li>
+                <li class="third-level"><a href="#source">source</a></li>
         <li class="first-level "><a href="#fields_1">Fields</a></li>
             <li class="second-level"><a href="#booleanfield">BooleanField</a></li>
                 
@@ -250,6 +251,26 @@ Set to false if this field is not required to be present during deserialization.
 <p>A list of validator functions which should be applied to the incoming field input, and which either raise a validation error or simply return. Validator functions should raise <code>serializers.ValidationError</code>.</p>
 <h3 id="error_messages"><a class="toclink" href="#error_messages"><code>error_messages</code></a></h3>
 <p>A dictionary of error codes to error messages.</p>
+<h3 id="source"><a class="toclink" href="#source"><code>source</code></a></h3>
+<p>The name of the field object with which the serializer field is associated. By default, the field name of the serializer = the name of the field of the object being serialized. This field changes this behavior.</p>
+<p><strong>Example:</strong></p>
+<pre><code class="python">from rest_framework import serializers
+
+class Model(object):
+    field = 10
+
+class StandardSerializer(serializers.Serializer):
+    field = serializers.IntegerField()
+
+class SourceFieldSerializer(serializers.Serializer):
+    new_field = serializers.IntegerField(source='field')
+
+print(StandardSerializer(instance=Model()).data)
+# {'field': 10}
+print(SourceFieldSerializer(instance=Model()).data)
+# {'new_field': 10}
+</code></pre>
+
 <hr />
 <h1 id="fields_1"><a class="toclink" href="#fields_1">Fields</a></h1>
 <h2 id="booleanfield"><a class="toclink" href="#booleanfield">BooleanField</a></h2>

@@ -1,5 +1,0 @@
-# for build and push package
-twine==1.12.1
-
-# for docs
-mkdocs==1.0.4

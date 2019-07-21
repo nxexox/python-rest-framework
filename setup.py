@@ -29,7 +29,9 @@ with open(os.path.join(os.path.dirname(__file__), 'requirements', 'requirements-
 setup(
     name=rest_framework.__title__,
     version=rest_framework.__version__,
-    packages=find_packages(exclude=('tests', '*tests', '*tests*', 'docs', 'docs_theme', 'requirements')),  # We throw away from the assembly too much.
+    packages=find_packages(
+        exclude=('tests', '*tests', '*tests*', 'docs', 'docs_theme')
+    ),  # We throw away from the assembly too much.
     include_package_data=True,
     test_suite='tests',  # Include tests.
     license='Apache 2.0',  # Put the license.
@@ -44,6 +46,16 @@ setup(
         'sanic': requirements_sanic
     },
     setup_requires=requirements_setup,
+    data_files=[
+        ('requirements', [
+            'requirements/requirements-app.txt',
+            'requirements/requirements-tests.txt',
+            'requirements/requirements-setup.txt',
+            'requirements/requirements-aiohttp.txt',
+            'requirements/requirements-flask.txt',
+            'requirements/requirements-sanic.txt'
+        ])
+    ],
     url=rest_framework.__url__,
     author=rest_framework.__author__,
     author_email=rest_framework.__email__,

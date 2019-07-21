@@ -8,6 +8,18 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.3.2
+
+**Date:** [22th Jule 2019]
+
+* Mini fix new setup.py config. Added requirements folder to `data_files` argument.
+
+### 0.3.1
+
+**Date:** [22th Jule 2019]
+
+* Mini fix new setup.py config. Change requirements
+
 ### 0.3.0
 
 **Date:** [19th Jule 2019]

@@ -9,7 +9,7 @@ python:
 
 script:
   - python setup.py test  # run tests
-  - coverage run setup.py test  # run coverage tests
+  - coverage run python tests/__ini__.py  # run coverage tests
 
 after_success:
   - codecov  # report to coverage.

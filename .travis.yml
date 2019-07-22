@@ -8,6 +8,7 @@ python:
   - 3.7
 
 script:
+  - pip install coverage
   - python setup.py test  # run tests
   - coverage run python tests/__ini__.py  # run coverage tests
 

@@ -1,18 +1,12 @@
 import unittest
 
-from tests.test_fields import *
-from tests.test_serializers import *
-from tests.test_validators import *
+from .test_fields import *
+from .test_serializers import *
+from .test_validators import *
+from .test_views import *
+from .test_views_mixin import *
+from .test_views_pagination import *
 
-__all__ = (
-    # test fields
-    BaseFieldTestCase, CharFieldTest, TestIntegerField, TestFloatField, TestBooleanField,
-    TestListField,
-
-    # test serializers
-    BaseSerializerTestClass, SerializerTestClass, SerializerUserTestCase, SerializerSingleMixinTestCase,
-    SerializerManyMixinTestCase, SerializerRequiredMixinTestCase,
-)
 
 if __name__ == '__main__':
     unittest.main()

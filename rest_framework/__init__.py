@@ -8,12 +8,12 @@ r"""
          __/ |
         |___/
 """
-VERSION = (0, 3, 4)
+VERSION = (0, 3, 5)
 
 __title__ = 'Python-Rest-Framework'
 __author__ = 'Deys Timofey'
 __email__ = 'nxexox@gmail.com'
-__copyright__ = 'Copyright (c) 2018 Deys Timofey'
+__copyright__ = 'Copyright (c) 2019 Deys Timofey'
 __license__ = 'Apache License 2.0'
 __url__ = 'https://github.com/nxexox/python-rest-framework'
 __version__ = '.'.join(map(str, VERSION))

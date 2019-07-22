@@ -21,3 +21,8 @@ class ValidationError(ApiException):
         """
         super().__init__(*args, **kwargs)
         self.code = code
+
+    def __str__(self):
+        return 'rest_framework.serializers.exceptions.ValidationError(code={}, detail={}, code={})'.format(
+            self.code, self.detail, self.status
+        )

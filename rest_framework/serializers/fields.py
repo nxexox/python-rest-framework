@@ -103,7 +103,8 @@ class Field(object):
     def __deepcopy__(self, memo={}):
         return self.__class__(
             required=self.required, default=self.default, label=self.label,
-            validators=self._src_validators, error_messages=self._src_messages
+            validators=self._src_validators, error_messages=self._src_messages,
+            source=self.source
         )
 
     def bind(self, field_name, parent):
@@ -394,7 +395,8 @@ class CharField(Field):
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
             min_length=self.min_length, max_length=self.max_length,
-            trim_whitespace=self.trim_whitespace, allow_blank=self.allow_blank
+            trim_whitespace=self.trim_whitespace, allow_blank=self.allow_blank,
+            source=self.source
         )
 
     def run_validation(self, data=None):
@@ -487,7 +489,8 @@ class IntegerField(Field):
         return self.__class__(
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
-            min_value=self.min_value, max_value=self.max_value
+            min_value=self.min_value, max_value=self.max_value,
+            source=self.source
         )
 
     def to_internal_value(self, data):
@@ -562,7 +565,8 @@ class FloatField(Field):
         return self.__class__(
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
-            min_value=self.min_value, max_value=self.max_value
+            min_value=self.min_value, max_value=self.max_value,
+            source=self.source
         )
 
     def to_internal_value(self, data):
@@ -822,7 +826,7 @@ class ListField(Field):
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
             child=self.child, min_length=self.min_length, max_length=self.max_length,
-            allow_empty=self.allow_empty
+            allow_empty=self.allow_empty, source=self.source
         )
 
     def to_internal_value(self, data):
@@ -892,7 +896,8 @@ class DateField(Field):
         return self.__class__(
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
-            format=getattr(self, 'format'), input_format=getattr(self, 'input_format')
+            format=getattr(self, 'format'), input_format=getattr(self, 'input_format'),
+            source=self.source
         )
 
     def to_internal_value(self, data):
@@ -991,7 +996,8 @@ class TimeField(Field):
         return self.__class__(
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
-            format=getattr(self, 'format', None), input_format=getattr(self, 'input_format')
+            format=getattr(self, 'format', None), input_format=getattr(self, 'input_format'),
+            source=self.source
         )
 
     def to_internal_value(self, data):
@@ -1088,7 +1094,8 @@ class DateTimeField(Field):
         return self.__class__(
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
-            format=getattr(self, 'format'), input_format=getattr(self, 'input_format')
+            format=getattr(self, 'format'), input_format=getattr(self, 'input_format'),
+            source=self.source
         )
 
     def to_internal_value(self, data):
@@ -1220,7 +1227,7 @@ class DictField(JsonField):
         return self.__class__(
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
-            child=self.child
+            child=self.child, source=self.source
         )
 
     def to_internal_value(self, data):
@@ -1305,7 +1312,8 @@ class SerializerMethodField(Field):
         return self.__class__(
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
-            method_name_get=self.method_name_get, method_name_pop=self.method_name_pop
+            method_name_get=self.method_name_get, method_name_pop=self.method_name_pop,
+            source=self.source
         )
 
     def bind(self, field_name, parent):

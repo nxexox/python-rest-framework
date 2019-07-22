@@ -33,7 +33,7 @@ class GetValidJsonApiGenericMethodView(SanicApiMethodView, GetValidJsonMixin):
     pass
 
 
-class ApiGenericMethodView(SanicApiMethodView, GetResponseMixin, GetSerializerMixin, GetValidJsonMixin):
+class ApiGenericMethodView(SanicApiMethodView, GetResponseMixin, GetValidJsonMixin, GetSerializerMixin):
     """
     Generic Api method view for GetResponse, GetSerializer, GetValidJsonMixin methods.
 
@@ -65,7 +65,7 @@ class GetValidJsonApiGenericCompositionView(SanicApiCompositionView, GetValidJso
     pass
 
 
-class ApiGenericCompositionView(SanicApiCompositionView, GetResponseMixin, GetSerializerMixin, GetValidJsonMixin):
+class ApiGenericCompositionView(SanicApiCompositionView, GetResponseMixin, GetValidJsonMixin, GetSerializerMixin):
     """
     Generic Api composition view for GetResponse, GetSerializer, GetValidJsonMixin methods.
 

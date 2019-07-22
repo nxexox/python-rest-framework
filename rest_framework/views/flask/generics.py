@@ -33,7 +33,7 @@ class GetValidJsonApiGenericView(FlaskBaseApiView, GetValidJsonMixin):
     pass
 
 
-class ApiGenericView(FlaskBaseApiView, GetResponseMixin, GetSerializerMixin, GetValidJsonMixin):
+class ApiGenericView(FlaskBaseApiView, GetResponseMixin, GetValidJsonMixin, GetSerializerMixin):
     """
     Generic Api view for GetResponse, GetSerializer, GetValidJsonMixin methods.
 
@@ -65,7 +65,7 @@ class GetValidJsonApiGenericMethodView(FlaskBaseMethodView, GetValidJsonMixin):
     pass
 
 
-class ApiGenericMethodView(FlaskBaseMethodView, GetResponseMixin, GetSerializerMixin, GetValidJsonMixin):
+class ApiGenericMethodView(FlaskBaseMethodView, GetResponseMixin, GetValidJsonMixin, GetSerializerMixin):
     """
     Generic Api method view for GetResponse, GetSerializer, GetValidJsonMixin methods.
 

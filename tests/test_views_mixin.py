@@ -123,8 +123,11 @@ class GetResponseMixinTestCase(unittest.TestCase):
         except AttributeError:
             pass
 
+        def get_response(data, status, content_type='application/json'):
+            return Response(data, status, content_type)
+
         class ForTest(ForTests, GetResponseMixin):
-            response_class = Response
+            response_class = get_response
 
         mixin = ForTest()
 
@@ -141,8 +144,11 @@ class GetResponseMixinTestCase(unittest.TestCase):
         except AttributeError:
             pass
 
+        def get_response(data, status, content_type='application/json'):
+            return Response(data, status, content_type)
+
         class ForTest(ForTests, GetResponseMixin):
-            response_class = Response
+            response_class = get_response
             pagination_class = LimitOffsetObjectsPaginator
 
         mixin = ForTest()

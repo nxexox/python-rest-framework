@@ -27,3 +27,6 @@ class ApiException(Exception):
         """
         self.detail = detail
         self.status = status
+
+    def __str__(self):
+        return 'rest_framework.exceptions.ApiException(detail={}, code={})'.format(self.detail, self.status)

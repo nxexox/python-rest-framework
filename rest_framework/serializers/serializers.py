@@ -22,7 +22,7 @@ from rest_framework.utils import html
 
 LIST_SERIALIZER_KWARGS = (
     'required', 'default', 'label', 'error_messages', 'allow_empty',
-    'instance', 'data', 'min_length', 'max_length'
+    'instance', 'data', 'min_length', 'max_length', 'source'
 )  # The argument list for the ListSerializer to control the creation of many=True.
 
 
@@ -126,7 +126,7 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
         return super(BaseSerializer, cls).__new__(cls)
 
     def __deepcopy__(self, memo={}):
-        return self.__class__(instance=self.instance, data=self.data)
+        return self.__class__(instance=self.instance, data=self.data, source=self.source)
 
     @classmethod
     def many_init(cls, *args, **kwargs):
@@ -313,8 +313,9 @@ class Serializer(BaseSerializer):
         """
         res = OrderedDict()  # Attributes storage.
 
-        for field_name, field_val in six.iteritems(self.fields):
+        for _, field_val in six.iteritems(self.fields):
             # TODO: mini hack
+            field_name = field_val._get_field_name()
             if not isinstance(field_val, SerializerMethodField):
                 # We try to get the attribute.
                 try:
@@ -361,7 +362,8 @@ class Serializer(BaseSerializer):
         """
         validated_data, errors = OrderedDict(), OrderedDict()
         # Running through the fields.
-        for field_name, field_obj in six.iteritems(fields_dict):
+        for _, field_obj in six.iteritems(fields_dict):
+            field_name = field_obj._get_field_name()
             try:
                 # Transform to python type and validate each field.
                 validated_val = field_obj.run_validation(data.get(field_name, None))
@@ -516,7 +518,8 @@ class ListSerializer(Serializer):
     def __deepcopy__(self, memo={}):
         return self.__class__(
             instance=self.instance, data=self.data,
-            child=self.child, allow_empty=self.allow_empty
+            child=self.child, allow_empty=self.allow_empty,
+            source=self.source
         )
 
     def to_internal_value(self, data):

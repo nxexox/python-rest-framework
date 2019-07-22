@@ -37,7 +37,7 @@ class GetValidJsonMixin(GetSerializerMixin):
             data.update(request_json)
         except JSONDecodeError:
             if raise_exception:
-                raise ValidationError('Not valid json.')
+                raise ValidationError(detail='Not valid json.')
 
         # Validate body request.
         serializer = self.get_request_serializer()

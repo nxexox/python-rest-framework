@@ -13,16 +13,12 @@ from unittest import TestCase
 
 import six
 
-from rest_framework.serializers.fields import (
-    CharField, BooleanField, IntegerField, FloatField, ListField
-)
 from rest_framework.serializers.serializers import BaseSerializer, Serializer, ListSerializer
-from rest_framework.exceptions import SkipError
 from rest_framework.serializers.exceptions import ValidationError
 
 from tests.serializers_for_tests import (
     SerializerPrimitiveField, SerializerMixinSingle, SerializerMixinMany, SerializerMixinRequired,
-    InheritSecondLevelChild
+    InheritSecondLevelChild, SerializerSourceFields, SourceFieldFromSerializer
 )
 
 

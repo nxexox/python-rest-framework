@@ -8,6 +8,16 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.3.5
+
+**Date:** [22th Jule 2019]
+
+* Fix for current work [`source`][SourceFieldAttribute] attribute for base fields class.
+* Fix exceptions `__str__` method.
+* Fix `GenericViews` `MRO`.
+* Added unbound `response_class` from all views.
+* Fix `ValidationError` arguments in views.
+
 ### 0.3.4
 
 **Date:** [22th Jule 2019]

@@ -77,4 +77,4 @@ class AioHTTPApiView(AioHttpClassBaseView, BaseApiView):
             return result
         except ApiException as e:
             # TODO: Not security. e.detail maybe anything
-            return self.response_class({'errors': e.detail}, status=e.status or 400)
+            return self.response_class.__func__(detail={'errors': e.detail}, status=e.status or 400)

@@ -43,7 +43,7 @@ class BaseApiView(object):
             return method(*args, **kwargs)
         except ApiException as e:
             # TODO: Not security. e.detail maybe anything
-            return self.response_class(
+            return self.response_class.__func__(
                 {'errors': e.detail},
                 status=e.status or 400,
                 content_type=self.response_content_type

@@ -105,7 +105,7 @@ class GetResponseMixin(GetSerializerMixin):
     response_content_type = 'application/json'
 
     def __new__(cls, *args, **kwargs):
-        res = super().__new__(cls, *args, **kwargs)
+        res = super().__new__(cls)
         # TODO: Not working
         if cls.response_class is None:
             raise AttributeError(
@@ -152,7 +152,7 @@ class GetResponseMixin(GetSerializerMixin):
         if is_serialized and obj is not None:
             data = self.get_response_serializer()(obj).data
 
-        return self.response_class(
+        return self.response_class.__func__(
             data, status=status_code,
             content_type=self.response_content_type
         )

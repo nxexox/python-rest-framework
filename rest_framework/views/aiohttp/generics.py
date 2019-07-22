@@ -33,7 +33,7 @@ class GetValidJsonApiGenericView(AioHTTPApiView, GetValidJsonMixin):
     pass
 
 
-class ApiGenericView(AioHTTPApiView, GetResponseMixin, GetSerializerMixin, GetValidJsonMixin):
+class ApiGenericView(AioHTTPApiView, GetResponseMixin, GetValidJsonMixin, GetSerializerMixin):
     """
     Generic Api view for GetResponse, GetSerializer, GetValidJsonMixin methods.
 

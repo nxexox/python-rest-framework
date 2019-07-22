@@ -95,3 +95,19 @@ class InheritSecondLevelChild(InheritFirstLevelChild):
 
     """
     second_level_child = IntegerField(required=True)
+
+
+class SerializerSourceFields(Serializer):
+    """
+    Serializer for check source argument.
+
+    """
+    source_field = CharField(source='source', required=True)
+
+
+class SourceFieldFromSerializer(Serializer):
+    """
+    Serializer for check source argument.
+
+    """
+    source_field_serializer = SerializerSourceFields(source='source_field', required=True)

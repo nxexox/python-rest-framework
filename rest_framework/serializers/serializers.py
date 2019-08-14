@@ -47,31 +47,36 @@ class MroFieldsSearch(object):
         _declared_fields = OrderedDict()
 
         for _cls in reversed((cls or self.cls).__mro__):
-            _current_fields = self.get_fields_from_cls(_cls)
+            _current_fields, _remove_fields = self.get_fields_from_cls(_cls, _declared_fields)
             # print(_cls, _current_fields)
             _declared_fields.update(_current_fields)
+            for name in _remove_fields:
+                del _declared_fields[name]
 
         return _declared_fields
 
-    def get_fields_from_cls(self, cls):
+    def get_fields_from_cls(self, cls, current_fields):
         """
         Search fields for one class.
 
         :param rest_framework.serializers.Serializer cls: Class for search fields.
+        :param collections.OrderedDict current_fields: Current searching fields.
 
-        :return: Dict fields for class.
-        :rtype: collections.OrderedDict
+        :return: Dict fields for class. Tuple[new_fields, remove_fields]
+        :rtype: Tuple[collections.OrderedDict, list]
 
         """
-        _declared_fields = OrderedDict()
+        _declared_fields, _remove_fields = OrderedDict(), []
 
         # Fill storage of fields.
         for name, obj in six.iteritems(cls.__dict__):
             if isinstance(obj, Field):
                 _declared_fields[name] = obj
+            elif name in current_fields:
+                _remove_fields.append(name)
 
         # Forward storage of fields to the class itself.
-        return _declared_fields
+        return _declared_fields, _remove_fields
 
 
 class BaseSerializerMeta(type):

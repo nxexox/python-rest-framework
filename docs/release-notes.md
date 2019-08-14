@@ -8,6 +8,20 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.3.6
+
+**Date:** [14th August 2019]
+
+* Fix for current remove fields from base serializer.
+```python
+class Ser(Serializer):
+    field_one = CharField()
+
+class TwoSer(Ser):
+    field_one = None
+
+```
+
 ### 0.3.5
 
 **Date:** [22th Jule 2019]

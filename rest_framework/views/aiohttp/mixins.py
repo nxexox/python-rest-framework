@@ -2,7 +2,6 @@
 Mixins for views AioHttp.
 
 """
-import asyncio
 try:
     from json.decoder import JSONDecodeError
 except (AttributeError, ImportError):
@@ -17,8 +16,7 @@ class GetValidJsonMixin(GetSerializerMixin):
     Mixin for method get_valid json.
 
     """
-    @asyncio.coroutine
-    def get_valid_json(self, parse_query=False, raise_exception=True):
+    async def get_valid_json(self, parse_query=False, raise_exception=True):
         """
         Make, Validate and return JSON from request BODY.
 
@@ -33,7 +31,7 @@ class GetValidJsonMixin(GetSerializerMixin):
         data = self.request_object.query.copy() if parse_query else {}
         # Get request body
         try:
-            request_json = yield from self.request_object.json()
+            request_json = await self.request_object.json()
             data.update(request_json)
         except JSONDecodeError:
             if raise_exception:

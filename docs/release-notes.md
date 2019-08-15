@@ -8,6 +8,12 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.3.7
+
+**Date:** [15th August 2019]
+
+* Change `@asyncio.coroutine` to `async/await`.
+
 ### 0.3.6
 
 **Date:** [14th August 2019]

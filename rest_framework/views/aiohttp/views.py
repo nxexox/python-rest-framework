@@ -2,8 +2,6 @@
 Views for aiohttp.
 
 """
-import asyncio
-
 from aiohttp.hdrs import METH_ALL
 from aiohttp.web import (
     View as AioHttpClassBaseView,
@@ -43,8 +41,7 @@ class AioHTTPApiView(AioHttpClassBaseView, BaseApiView):
         """
         return self.request.method
 
-    @asyncio.coroutine
-    def _iter(self):
+    async def _iter(self):
         """
         Iter for request handler.
 
@@ -58,14 +55,13 @@ class AioHTTPApiView(AioHttpClassBaseView, BaseApiView):
             self._raise_allowed_methods()
 
         if self.use_dispatch:
-            response = yield from self._dispatch(method)
+            response = await self._dispatch(method)
         else:
-            response = yield from method()
+            response = await method()
 
         return response
 
-    @asyncio.coroutine
-    def _dispatch(self, method, *args, **kwargs):
+    async def _dispatch(self, method, *args, **kwargs):
         """
         Code after, before call request handler.
 
@@ -73,7 +69,7 @@ class AioHTTPApiView(AioHttpClassBaseView, BaseApiView):
 
         """
         try:
-            result = yield from method()
+            result = await method()
             return result
         except ApiException as e:
             # TODO: Not security. e.detail maybe anything

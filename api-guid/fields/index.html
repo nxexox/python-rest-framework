@@ -188,6 +188,7 @@
                 <li class="third-level"><a href="#validators">validators</a></li>
                 <li class="third-level"><a href="#error_messages">error_messages</a></li>
                 <li class="third-level"><a href="#source">source</a></li>
+                <li class="third-level"><a href="#allow_none">allow_none</a></li>
         <li class="first-level "><a href="#fields_1">Fields</a></li>
             <li class="second-level"><a href="#booleanfield">BooleanField</a></li>
                 
@@ -269,6 +270,23 @@ print(StandardSerializer(instance=Model()).data)
 # {'field': 10}
 print(SourceFieldSerializer(instance=Model()).data)
 # {'new_field': 10}
+</code></pre>
+
+<h3 id="allow_none"><a class="toclink" href="#allow_none"><code>allow_none</code></a></h3>
+<p>If set to True, skips None in the data field.</p>
+<p><strong>Example:</strong></p>
+<pre><code class="python">from rest_framework import serializers
+
+class StandardSerializer(serializers.Serializer):
+    field = serializers.IntegerField()
+
+class AllowNoneSerializer(serializers.Serializer):
+    field = serializers.IntegerField(allow_none=True)
+
+print(StandardSerializer(instance={'field': None}).data)
+# Raise Validation Exception
+print(AllowNoneSerializer(instance={'field': None}).data)
+# {'field': None}
 </code></pre>
 
 <hr />

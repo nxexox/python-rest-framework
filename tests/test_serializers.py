@@ -18,7 +18,8 @@ from rest_framework.serializers.exceptions import ValidationError
 
 from tests.serializers_for_tests import (
     SerializerPrimitiveField, SerializerMixinSingle, SerializerMixinMany, SerializerMixinRequired,
-    InheritSecondLevelChild, SerializerSourceFields, SourceFieldFromSerializer
+    InheritSecondLevelChild, SerializerSourceFields, SourceFieldFromSerializer,
+    AllowNoneSerializer, InheritAllowNoneSerializer
 )
 
 
@@ -387,7 +388,7 @@ class SerializerUserTestCase(TestCase):
         data = self.__create_params(fullness='full')
         ser = self.serializer_class(data=data)
         # Check logic.
-        assert ser.is_valid() is True, '`.is_valid()` must return True.'
+        assert ser.is_valid() is True, '`.is_valid()` must return True. Errors: `{}`'.format(ser.errors)
         assert isinstance(ser.errors, Mapping), \
             '`.errors` must be dict. Reality: {}.'.format(type(ser.errors))
         assert len(ser.errors) == 0, '`.errors` must be empty. Reality: {}.'.format(ser.errors)
@@ -437,7 +438,7 @@ class SerializerUserTestCase(TestCase):
         Feed the dictionary.
 
         """
-        # First we feed him an empty object..
+        # First we feed him an empty object.
         ser = self.serializer_class(instance=self.__create_params(fullness='empty'))
         assert isinstance(ser.data, Mapping), '`.data` must be dict. Reality: {}.'.format(type(ser.data))
 
@@ -577,3 +578,57 @@ class SerializerInheritTestCase(SerializerUserTestCase):
             return {}
         else:
             return {'root': 100, 'first_level_child': 50, 'second_level_child': 100}
+
+
+class SerializerAllowNoneTestCase(SerializerUserTestCase):
+    """
+    Testing the serializer with many levels inherit.
+
+    """
+    serializer_class = AllowNoneSerializer
+
+    def create_params(self, fullness):
+        """
+        Create data for serializer.
+
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`, `validation_error`.
+
+        :return: Data dict.
+        :rtype: dict
+
+        """
+        if fullness == 'empty':
+            return {'bool': 'test', 'integer': None}
+        elif fullness == 'middle':
+            return {'char': 'testtest', 'bool': None, 'integer': None}
+        elif fullness == 'validation_error':
+            return {'bool': 'test'}
+        else:
+            return {'char': None, 'bool': None, 'integer': None}
+
+
+class SerializerInheritAllowNoneTestCase(SerializerUserTestCase):
+    """
+    Testing the serializer with many levels inherit.
+
+    """
+    serializer_class = InheritAllowNoneSerializer
+
+    def create_params(self, fullness):
+        """
+        Create data for serializer.
+
+        :param str fullness: Type of data creation: `empty`,` middle`, `full`, `validation_error`.
+
+        :return: Data dict.
+        :rtype: dict
+
+        """
+        if fullness == 'empty':
+            return {'inherit': None}
+        elif fullness == 'middle':
+            return {'inherit': {'char': 'testtest', 'bool': None, 'integer': None}}
+        elif fullness == 'validation_error':
+            return {'inherit': {'bool': 'test'}}
+        else:
+            return {'inherit': {'char': None, 'bool': None, 'integer': None}}

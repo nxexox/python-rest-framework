@@ -19,6 +19,7 @@ import six
 
 from rest_framework.exceptions import SkipError
 from rest_framework.serializers.exceptions import ValidationError
+from rest_framework.serializers.helpers import get_class_name
 from rest_framework.utils import html
 from rest_framework.serializers.validators import (
     RequiredValidator, MaxLengthValidator, MinLengthValidator, MaxValueValidator, MinValueValidator
@@ -72,7 +73,7 @@ class Field(object):
     default_validators = []  # Default validators for field.
 
     def __init__(self, required=True, default=None, label=None, validators=None,
-                 error_messages=None, source=None):
+                 error_messages=None, source=None, allow_none=None):
         """
         Base field.
 
@@ -82,11 +83,13 @@ class Field(object):
         :param list validators: Validators for field.
         :param dict error_messages: Dictionary with custom error description.
         :param str source: Source field_name, if field_name object other in serializer.
+        :param bool allow_none: Allow None value in field?
 
         """
         self.label = label
         self.default = default
         self.source = source
+        self.allow_none = allow_none
         self.required = bool(required) if self.default is None else False
         # Added validator for check on required field.
         self._src_validators = validators
@@ -104,7 +107,7 @@ class Field(object):
         return self.__class__(
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
-            source=self.source
+            source=self.source, allow_none=self.allow_none
         )
 
     def bind(self, field_name, parent):
@@ -191,6 +194,20 @@ class Field(object):
         """
         raise NotImplementedError('`to_internal_value()` must be implemented.')
 
+    def _to_representation(self, value):
+        """
+        Transformation an object to a valid JSON object.
+
+        :param object value: The object to transformation.
+
+        :return: Transformed data.
+        :rtype: object
+
+        """
+        if value is None and self.allow_none:
+            return value
+        return self.to_representation(value)
+
     def to_representation(self, value):
         """
         Transformation an object to a valid JSON object.
@@ -257,6 +274,8 @@ class Field(object):
             # If there is a default value, then it.
             if self.default is not None:
                 return self.get_default()
+            if self.allow_none:
+                return None
             # If there is no default and the field is required, we swear.
             if self.required:
                 raise SkipError(self.error_messages['required'])
@@ -270,8 +289,8 @@ class Field(object):
                 'Original exception text was: {exc}.'.format(
                     exc_type=type(e).__name__,
                     field=self.field_name,
-                    serializer=self.parent.__name__,
-                    instance=instance.__class__.__name__,
+                    serializer=get_class_name(self.parent),
+                    instance=get_class_name(instance),
                     exc=e
                 )
             )
@@ -396,7 +415,7 @@ class CharField(Field):
             validators=self._src_validators, error_messages=self._src_messages,
             min_length=self.min_length, max_length=self.max_length,
             trim_whitespace=self.trim_whitespace, allow_blank=self.allow_blank,
-            source=self.source
+            source=self.source, allow_none=self.allow_none
         )
 
     def run_validation(self, data=None):
@@ -490,7 +509,7 @@ class IntegerField(Field):
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
             min_value=self.min_value, max_value=self.max_value,
-            source=self.source
+            source=self.source, allow_none=self.allow_none
         )
 
     def to_internal_value(self, data):
@@ -566,7 +585,7 @@ class FloatField(Field):
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
             min_value=self.min_value, max_value=self.max_value,
-            source=self.source
+            source=self.source, allow_none=self.allow_none
         )
 
     def to_internal_value(self, data):
@@ -826,7 +845,7 @@ class ListField(Field):
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
             child=self.child, min_length=self.min_length, max_length=self.max_length,
-            allow_empty=self.allow_empty, source=self.source
+            allow_empty=self.allow_empty, source=self.source, allow_none=self.allow_none
         )
 
     def to_internal_value(self, data):
@@ -862,7 +881,7 @@ class ListField(Field):
         :rtype: list
 
         """
-        return [self.child.to_representation(item) if item is not None else None for item in (value or [])]
+        return [self.child._to_representation(item) if item is not None else None for item in (value or [])]
 
 
 class DateField(Field):
@@ -897,7 +916,7 @@ class DateField(Field):
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
             format=getattr(self, 'format'), input_format=getattr(self, 'input_format'),
-            source=self.source
+            source=self.source, allow_none=self.allow_none
         )
 
     def to_internal_value(self, data):
@@ -997,7 +1016,7 @@ class TimeField(Field):
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
             format=getattr(self, 'format', None), input_format=getattr(self, 'input_format'),
-            source=self.source
+            source=self.source, allow_none=self.allow_none
         )
 
     def to_internal_value(self, data):
@@ -1095,7 +1114,7 @@ class DateTimeField(Field):
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
             format=getattr(self, 'format'), input_format=getattr(self, 'input_format'),
-            source=self.source
+            source=self.source, allow_none=self.allow_none
         )
 
     def to_internal_value(self, data):
@@ -1227,7 +1246,7 @@ class DictField(JsonField):
         return self.__class__(
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
-            child=self.child, source=self.source
+            child=self.child, source=self.source, allow_none=self.allow_none
         )
 
     def to_internal_value(self, data):
@@ -1264,7 +1283,7 @@ class DictField(JsonField):
 
         """
         return {
-            six.text_type(key): self.child.to_representation(val) if val is not None else None
+            six.text_type(key): self.child._to_representation(val) if val is not None else None
             for key, val in six.iteritems(value)
         }
 
@@ -1313,7 +1332,7 @@ class SerializerMethodField(Field):
             required=self.required, default=self.default, label=self.label,
             validators=self._src_validators, error_messages=self._src_messages,
             method_name_get=self.method_name_get, method_name_pop=self.method_name_pop,
-            source=self.source
+            source=self.source, allow_none=self.allow_none
         )
 
     def bind(self, field_name, parent):

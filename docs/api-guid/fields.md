@@ -66,6 +66,26 @@ print(SourceFieldSerializer(instance=Model()).data)
 # {'new_field': 10}
 ```
 
+###`allow_none`
+
+If set to True, skips None in the data field.
+
+**Example:**
+```python
+from rest_framework import serializers
+
+class StandardSerializer(serializers.Serializer):
+    field = serializers.IntegerField()
+
+class AllowNoneSerializer(serializers.Serializer):
+    field = serializers.IntegerField(allow_none=True)
+
+print(StandardSerializer(instance={'field': None}).data)
+# Raise Validation Exception
+print(AllowNoneSerializer(instance={'field': None}).data)
+# {'field': None}
+```
+
 ---
 
 # Fields

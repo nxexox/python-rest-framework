@@ -3,8 +3,11 @@ Validators.
 
 """
 import re
-
 import six
+try:
+    from typing import Mapping
+except ImportError:
+    from collections import Mapping
 
 from rest_framework.serializers.exceptions import ValidationError
 
@@ -243,7 +246,11 @@ class ChoiceValidator(BaseValidator):
         except TypeError:
             raise ValueError('`choices=` must be iter or dict. Reality: `{}`.'.format(type(choices)))
         super().__init__(*args, **kwargs)
-        self.choices = choices
+        self._choices = choices
+
+    @property
+    def choices(self):
+        return self._choices.keys() if isinstance(self._choices, Mapping) else self._choices
 
     def __call__(self, value: object):
         """

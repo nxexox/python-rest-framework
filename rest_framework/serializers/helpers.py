@@ -5,6 +5,21 @@ Helpers for serializers and fields.
 from collections import OrderedDict, MutableMapping
 
 
+def get_class_name(obj):
+    """
+    Get class name attribute.
+
+    :param Any obj: Object for get class name.
+
+    :return: Class name
+    :rtype: str
+
+    """
+    if isinstance(obj, type):
+        return obj.__name__
+    return obj.__class__.__name__
+
+
 class BindingDict(MutableMapping):
     """
     This dict-like object is used to store fields on a serializer.

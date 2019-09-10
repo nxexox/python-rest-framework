@@ -111,3 +111,21 @@ class SourceFieldFromSerializer(Serializer):
 
     """
     source_field_serializer = SerializerSourceFields(source='source_field', required=True)
+
+
+class AllowNoneSerializer(Serializer):
+    """
+    Serializer for testing `allow_none` argument on field.
+
+    """
+    integer = IntegerField(allow_none=True, required=False)
+    char = CharField(allow_none=True, required=False, max_length=5)
+    bool = BooleanField(allow_none=True, required=False)
+
+
+class InheritAllowNoneSerializer(Serializer):
+    """
+    Serializer for testing `allow_none` argument on field.
+
+    """
+    inherit = AllowNoneSerializer(allow_none=True)

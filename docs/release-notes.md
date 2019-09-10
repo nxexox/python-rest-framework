@@ -8,6 +8,12 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.3.9
+
+**Date:** [10th September 2019]
+
+* Added the argument [`allow_none`][AllowNoneFieldAttribute] to all Serializer Fields.
+
 ### 0.3.8
 
 **Date:** [22th August 2019]
@@ -159,6 +165,7 @@ class TwoSer(Ser):
 * Push to Open Source community.
 
 
+[AllowNoneFieldAttribute]: api-guid/fields#allow_none
 [SourceFieldAttribute]: api-guid/fields#source
 [BaseViews]: api-guid/views/views
 [ViewsMixins]: api-guid/views/mixins

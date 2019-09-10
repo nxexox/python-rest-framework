@@ -131,7 +131,7 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
         return super(BaseSerializer, cls).__new__(cls)
 
     def __deepcopy__(self, memo={}):
-        return self.__class__(instance=self.instance, data=self.data, source=self.source)
+        return self.__class__(instance=self.instance, data=self.data, source=self.source, allow_none=self.allow_none)
 
     @classmethod
     def many_init(cls, *args, **kwargs):
@@ -177,6 +177,20 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
 
         """
         raise NotImplementedError('`.to_internal_value()` must be implemented.')
+
+    def _to_representation(self, instance):
+        """
+        Transformation an object to a valid JSON object.
+
+        :param object instance: The object to transformation.
+
+        :return: Transformed data.
+        :rtype: dict
+
+        """
+        if instance is None and self.allow_none:
+            return instance
+        return self.to_representation(instance)
 
     def to_representation(self, instance):
         """
@@ -279,9 +293,9 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
 
         if not hasattr(self, '_data'):
             if self.instance is not None and not getattr(self, '_errors', None):
-                self._data = self.to_representation(self.instance)
+                self._data = self._to_representation(self.instance)
             elif hasattr(self, '_validated_data') and not getattr(self, '_errors', None):
-                self._data = self.to_representation(self._validated_data)
+                self._data = self._to_representation(self._validated_data)
             else:
                 self._data = self.get_default()
         return self._data
@@ -332,7 +346,7 @@ class Serializer(BaseSerializer):
                 attribute = instance
 
             # We try to turn it into a JSON valid format.
-            res[field_name] = field_val.to_representation(attribute)
+            res[field_name] = field_val._to_representation(attribute)
 
         # Return.
         return res
@@ -524,7 +538,7 @@ class ListSerializer(Serializer):
         return self.__class__(
             instance=self.instance, data=self.data,
             child=self.child, allow_empty=self.allow_empty,
-            source=self.source
+            source=self.source, allow_none=self.allow_none
         )
 
     def to_internal_value(self, data):
@@ -585,7 +599,7 @@ class ListSerializer(Serializer):
         :rtype: list
 
         """
-        return [self.child.to_representation(item) for item in instance]
+        return [self.child._to_representation(item) for item in instance]
 
     def is_valid(self, raise_exception=False):
         """

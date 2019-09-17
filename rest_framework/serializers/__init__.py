@@ -12,7 +12,7 @@ from .fields import (
 from .exceptions import ValidationError
 
 
-__all__ = (
+__ALL__ = (
     # fields
     BooleanField, BooleanNullField, CharField, IntegerField, FloatField, ListField,
     TimeField, DateField, DateTimeField,

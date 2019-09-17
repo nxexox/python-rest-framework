@@ -8,6 +8,12 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
+### 0.3.10
+
+**Date:** [17th September 2019]
+
+* Fixed the argument [`source`][SourceFieldAttribute] in serializer fields into method `to_representation`.
+
 ### 0.3.9
 
 **Date:** [10th September 2019]

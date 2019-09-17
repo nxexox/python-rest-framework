@@ -7,7 +7,7 @@ try:
         GetSerializerApiGenericMethodView, GetResponseApiGenericMethodView, ApiGenericMethodView
     )
     from .mixins import GetValidJsonMixin
-    __all__ = [
+    __ALL__ = [
         FlaskBaseApiView, FlaskBaseMethodView,
         GetResponseApiGenericView, GetSerializerApiGenericView, ApiGenericView,
         GetSerializerApiGenericMethodView, GetResponseApiGenericMethodView, ApiGenericMethodView,

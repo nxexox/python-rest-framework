@@ -4,7 +4,7 @@ try:
     from .views import AioHTTPApiView, json_response
     from .generics import GetResponseApiGenericView, GetSerializerApiGenericView, ApiGenericView
     from .mixins import GetValidJsonMixin
-    __all__ = [
+    __ALL__ = [
         AioHTTPApiView,
         GetResponseApiGenericView, GetSerializerApiGenericView, ApiGenericView,
         GetValidJsonMixin,

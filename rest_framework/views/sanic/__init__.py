@@ -9,7 +9,7 @@ try:
         GetValidJsonApiGenericCompositionView, SanicApiCompositionView
     )
     from .mixins import GetValidJsonMixin
-    __all__ = [
+    __ALL__ = [
         SanicApiMethodView, SanicApiCompositionView,
 
         GetResponseApiGenericMethodView, GetSerializerApiGenericMethodView, GetValidJsonApiGenericMethodView,

@@ -241,6 +241,16 @@ class Field(object):
         :rtype: str
 
         """
+        return self.field_name
+
+    def _get_attribute_name(self):
+        """
+        Get attribute name, for search attribute in object.
+
+        :return: Attribute name
+        :rtype: str
+
+        """
         return self.source or self.field_name
 
     def _get_attribute(self, instance):
@@ -254,7 +264,7 @@ class Field(object):
         :raise Exception: If an error occurred during the search.
 
         """
-        return get_attribute(instance, self._get_field_name())
+        return get_attribute(instance, self._get_attribute_name())
 
     def get_attribute(self, instance):
         """

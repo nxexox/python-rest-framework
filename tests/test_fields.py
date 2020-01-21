@@ -251,32 +251,63 @@ class BaseFieldTestCase(TestCase):
         field.bind('test_label', self)
         self.assert_bind(field, 'test_label', self, 'test_label')
 
-    def test_fail(self):
+    def test_fail_field_validation(self):
         """
-        Testing fail method.
+        Testing fail_field_validation method.
 
         """
         # We test without our errors.
         field = self.field_class(**self.create_params())
         try:
-            field.fail('required')
-            self.fail('`.fail()` must throw as exception `ValidationError`.')
+            field.fail_field_validation('required')
+            self.fail('`.fail_field_validation()` must throw as exception `ValidationError`.')
         except ValidationError:
             pass
         try:
-            field.fail('test')
-            self.fail('`.fail()` must throw as exception `AssertionError`.')
+            field.fail_field_validation('test')
+            self.fail('`.fail_field_validation()` must throw as exception `AssertionError`.')
         except AssertionError:
             pass
 
         # Now add custom error message
         field = self.field_class(**self.create_params(error_messages={'test': '{test}-test'}))
         try:
-            field.fail('test', test='test')
-            self.fail('`.fail()` must throw as exception `ValidationError`.')
+            field.fail_field_validation('test', test='test')
+            self.fail('`.fail_field_validation()` must throw as exception `ValidationError`.')
         except ValidationError as e:
             assert e.detail == 'test-test', 'The error message should be `{}`, reality `{}`.'.format(
                 'test-test', e.detail
+            )
+
+    def test_fail(self):
+        """
+        Testing fail method.
+
+        """
+        field = self.field_class(**self.create_params())
+        detail = {'error': 'test'}
+        try:
+            field.fail(detail=detail)
+            self.fail('`.fail()` must throw as exception `ValidationError`.')
+        except ValidationError as e:
+            self.assertEqual(
+                e.detail, detail,
+                'ValidationError.detail not equal source error. '
+                'Should be: `{}`, reality: `{}`.'.format(detail, e.detail)
+            )
+            self.assertEqual(
+                e.status, 400,
+                'ValidationError.status = `{}`. This is not 400.'.format(e.status)
+            )
+        status = 404
+        try:
+            field.fail(detail=detail, status=status)
+            self.fail('`.fail()` must throw as exception `ValidationError`.')
+        except ValidationError as e:
+            self.assertEqual(
+                e.status, status,
+                'ValidationError.status not equal source status. '
+                'Should be: `{}`, reality: `{}`.'.format(status, e.status)
             )
 
     def test_abstract_methods(self):

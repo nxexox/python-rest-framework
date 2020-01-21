@@ -333,7 +333,7 @@ class ClassNameField(serializers.Field):
 ### Raising validation errors
 
 Our `ColorField` class above currently does not perform any data validation.
-To indicate invalid data, we should raise a `serializers.ValidationError` or call `self.fail(detail, status=400)`, like so:
+To indicate invalid data, we should raise a `serializers.ValidationError` or call `self.fail_validate(detail, status=400)`, like so:
 ```python
 def to_internal_value(self, data):
     if not isinstance(data, six.text_type):
@@ -347,7 +347,7 @@ def to_internal_value(self, data):
     red, green, blue = [int(col) for col in data.split(',')]
 
     if any([col > 255 or col < 0 for col in (red, green, blue)]):
-        self.fail(detail='Value out of range. Must be between 0 and 255.')
+        self.fail_validate(detail='Value out of range. Must be between 0 and 255.')
 
     return Color(red, green, blue)
 ```

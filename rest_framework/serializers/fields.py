@@ -158,7 +158,7 @@ class Field(object):
         """
         return self.default_validators[:]
 
-    def fail(self, detail=None, status=400):
+    def fail_validate(self, detail=None, status=400):
         """
         We throw a normal error if custom validation error.
 

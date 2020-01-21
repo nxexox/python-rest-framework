@@ -279,7 +279,7 @@ class BaseFieldTestCase(TestCase):
                 'test-test', e.detail
             )
 
-    def test_fail(self):
+    def test_fail_validate(self):
         """
         Testing fail method.
 
@@ -287,7 +287,7 @@ class BaseFieldTestCase(TestCase):
         field = self.field_class(**self.create_params())
         detail = {'error': 'test'}
         try:
-            field.fail(detail=detail)
+            field.fail_validate(detail=detail)
             self.fail('`.fail()` must throw as exception `ValidationError`.')
         except ValidationError as e:
             self.assertEqual(
@@ -301,7 +301,7 @@ class BaseFieldTestCase(TestCase):
             )
         status = 404
         try:
-            field.fail(detail=detail, status=status)
+            field.fail_validate(detail=detail, status=status)
             self.fail('`.fail()` must throw as exception `ValidationError`.')
         except ValidationError as e:
             self.assertEqual(

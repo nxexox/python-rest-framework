@@ -158,7 +158,20 @@ class Field(object):
         """
         return self.default_validators[:]
 
-    def fail(self, key, **kwargs):
+    def fail(self, detail=None, status=400):
+        """
+        We throw a normal error if custom validation error.
+
+        :param Union[str, dict] detail: Detail validation error
+        :param int status: Code for response
+
+        :raise AssertionError: If you have not found the key in the `self.error_messages`.
+        :raise ValidationError: If you find the key in the `self.error_messages`.
+
+        """
+        raise ValidationError(detail=detail, status=status)
+
+    def fail_field_validation(self, key, **kwargs):
         """
         We throw a normal error if something went wrong during data processing.
 
@@ -440,7 +453,7 @@ class CharField(Field):
         """
         if data == '' or (self.trim_whitespace and six.text_type(data).strip() == ''):
             if not self.allow_blank:
-                self.fail('blank')
+                self.fail_field_validation('blank')
             return ''
         return super(CharField, self).run_validation(data)
 
@@ -458,7 +471,7 @@ class CharField(Field):
         """
         # We skip numbers as strings, but bool as strings seems to be a developer error.
         if isinstance(data, bool) or not isinstance(data, six.string_types + six.integer_types + (float,)):
-            self.fail('invalid')
+            self.fail_field_validation('invalid')
 
         val = six.text_type(data)
 
@@ -536,12 +549,12 @@ class IntegerField(Field):
         """
         # We look, do not want us to score a memory?
         if isinstance(data, six.text_type) and len(data) > self.MAX_STRING_LENGTH:
-            self.fail('max_string_length')
+            self.fail_field_validation('max_string_length')
 
         try:
             data = int(self.re_decimal.sub('', str(data)))
         except (ValueError, TypeError):
-            self.fail('invalid')
+            self.fail_field_validation('invalid')
         return data
 
     def to_representation(self, value):
@@ -612,12 +625,12 @@ class FloatField(Field):
         """
         # We look, do not want us to score a memory?
         if isinstance(data, six.text_type) and len(data) > self.MAX_STRING_LENGTH:
-            self.fail('max_string_length')
+            self.fail_field_validation('max_string_length')
 
         try:
             return float(data)
         except (TypeError, ValueError):
-            self.fail('invalid')
+            self.fail_field_validation('invalid')
 
     def to_representation(self, value):
         """
@@ -676,7 +689,7 @@ class BooleanField(Field):
                 return False
         except TypeError:  # If the non-hash type came.
             pass
-        self.fail('invalid', input=data)
+        self.fail_field_validation('invalid', input=data)
 
     def to_representation(self, value):
         """
@@ -744,7 +757,7 @@ class BooleanNullField(Field):
                 return None
         except TypeError:  # If the non-hash type came.
             pass
-        self.fail('invalid', input=data)
+        self.fail_field_validation('invalid', input=data)
 
     def to_representation(self, value):
         """
@@ -874,10 +887,10 @@ class ListField(Field):
             data = html.parse_html_list(data)
 
         if any((isinstance(data, type('')), isinstance(data, Mapping), not hasattr(data, '__iter__'))):
-            self.fail('not_a_list', input_type=type(data).__name__)
+            self.fail_field_validation('not_a_list', input_type=type(data).__name__)
 
         if not self.allow_empty and len(data) == 0:
-            self.fail('empty')
+            self.fail_field_validation('empty')
 
         return [self.child.run_validation(item) for item in data]
 
@@ -946,7 +959,7 @@ class DateField(Field):
 
         # Check on the datetime object.
         if isinstance(data, datetime.datetime):
-            self.fail('datetime')
+            self.fail_field_validation('datetime')
 
         # Check on the date object.
         if isinstance(data, datetime.date):
@@ -962,7 +975,7 @@ class DateField(Field):
             return parsed.date()
 
         # Throw exception.
-        self.fail('invalid', format=data)
+        self.fail_field_validation('invalid', format=data)
 
     def to_representation(self, value):
         """
@@ -1058,7 +1071,7 @@ class TimeField(Field):
             return parsed.time()
 
         # Throw exception.
-        self.fail('invalid', format=data)
+        self.fail_field_validation('invalid', format=data)
 
     def to_representation(self, value):
         """
@@ -1145,7 +1158,7 @@ class DateTimeField(Field):
         # Check ot the data ot datetime object.
         if isinstance(data, datetime.date):
             if not isinstance(data, datetime.datetime):
-                self.fail('date')
+                self.fail_field_validation('date')
             else:
                 return data
 
@@ -1156,7 +1169,7 @@ class DateTimeField(Field):
             pass
 
         # Throw error.
-        self.fail('invalid', format=data)
+        self.fail_field_validation('invalid', format=data)
 
     def to_representation(self, value):
         """
@@ -1207,7 +1220,7 @@ class JsonField(Field):
         try:
             return json.loads(data, encoding='utf8')
         except (JSONDecodeError, TypeError, ValueError):
-            self.fail('invalid')
+            self.fail_field_validation('invalid')
 
     def to_representation(self, value):
         """
@@ -1222,7 +1235,7 @@ class JsonField(Field):
         try:
             return json.dumps(value)
         except (TypeError, ValueError):
-            self.fail('invalid')
+            self.fail_field_validation('invalid')
 
 
 class DictField(JsonField):
@@ -1275,7 +1288,7 @@ class DictField(JsonField):
             data = html.parse_html_dict(data)
 
         if not isinstance(data, dict):
-            self.fail('not_a_dict', input_type=type(data).__name__)
+            self.fail_field_validation('not_a_dict', input_type=type(data).__name__)
 
         return {
             six.text_type(key): self.child.run_validation(value)

@@ -333,25 +333,25 @@ class ClassNameField(serializers.Field):
 ### Raising validation errors
 
 Our `ColorField` class above currently does not perform any data validation.
-To indicate invalid data, we should raise a `serializers.ValidationError`, like so:
+To indicate invalid data, we should raise a `serializers.ValidationError` or call `self.fail(detail, status=400)`, like so:
 ```python
 def to_internal_value(self, data):
     if not isinstance(data, six.text_type):
         msg = 'Incorrect type. Expected a string, but got %s'
-        raise ValidationError(msg % type(data).__name__)
+        raise ValidationError(detail=msg % type(data).__name__)
 
     if not re.match(r'^rgb\([0-9]+,[0-9]+,[0-9]+\)$', data):
-        raise ValidationError('Incorrect format. Expected `rgb(#,#,#)`.')
+        raise ValidationError(detail='Incorrect format. Expected `rgb(#,#,#)`.', status=500)
 
     data = data.strip('rgb(').rstrip(')')
     red, green, blue = [int(col) for col in data.split(',')]
 
     if any([col > 255 or col < 0 for col in (red, green, blue)]):
-        raise ValidationError('Value out of range. Must be between 0 and 255.')
+        self.fail(detail='Value out of range. Must be between 0 and 255.')
 
     return Color(red, green, blue)
 ```
-The `.fail()` method is a shortcut for raising `ValidationError` that takes a message string from the `error_messages` dictionary. For example:
+The `.fail_field_validation()` method is a shortcut for raising `ValidationError` that takes a message string from the `error_messages` dictionary. For example:
 ```python
 default_error_messages = {
     'incorrect_type': 'Incorrect type. Expected a string, but got {input_type}',
@@ -361,16 +361,16 @@ default_error_messages = {
 
 def to_internal_value(self, data):
     if not isinstance(data, six.text_type):
-        self.fail('incorrect_type', input_type=type(data).__name__)
+        self.fail_field_validation('incorrect_type', input_type=type(data).__name__)
 
     if not re.match(r'^rgb\([0-9]+,[0-9]+,[0-9]+\)$', data):
-        self.fail('incorrect_format')
+        self.fail_field_validation('incorrect_format')
 
     data = data.strip('rgb(').rstrip(')')
     red, green, blue = [int(col) for col in data.split(',')]
 
     if any([col > 255 or col < 0 for col in (red, green, blue)]):
-        self.fail('out_of_range')
+        self.fail_field_validation('out_of_range')
 
     return Color(red, green, blue)
 ```

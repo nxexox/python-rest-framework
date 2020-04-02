@@ -14,10 +14,10 @@ Major version numbers (x.0.0) are reserved for substantial project milestones.
 **Date:** [2nd April 2020]
 
 * Added check on `None` in `to_representation` methods in:
-* * ['CharField'][CharField]
-* * ['IntegerField'][IntegerField]
-* * ['FloatField'][FloatField]
-* * ['DictField'][DictField]
+    * ['CharField'][CharField]
+    * ['IntegerField'][IntegerField]
+    * ['FloatField'][FloatField]
+    * ['DictField'][DictField]
 
 ### 0.3.12
 

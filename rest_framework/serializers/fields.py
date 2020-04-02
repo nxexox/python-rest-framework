@@ -490,6 +490,8 @@ class CharField(Field):
         :rtype: str
 
         """
+        if value is None:
+            return None
         return six.text_type(value)
 
 
@@ -567,6 +569,8 @@ class IntegerField(Field):
         :rtype: int
 
         """
+        if value is None:
+            return value
         return int(value)
 
 
@@ -642,6 +646,8 @@ class FloatField(Field):
         :rtype: float
 
         """
+        if value is None:
+            return value
         return float(value)
 
 
@@ -1305,6 +1311,8 @@ class DictField(JsonField):
         :rtype: str
 
         """
+        if value is None:
+            return value
         return {
             six.text_type(key): self.child._to_representation(val) if val is not None else None
             for key, val in six.iteritems(value)

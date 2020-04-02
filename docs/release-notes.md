@@ -9,6 +9,16 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
 
+### 0.3.13
+
+**Date:** [2nd April 2020]
+
+* Added check on `None` in `to_representation` methods in:
+* * ['CharField'][CharField]
+* * ['IntegerField'][IntegerField]
+* * ['FloatField'][FloatField]
+* * ['DictField'][DictField]
+
 ### 0.3.12
 
 **Date:** [21th January 2020]
@@ -201,6 +211,9 @@ class TwoSer(Ser):
 [ListField]: api-guid/fields.md#-listfield
 [JsonField]: api-guid/fields.md#-jsonfield
 [DictField]: api-guid/fields.md#-dictfield
+[IntegerField]: api-guid/fields.md#-integerfield
+[FloatField]: api-guid/fields.md#-floatfield
+[CharField]: api-guid/fields.md#-charfield
 [SerializerMethodField]: api-guid/fields.md#-serializermethodfield
 [InheritSerializers]: api-guid/serializers.md#serializer-inheritance
 [RegexValidator]: api-guid/validators.md#regexvalidator

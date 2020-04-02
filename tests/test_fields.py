@@ -499,7 +499,8 @@ class CharFieldTest(BaseFieldTestCase):
     to_representation_cases = (
         {'data': {'value': '123'}, 'return': '123'},
         {'data': {'value': 123}, 'return': '123'},
-        {'data': {'value': 'qwe'}, 'return': 'qwe'}
+        {'data': {'value': 'qwe'}, 'return': 'qwe'},
+        {'data': {'value': None}, 'return': None},
     )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
         {'data': {'data': '123'}, 'return': '123'},
@@ -560,6 +561,7 @@ class TestIntegerField(BaseFieldTestCase):
         {'data': {'value': 123}, 'return': 123},
         {'data': {'value': '123'}, 'return': 123},
         {'data': {'value': 'qwe'}, 'exceptions': (ValueError,)},
+        {'data': {'value': None}, 'return': None},
     )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
         {'data': {'data': 123}, 'return': 123},
@@ -609,6 +611,7 @@ class TestFloatField(BaseFieldTestCase):
         {'data': {'value': 123}, 'return': 123.0},
         {'data': {'value': '123'}, 'return': 123.0},
         {'data': {'value': 'qwe'}, 'exceptions': (ValueError,)},
+        {'data': {'value': None}, 'return': None},
     )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
         {'data': {'data': 123}, 'return': 123.0},
@@ -949,7 +952,8 @@ class TestJsonField(BaseFieldTestCase):
         {'data': {'value': {'123': 123}}, 'return': '{"123": 123}'},
         {'data': {'value': {'123': [123, '123']}}, 'return': '{"123": [123, "123"]}'},
         {'data': {'value': lambda: None}, 'exceptions': (ValidationError,)},
-        {'data': {'value': {123: 123}}, 'return': '{"123": 123}'}
+        {'data': {'value': {123: 123}}, 'return': '{"123": 123}'},
+        {'data': {'value': None}, 'return': 'null'},
     )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (
         {'data': {'data': {}}, 'return': {}},
@@ -998,6 +1002,7 @@ class TestDictField(BaseFieldTestCase):
         {'data': {'value': 123}, 'exceptions': (AttributeError,)},
         {'data': {'value': lambda: None}, 'exceptions': (AttributeError,)},
         {'data': {'value': {123: 123}}, 'return': {'123': 123}},
+        {'data': {'value': None}, 'return': None},
         {'data': {'value': {123: [123]}}, 'params': {'child': IntegerField()}, 'exceptions': (TypeError,)}
     )  # Cases, to test the performance of `.to_representation()`.
     to_internal_value_cases = (

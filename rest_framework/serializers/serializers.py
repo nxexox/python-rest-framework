@@ -131,7 +131,9 @@ class BaseSerializer(six.with_metaclass(BaseSerializerMeta, Field)):
         return super(BaseSerializer, cls).__new__(cls)
 
     def __deepcopy__(self, memo={}):
-        return self.__class__(instance=self.instance, data=self.data, source=self.source, allow_none=self.allow_none)
+        return self.__class__(instance=self.instance, data=self.data,
+                              source=self.source, allow_none=self.allow_none,
+                              required=self.required)
 
     @classmethod
     def many_init(cls, *args, **kwargs):
@@ -384,8 +386,15 @@ class Serializer(BaseSerializer):
         for _, field_obj in six.iteritems(fields_dict):
             field_name = field_obj._get_field_name()
             try:
+                # Check by empty for nested serializer fields
+                is_empty, _field_data = field_obj.validate_empty_values(data.get(field_name, None))
+                if is_empty:
+                    if field_name in data:
+                        validated_data[field_name] = _field_data
+                    continue
+
                 # Transform to python type and validate each field.
-                validated_val = field_obj.run_validation(data.get(field_name, None))
+                validated_val = field_obj.run_validation(_field_data)
 
                 # Now manual validation.
                 validated_val = self._manual_validate_method(field_name, validated_val)
@@ -538,7 +547,8 @@ class ListSerializer(Serializer):
         return self.__class__(
             instance=self.instance, data=self.data,
             child=self.child, allow_empty=self.allow_empty,
-            source=self.source, allow_none=self.allow_none
+            source=self.source, allow_none=self.allow_none,
+            required=self.required
         )
 
     def to_internal_value(self, data):

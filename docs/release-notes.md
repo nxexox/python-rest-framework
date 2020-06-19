@@ -9,15 +9,21 @@ Medium version numbers (0.x.0) may include API changes, in line with the [deprec
 Major version numbers (x.0.0) are reserved for substantial project milestones.
 
 
+### 0.3.14
+
+**Date:** [18th June 2019]
+
+* Fix required nested serializers
+
 ### 0.3.13
 
 **Date:** [2nd April 2020]
 
 * Added check on `None` in `to_representation` methods in:
-    * ['CharField'][CharField]
-    * ['IntegerField'][IntegerField]
-    * ['FloatField'][FloatField]
-    * ['DictField'][DictField]
+    * [`CharField`][CharField]
+    * [`IntegerField`][IntegerField]
+    * [`FloatField`][FloatField]
+    * [`DictField`][DictField]
 
 ### 0.3.12
 
